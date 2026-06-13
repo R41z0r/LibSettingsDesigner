@@ -51,6 +51,10 @@ Do not remove this notice from redistributed copies.
 - All changes must be made on a feature branch and merged through a pull
   request.
 - Pull requests must pass validation before merge.
+- Pull requests that touch runtime Lua, sample addon Lua, Lua config, or
+  packaging-relevant Lua files must run Luacheck before merge. Fix real
+  warnings instead of suppressing them. Project-specific WoW globals belong in
+  `.luacheckrc`.
 - Pull requests that change runtime Lua/XML/assets or sample addon Lua/XML/assets
   must not be merged to `main` until the changed behavior was tested in game and
   the user confirmed that it works.
@@ -382,6 +386,12 @@ Runtime syntax check when source files are present:
 
 ```bash
 lua -e 'assert(loadfile("runtime/LibSettingsDesigner/LibSettingsDesignerConfig.lua")); assert(loadfile("runtime/LibSettingsDesigner/LibSettingsDesignerUI.lua"))'
+```
+
+Luacheck is required before merging Lua changes:
+
+```bash
+luacheck runtime/LibSettingsDesigner Samples/LibSettingsDesignerSample
 ```
 
 When validating a host addon that vendors the library, use that addon's local

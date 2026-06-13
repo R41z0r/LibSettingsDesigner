@@ -83,6 +83,17 @@ Run the host addon's configured lint/test command when available. If library
 files are intentionally excluded from lint, say so in the final report and show
 the syntax-check result instead.
 
+Run Luacheck before merging any pull request that touches runtime Lua, sample
+addon Lua, Lua config, or packaging-relevant Lua files:
+
+```bash
+luacheck runtime/LibSettingsDesigner Samples/LibSettingsDesignerSample
+```
+
+Fix real warnings before merge. Expected World of Warcraft globals or sample
+SavedVariables belong in `.luacheckrc`; do not hide warnings with broad inline
+suppression unless the warning is intentionally local to one line.
+
 ## [Link and Navigation Checks][Top]
 
 Useful local checks:

@@ -1656,28 +1656,6 @@ function getControlType(control)
 	return controlType
 end
 
-local function getControlTypeLabel(app, control)
-	local L = getLocale(app)
-	local controlType = getControlType(control)
-	if controlType == "toggle" then
-		return _G.ENABLE or "Toggle"
-	elseif controlType == "slider" then
-		return L["configCenterControlSlider"] or "Slider"
-	elseif controlType == "dropdown" or controlType == "sounddropdown" or controlType == "multidropdown"
-		or controlType == "checkboxdropdown" then
-		return L["configCenterControlDropdown"] or "Dropdown"
-	elseif controlType == "input" then
-		return _G.EDIT or "Input"
-	elseif controlType == "button" then
-		return _G.ACTION or "Action"
-	elseif controlType == "reorderlist" then
-		return _G.LIST_DELIMITER or "List"
-	elseif controlType == "colorpicker" or controlType == "coloroverrides" then
-		return _G.COLOR or "Color"
-	end
-	return _G.SETTINGS or "Settings"
-end
-
 function lib.GetFallbackControlDescription(app, control)
 	local L = getLocale(app)
 	local controlType = getControlType(control)
@@ -2616,13 +2594,13 @@ function lib.SetSearchQuery(state, query)
 	state.frame.SearchBox:ClearFocus()
 end
 
-local function getDashboardIconSize(iconSource)
+local function getDashboardIconSize()
 	return 48, 48
 end
 
 local function createDashboardIcon(parent, iconSource)
 	local icon = parent:CreateTexture(nil, "OVERLAY")
-	local width, height = getDashboardIconSize(iconSource)
+	local width, height = getDashboardIconSize()
 	icon:SetSize(width, height)
 	icon:SetTexture(iconSource or ASSET.fallback)
 	return icon
@@ -2719,28 +2697,6 @@ local function addDashboardHero(state, title, subtitle, iconSource)
 	icon:SetAlpha(0.90)
 	state.y = state.y - 8
 	return hero
-end
-
-local function getOptionalNumber(app, key)
-	local value = app.opts and app.opts[key]
-	value = type(value) == "function" and value() or value
-	value = tonumber(value)
-	return value
-end
-
-local function splitVersionBadge(version)
-	version = tostring(version or "")
-	local base, suffix = version:match("^(.-)%-beta([%w%.%-]*)$")
-	if base and base ~= "" then
-		local number = tostring(suffix or ""):match("^(%d+)")
-		return base, number and ("Beta " .. number) or "Beta"
-	end
-	base, suffix = version:match("^(.-)%-alpha([%w%.%-]*)$")
-	if base and base ~= "" then
-		local number = tostring(suffix or ""):match("^(%d+)")
-		return base, number and ("Alpha " .. number) or "Alpha"
-	end
-	return version, nil
 end
 
 local function addDashboardStatusTile(parent, index, iconSource, iconAtlas, title, value, badge, action)
@@ -5389,12 +5345,12 @@ function StateMixin:RenderContent()
 	end
 	setScrollHeight(self)
 	if self.resetContentScroll then
-		if self.pendingFocusControlID then
-			-- Search result navigation scrolls to the focused control after render.
-		elseif self.restoreContentScrollKey and self.scrollPositions then
-			lib.QueueContentScroll(self, self.scrollPositions[self.restoreContentScrollKey] or 0)
-		else
-			lib.SetContentScrollTop(self)
+		if not self.pendingFocusControlID then
+			if self.restoreContentScrollKey and self.scrollPositions then
+				lib.QueueContentScroll(self, self.scrollPositions[self.restoreContentScrollKey] or 0)
+			else
+				lib.SetContentScrollTop(self)
+			end
 		end
 		self.resetContentScroll = nil
 		self.restoreContentScrollKey = nil
@@ -6167,7 +6123,7 @@ function lib:Open(appOrID, pageID, focusControlID)
 	return frame
 end
 
-function lib:GetFrame(appOrID)
+function lib.GetFrame(_, appOrID)
 	local config = addon.LibSettingsDesigner and addon.LibSettingsDesigner.Config
 	local app = type(appOrID) == "table" and appOrID or (config and config:GetAddOn(appOrID))
 	if not app then

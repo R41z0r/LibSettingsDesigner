@@ -754,7 +754,7 @@ function AppMixin:GetControlValue(control)
 	return control.default
 end
 
-function AppMixin:GetControlDefault(control)
+function AppMixin.GetControlDefault(_, control)
 	local default, hasDefault = resolveControlDefault(control)
 	if not hasDefault then
 		return nil, false
