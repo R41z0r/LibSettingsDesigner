@@ -6,6 +6,7 @@
 - [Documentation-Only Change Checklist](#documentation-only-change-checklist)
 - [Runtime Change Checklist](#runtime-change-checklist)
 - [Link and Navigation Checks](#link-and-navigation-checks)
+- [GitHub Wiki Sync](#github-wiki-sync)
 - [Code-vs-Documentation Audit](#code-vs-documentation-audit)
 - [Manual In-Game Checklist](#manual-in-game-checklist)
 - [Reporting Template](#reporting-template)
@@ -82,6 +83,17 @@ Run the host addon's configured lint/test command when available. If library
 files are intentionally excluded from lint, say so in the final report and show
 the syntax-check result instead.
 
+Run Luacheck before merging any pull request that touches runtime Lua, sample
+addon Lua, Lua config, or packaging-relevant Lua files:
+
+```bash
+luacheck runtime/LibSettingsDesigner Samples/LibSettingsDesignerSample
+```
+
+Fix real warnings before merge. Expected World of Warcraft globals or sample
+SavedVariables belong in `.luacheckrc`; do not hide warnings with broad inline
+suppression unless the warning is intentionally local to one line.
+
 ## [Link and Navigation Checks][Top]
 
 Useful local checks:
@@ -99,6 +111,41 @@ Manual checks:
 - `docs/Elements/_Sidebar.md` links to every element page.
 - `docs/Examples/_Sidebar.md` links to every example page.
 - New pages are discoverable from at least `docs/Home.md` or `README.md`.
+
+## [GitHub Wiki Sync][Top]
+
+The public wiki at
+`https://github.com/R41z0r/LibSettingsDesigner/wiki` is backed by a separate Git
+repository:
+
+```bash
+git clone https://github.com/R41z0r/LibSettingsDesigner.wiki.git
+```
+
+`docs/` remains the source copy for review and pull requests. After a
+documentation pull request is merged to `main`, sync the wiki repository in a
+separate commit.
+
+Do not treat the wiki as a normal subfolder of this repository. The wiki uses a
+flat page layout:
+
+```text
+docs/Elements/Toggle.md  -> Toggle.md
+docs/API/Config-API.md   -> Config-API.md
+docs/Examples/Support-Links.md -> Support-Links.md
+docs/assets/images/*.png -> assets/images/*.png
+```
+
+Rewrite internal links during sync:
+
+- `Elements/Toggle.md` -> `Toggle`
+- `../Elements/Toggle.md` -> `Toggle`
+- `Examples/Support-Links.md` -> `Support-Links`
+- `../assets/images/example.png` -> `assets/images/example.png`
+
+Do not add the wiki as a submodule or subtree unless the owner explicitly asks
+for that repository-structure change. Keeping it separate avoids packaging or
+vendoring the public wiki with the runtime library.
 
 ## [Code-vs-Documentation Audit][Top]
 
