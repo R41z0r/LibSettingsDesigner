@@ -2,6 +2,7 @@
 <details open><summary><strong>Contents</strong></summary><br />
 
 - [Overview](#overview)
+- [Preview](#preview)
 - [Fields](#fields)
 - [Example](#example)
 - [Preview Behavior](#preview-behavior)
@@ -12,6 +13,10 @@
 
 SoundDropdown stores one sound value and can preview sounds through a custom
 resolver, custom playback function, or LibSharedMedia lookup.
+
+## [Preview][Top]
+
+![SoundDropdown menu example](../assets/images/sound-dropdown-menu-example.png)
 
 ## [Fields][Top]
 
@@ -56,4 +61,3 @@ The preview button tries, in order:
 
 [//]: # (Links)
 [Top]: #Top
-
