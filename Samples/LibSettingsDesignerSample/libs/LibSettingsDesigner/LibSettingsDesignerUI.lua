@@ -5663,7 +5663,26 @@ function StateMixin:RenderContent()
 		self.resetSearchScroll = nil
 	end
 	lib.FocusPendingControl(self)
+	self:RefreshSidebarNewBadges()
 	self:RefreshSidebarSelection()
+end
+
+function StateMixin:RefreshSidebarNewBadges()
+	for _, row in pairs(self.sidebarRows or {}) do
+		if row.categoryID and row.Text then
+			local isNewCategory = lib.IsCategoryNew(self.app, row.categoryID)
+			if isNewCategory and not row.NewBadge then
+				row.NewBadge = lib.CreateNewBadge(row)
+				row.NewBadge:SetPoint("RIGHT", row, "RIGHT", -10, 0)
+			end
+			if row.NewBadge and row.NewBadge.SetShown then
+				row.NewBadge:SetShown(isNewCategory)
+			end
+			row.Text:ClearAllPoints()
+			row.Text:SetPoint("LEFT", row.Icon, "RIGHT", 10, 0)
+			row.Text:SetPoint("RIGHT", row, "RIGHT", isNewCategory and -64 or -12, 0)
+		end
+	end
 end
 
 function StateMixin:RefreshSidebarSelection()

@@ -27,6 +27,36 @@ local SAMPLE_NEW_TAGS = {
 	["shortcuts"] = true,
 }
 
+local function markSampleNewTagSeen(tagID)
+	tagID = tostring(tagID or "")
+	if tagID == "" or not SAMPLE_NEW_TAGS[tagID] then
+		return
+	end
+	DB().seenNewTags = DB().seenNewTags or {}
+	DB().seenNewTags[tagID] = true
+end
+
+local function isSampleNewTagActive(tagID)
+	tagID = tostring(tagID or "")
+	return SAMPLE_NEW_TAGS[tagID] == true
+		and not (DB().seenNewTags and DB().seenNewTags[tagID] == true)
+end
+
+local function markSamplePageSeen(page)
+	if not page then
+		return
+	end
+	markSampleNewTagSeen(page.newTagID)
+	markSampleNewTagSeen(page.id)
+	markSampleNewTagSeen(page.pageKey)
+	markSampleNewTagSeen(page.key)
+	for _, control in ipairs(page.controls or {}) do
+		markSampleNewTagSeen(control.newTagID)
+		markSampleNewTagSeen(control.id)
+		markSampleNewTagSeen(control.key)
+	end
+end
+
 local function getSampleVersion()
 	return C_AddOns and C_AddOns.GetAddOnMetadata(addonName, "Version") or "1.0.0"
 end
@@ -218,7 +248,7 @@ app = Config:RegisterAddOn(addonName, {
 		DB().settingsWindow.locked = locked == true
 	end,
 	isNewTag = function(tagID)
-		return SAMPLE_NEW_TAGS[tostring(tagID or "")] == true
+		return isSampleNewTagActive(tagID)
 	end,
 	blizzardSettingsRoot = true,
 	blizzardSettingsTitle = "LibSettingsDesigner Sample",
@@ -339,6 +369,7 @@ app:RegisterPage({
 	description = "Common settings rows for addon behavior.",
 	mainToggleID = "enabled",
 	iconKey = "settingspage",
+	onOpen = markSamplePageSeen,
 	order = 100,
 })
 app:RegisterGroup("general.behavior", { id = "core", title = "Core", order = 100 })
@@ -444,6 +475,7 @@ app:RegisterPage({
 	iconAtlas = "transmog-icon-revert",
 	mainToggleID = "visualsEnabled",
 	newTagID = "visuals.theme",
+	onOpen = markSamplePageSeen,
 	order = 100,
 })
 app:RegisterGroup("visuals.theme", { id = "layout", title = "Layout", order = 100 })
@@ -601,6 +633,7 @@ app:RegisterPage({
 	iconKey = "movementinput",
 	mainToggleID = "shortcutsEnabled",
 	newTagID = "shortcuts",
+	onOpen = markSamplePageSeen,
 	order = 100,
 })
 
@@ -671,6 +704,7 @@ app:RegisterPage({
 	layout = "info",
 	iconKey = "dashboard",
 	newTagID = "dashboard.showcase",
+	onOpen = markSamplePageSeen,
 	order = 80,
 	content = {
 		{
