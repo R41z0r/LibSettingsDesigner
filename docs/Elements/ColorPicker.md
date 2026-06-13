@@ -2,6 +2,7 @@
 <details open><summary><strong>Contents</strong></summary><br />
 
 - [Overview](#overview)
+- [Preview](#preview)
 - [Fields](#fields)
 - [Example](#example)
 
@@ -10,6 +11,10 @@
 ## [Overview][Top]
 
 A ColorPicker stores one `{ r, g, b, a }` color table.
+
+## [Preview][Top]
+
+![ColorPicker example](../assets/images/color-picker-example.png)
 
 ## [Fields][Top]
 
