@@ -336,6 +336,7 @@ ConfigUI:Open("MyAddon", "general.core")
 | `db` | Function returning simple DB table. |
 | `locale` | Host addon locale table. |
 | `colors` / `colorTable` / `themeColors` | Optional global UI theme color overrides; missing keys keep defaults. |
+| `borders` / `themeBorders` / `borderAssets` | Optional global UI border asset overrides; missing keys keep defaults. |
 | `density` | Initial density, `"compact"` or `"comfortable"`, string or function. |
 | `getDensity(app)` / `setDensity(density, app)` | Persist the user's selected density. |
 | `showDensityButton` / `showDensityButton(app)` | Whether users can switch density; only `false` hides the button. |
@@ -401,6 +402,45 @@ For precise one-off overrides, use direct detail keys such as `topbarBg`,
 `topbarBorder`, `buttonTopbarBg`, `dashboardCardBg`, `detailSectionBg`,
 `disabledControlBg`, or any other key documented in
 `docs/Examples/Theme-Colors.md`.
+
+## Theme Borders
+
+Use `opts.borders`, `opts.themeBorders`, or `opts.borderAssets` to override
+global LibSettingsDesigner backdrop border assets. Every key is optional and
+falls back to the built-in default when omitted.
+
+Keep this separate from `colors`: colors define RGBA values, borders define
+backdrop files, edge sizes, tile settings, and insets.
+
+```lua
+local app = Config:RegisterAddOn(addonName, {
+  title = "My Addon",
+  borders = {
+    default = {
+      edgeFile = "Interface\\AddOns\\MyAddon\\Media\\PanelBorder",
+      edgeSize = 14,
+      insets = { left = 4, right = 4, top = 4, bottom = 4 },
+    },
+    button = {
+      edgeFile = "Interface\\AddOns\\MyAddon\\Media\\ButtonBorder",
+      edgeSize = 10,
+      insets = { left = 2, right = 2, top = 2, bottom = 2 },
+    },
+  },
+})
+```
+
+Common border keys:
+
+```text
+default, panel, topbar, content, sidebar, card, dashboardCard, detailSection,
+detailColumn, row, button, topbarButton, search, control, toggle, toggleKnob,
+swatch, reorderItem
+```
+
+Dynamic border themes may provide
+`borders = function(app) return borderTable end`. Detailed border keys and
+aliases are documented in `docs/Examples/Theme-Borders.md`.
 
 ## Blizzard Settings Bridge
 
@@ -1108,6 +1148,10 @@ Typical blocks:
 content = {
   {
     title = "Commands",
+    buttonLayout = "wrap",
+    buttonAlign = "center",
+    buttonWidth = 180,
+    buttonGap = 12,
     entries = {
       { type = "command", commands = { "/myaddon", "/myaddon config" }, desc = "Open settings." },
       { type = "button", text = "Open Website", onClick = function(entry, app) end },
@@ -1118,6 +1162,13 @@ content = {
   },
 }
 ```
+
+For horizontal button groups, set `buttonLayout = "wrap"` on the info block.
+Consecutive button entries then render left-to-right and automatically wrap when
+they exceed the available width. Optional block fields are `buttonWidth`,
+`buttonHeight`, `buttonGap`, `buttonRowGap`, and
+`buttonAlign = "left" | "center" | "right"`. A single button can opt in with
+`inline = true`.
 
 Use `type = "expandable"` inside info-page `entries` for changelogs, FAQs, or
 release notes. Prefer stable `id` or `key` values so expansion state does not
@@ -1158,10 +1209,14 @@ app:RegisterPage({
   content = {
     {
       title = "Community and Support",
+      buttonLayout = "wrap",
+      buttonAlign = "center",
+      buttonWidth = 180,
+      buttonGap = 12,
       entries = {
-        { type = "button", text = "Discord", width = 180, onClick = function() ShowSupportURL("Discord", "https://discord.gg/example") end },
-        { type = "button", text = "GitHub Issues", width = 180, onClick = function() ShowSupportURL("GitHub Issues", "https://github.com/example/MyAddon/issues") end },
-        { type = "button", text = "Ko-fi", width = 180, onClick = function() ShowSupportURL("Ko-fi", "https://ko-fi.com/example") end },
+        { type = "button", text = "Discord", onClick = function() ShowSupportURL("Discord", "https://discord.gg/example") end },
+        { type = "button", text = "GitHub Issues", onClick = function() ShowSupportURL("GitHub Issues", "https://github.com/example/MyAddon/issues") end },
+        { type = "button", text = "Ko-fi", onClick = function() ShowSupportURL("Ko-fi", "https://ko-fi.com/example") end },
         { type = "text", text = "Discord: https://discord.gg/example" },
       },
     },

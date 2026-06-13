@@ -652,6 +652,121 @@ function lib.ApplyThemeColors(app)
 	GREEN = colors.success
 end
 
+function lib.CopyThemeInset(insets)
+	insets = type(insets) == "table" and insets or {}
+	return {
+		left = tonumber(insets.left) or tonumber(insets[1]) or 3,
+		right = tonumber(insets.right) or tonumber(insets[2]) or 3,
+		top = tonumber(insets.top) or tonumber(insets[3]) or 3,
+		bottom = tonumber(insets.bottom) or tonumber(insets[4]) or 3,
+	}
+end
+
+function lib.CopyThemeBorder(style)
+	if type(style) ~= "table" then
+		return nil
+	end
+	return {
+		bgFile = style.bgFile or style.backgroundFile or "Interface\\Tooltips\\UI-Tooltip-Background",
+		edgeFile = style.edgeFile or style.borderFile or style.file or "Interface\\Tooltips\\UI-Tooltip-Border",
+		tile = style.tile ~= false,
+		tileSize = tonumber(style.tileSize) or 16,
+		edgeSize = tonumber(style.edgeSize) or tonumber(style.size) or 12,
+		insets = lib.CopyThemeInset(style.insets),
+	}
+end
+
+lib.DEFAULT_BORDER_STYLE = lib.CopyThemeBorder({
+	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+	edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+	tile = true,
+	tileSize = 16,
+	edgeSize = 12,
+	insets = { left = 3, right = 3, top = 3, bottom = 3 },
+})
+
+lib.BORDER_KEYS = {
+	"default",
+	"panel",
+	"topbar",
+	"content",
+	"sidebar",
+	"card",
+	"dashboardCard",
+	"detailSection",
+	"detailColumn",
+	"row",
+	"button",
+	"topbarButton",
+	"search",
+	"control",
+	"toggle",
+	"toggleKnob",
+	"swatch",
+	"reorderItem",
+}
+
+lib.BORDER_ALIASES = {
+	background = "panel",
+	frame = "panel",
+	buttons = "button",
+	topbarButtons = "topbarButton",
+	checkbox = "toggle",
+	checkboxes = "toggle",
+	switch = "toggle",
+	switchKnob = "toggleKnob",
+	dropdown = "button",
+	input = "control",
+	color = "swatch",
+	colorSwatch = "swatch",
+	dashboard = "dashboardCard",
+	detail = "detailSection",
+}
+
+function lib.ReadAppThemeBorders(app)
+	local opts = app and app.opts
+	local theme = opts and opts.theme
+	local borders = opts and (opts.borders or opts.themeBorders or opts.borderAssets)
+	if not borders and type(theme) == "table" then
+		borders = theme.borders or theme.border or theme.borderAssets
+	end
+	if type(borders) == "function" then
+		local ok, result = pcall(borders, app)
+		borders = ok and result or nil
+	end
+	return type(borders) == "table" and borders or nil
+end
+
+function lib.ResolveThemeBorders(app)
+	local overrides = lib.ReadAppThemeBorders(app)
+	local defaultStyle = lib.CopyThemeBorder(overrides and (overrides.default or overrides.all)) or lib.CopyThemeBorder(lib.DEFAULT_BORDER_STYLE)
+	local borders = {}
+	for _, key in ipairs(lib.BORDER_KEYS) do
+		borders[key] = lib.CopyThemeBorder(defaultStyle)
+	end
+	if overrides then
+		for _, key in ipairs(lib.BORDER_KEYS) do
+			local value = overrides[key]
+			if type(value) == "table" then
+				borders[key] = lib.CopyThemeBorder(value)
+			end
+		end
+		for alias, key in pairs(lib.BORDER_ALIASES) do
+			local value = overrides[alias]
+			if type(value) == "table" then
+				borders[key] = lib.CopyThemeBorder(value)
+			end
+		end
+	end
+	return borders
+end
+
+function lib.ApplyThemeBorders(app)
+	lib.ThemeBorders = lib.ResolveThemeBorders(app)
+end
+
+lib.ThemeBorders = lib.ResolveThemeBorders(nil)
+
 local ASSET = {
 	fallback = "Interface\\Icons\\INV_Misc_Gear_01",
 	statusEnabled = "Interface\\RaidFrame\\ReadyCheck-Ready",
@@ -780,7 +895,30 @@ local function setBasicFrameBorderAlpha(frame, alpha)
 	end
 end
 
-local function applyBackdrop(frame, bg, border)
+local function getThemeBorder(styleOrKey)
+	if type(styleOrKey) == "table" then
+		return lib.CopyThemeBorder(styleOrKey) or lib.ThemeBorders.default
+	end
+	local key = tostring(styleOrKey or "default")
+	return lib.ThemeBorders[key] or lib.ThemeBorders.default or lib.DEFAULT_BORDER_STYLE
+end
+
+local function applyBackdropDefinition(frame, styleOrKey)
+	if not frame or not frame.SetBackdrop then
+		return
+	end
+	local style = getThemeBorder(styleOrKey)
+	frame:SetBackdrop({
+		bgFile = style.bgFile,
+		edgeFile = style.edgeFile,
+		tile = style.tile,
+		tileSize = style.tileSize,
+		edgeSize = style.edgeSize,
+		insets = lib.CopyThemeInset(style.insets),
+	})
+end
+
+local function applyBackdrop(frame, bg, border, styleOrKey)
 	if not frame.SetBackdrop then
 		if frame.Bg and frame.Bg.SetColorTexture then
 			frame.Bg:SetColorTexture(bg[1], bg[2], bg[3], bg[4])
@@ -796,14 +934,9 @@ local function applyBackdrop(frame, bg, border)
 		end
 		return
 	end
-	frame:SetBackdrop({
-		bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-		edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-		tile = true,
-		tileSize = 16,
-		edgeSize = 12,
-		insets = { left = 3, right = 3, top = 3, bottom = 3 },
-	})
+	frame._LibSettingsDesignerBorderStyleKey = type(styleOrKey) == "string" and styleOrKey or frame._LibSettingsDesignerBorderStyleKey
+	frame._LibSettingsDesignerBorderStyle = type(styleOrKey) == "table" and styleOrKey or frame._LibSettingsDesignerBorderStyle
+	applyBackdropDefinition(frame, styleOrKey or frame._LibSettingsDesignerBorderStyleKey or frame._LibSettingsDesignerBorderStyle or "default")
 	frame:SetBackdropColor(bg[1], bg[2], bg[3], bg[4])
 	frame:SetBackdropBorderColor(border[1], border[2], border[3], border[4])
 end
@@ -923,7 +1056,10 @@ local function setBackdropBorderColor(frame, color)
 	end
 end
 
-local function setFrameBackdrop(frame, bg, border)
+local function setFrameBackdrop(frame, bg, border, styleOrKey)
+	if styleOrKey or frame._LibSettingsDesignerBorderStyleKey or frame._LibSettingsDesignerBorderStyle then
+		applyBackdropDefinition(frame, styleOrKey or frame._LibSettingsDesignerBorderStyleKey or frame._LibSettingsDesignerBorderStyle)
+	end
 	setBackdropColor(frame, bg)
 	setBackdropBorderColor(frame, border)
 	if frame and frame.SetBorderColor then
@@ -1098,7 +1234,7 @@ end
 local getControlType
 
 local function styleInlineSettingRow(row)
-	applyBackdrop(row, ROW_BG, ROW_BORDER)
+	applyBackdrop(row, ROW_BG, ROW_BORDER, "row")
 	createPixelBorder(row, ROW_BORDER)
 	row:EnableMouse(true)
 	row:SetScript("OnEnter", function(self)
@@ -1275,7 +1411,7 @@ end
 local function createIconPlate(parent, source, size, isAtlas)
 	local plate = CreateFrame("Frame", nil, parent, "BackdropTemplate")
 	plate:SetSize(size or 42, size or 42)
-	applyBackdrop(plate, { 0.015, 0.015, 0.018, 0.80 }, { 0.55, 0.42, 0.18, 0.75 })
+	applyBackdrop(plate, { 0.015, 0.015, 0.018, 0.80 }, { 0.55, 0.42, 0.18, 0.75 }, "card")
 	plate.Icon = createIcon(plate, source, (size or 42) - 6, isAtlas)
 	plate.Icon:SetPoint("CENTER")
 	return plate
@@ -1745,7 +1881,7 @@ function lib.ShowControlNotePanel(state, row, control)
 		end
 	end
 	panel.Textures = {}
-	applyBackdrop(panel, CARD_BG, { 0, 0, 0, 0 })
+	applyBackdrop(panel, CARD_BG, { 0, 0, 0, 0 }, "card")
 	createPixelBorder(panel, CARD_BORDER_HOVER)
 
 	panel.NoteInset = 10
@@ -2193,7 +2329,7 @@ local function makeFlatButton(parent, text, width, height, iconSource, iconIsAtl
 	button._eqolOwner = parent
 	button._eqolNormalBg = lib.ThemeColors.buttonBg
 	button._eqolNormalBorder = lib.ThemeColors.buttonBorder
-	applyBackdrop(button, button._eqolNormalBg, button._eqolNormalBorder)
+	applyBackdrop(button, button._eqolNormalBg, button._eqolNormalBorder, "button")
 	local leftInset = 10
 	if iconSource then
 		button.Icon = createIcon(button, iconSource, math.min((height or 26) - 8, 18), iconIsAtlas)
@@ -2690,7 +2826,7 @@ end
 
 local function addInfoCard(state, title, lines, height)
 	local card = createContentFrame(state, height or 96)
-	applyBackdrop(card, CARD_BG, CARD_BORDER)
+	applyBackdrop(card, CARD_BG, CARD_BORDER, "card")
 
 	local titleText = createText(card, FONT_HEADER, title or "", TEXT.gold)
 	titleText:SetPoint("TOPLEFT", card, "TOPLEFT", 14, -12)
@@ -2721,7 +2857,7 @@ local function createGridCard(state, row, index, columns, height)
 	local card = CreateFrame("Button", nil, row, "BackdropTemplate")
 	snapSize(card, width, height)
 	snapPoint(card, "TOPLEFT", row, "TOPLEFT", (index - 1) * (width + GRID_GAP), 0)
-	applyBackdrop(card, CARD_BG, CARD_BORDER)
+	applyBackdrop(card, CARD_BG, CARD_BORDER, "card")
 	card:EnableMouse(true)
 	return card, width
 end
@@ -2738,7 +2874,7 @@ end
 local function addStatusChip(parent, text, color, width)
 	local chip = CreateFrame("Frame", nil, parent, "BackdropTemplate")
 	chip:SetSize(width or 86, 20)
-	applyBackdrop(chip, { 0.02, 0.05, 0.025, 0.86 }, { color[1], color[2], color[3], 0.45 })
+	applyBackdrop(chip, { 0.02, 0.05, 0.025, 0.86 }, { color[1], color[2], color[3], 0.45 }, "card")
 	chip.Text = chip:CreateFontString(nil, "OVERLAY", FONT_MUTED)
 	chip.Text:SetAllPoints(chip)
 	chip.Text:SetJustifyH("CENTER")
@@ -2782,15 +2918,7 @@ local function createDashboardIcon(parent, iconSource)
 end
 
 local function applyDashboardCardBackground(card, bgColor)
-	if card.SetBackdrop then
-		card:SetBackdrop({
-			bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-			tile = true,
-			tileSize = 16,
-			insets = { left = 0, right = 0, top = 0, bottom = 0 },
-		})
-		card:SetBackdropColor(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
-	end
+	applyBackdrop(card, bgColor, DASHBOARD_CARD_BORDER, "dashboardCard")
 end
 
 local function setDashboardCardBorder(card, borderColor)
@@ -2930,7 +3058,7 @@ local function addDashboardStatusPanel(state, stats, statusConfig)
 	end
 
 	local panel = createContentFrame(state, 130)
-	applyBackdrop(panel, DETAIL_SECTION_BG, DASHBOARD_CARD_BORDER)
+	applyBackdrop(panel, DETAIL_SECTION_BG, DASHBOARD_CARD_BORDER, "dashboardCard")
 	local title = createText(panel, FONT_TITLE, statusConfig.title or (_G.STATUS or "Status"), TEXT.gold)
 	title:SetPoint("TOPLEFT", panel, "TOPLEFT", 14, -13)
 	title:SetPoint("RIGHT", panel, "RIGHT", -14, 0)
@@ -3236,7 +3364,7 @@ local function addSliderWidget(row, app, control, opts)
 	local function createStepButton(text)
 		local button = CreateFrame("Button", nil, container, "BackdropTemplate")
 		button:SetSize(stepButtonSize, stepButtonSize)
-		applyBackdrop(button, { 0.045, 0.042, 0.036, 0.90 }, { 0.42, 0.34, 0.20, 0.42 })
+		applyBackdrop(button, { 0.045, 0.042, 0.036, 0.90 }, { 0.42, 0.34, 0.20, 0.42 }, "control")
 		button.Text = button:CreateFontString(nil, "OVERLAY", FONT_TEXT)
 		button.Text:SetAllPoints(button)
 		button.Text:SetJustifyH("CENTER")
@@ -3245,10 +3373,10 @@ local function addSliderWidget(row, app, control, opts)
 		setTextColor(button.Text, TEXT.muted)
 		button._eqolApplyVisual = function(self)
 			if self._eqolDisabled then
-				applyBackdrop(self, DISABLED_CONTROL_BG, DISABLED_CONTROL_BORDER)
+				applyBackdrop(self, DISABLED_CONTROL_BG, DISABLED_CONTROL_BORDER, "control")
 				if self.Text then setTextColor(self.Text, TEXT.disabled) end
 			else
-				applyBackdrop(self, { 0.045, 0.042, 0.036, 0.90 }, { 0.42, 0.34, 0.20, 0.42 })
+				applyBackdrop(self, { 0.045, 0.042, 0.036, 0.90 }, { 0.42, 0.34, 0.20, 0.42 }, "control")
 				if self.Text then setTextColor(self.Text, TEXT.muted) end
 			end
 		end
@@ -3256,7 +3384,7 @@ local function addSliderWidget(row, app, control, opts)
 			if self._eqolDisabled then
 				return
 			end
-			applyBackdrop(self, { 0.105, 0.082, 0.045, 0.92 }, { TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.62 })
+			applyBackdrop(self, { 0.105, 0.082, 0.045, 0.92 }, { TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.62 }, "control")
 			if self.Text then setTextColor(self.Text, TEXT.gold) end
 		end)
 		button:SetScript("OnLeave", function(self)
@@ -3650,11 +3778,11 @@ local function addToggleWidget(row, app, control, opts)
 	else
 		switch:SetPoint("RIGHT", row, "RIGHT", -16, 0)
 	end
-	applyBackdrop(switch, { 0.050, 0.046, 0.038, 0.95 }, CARD_BORDER)
+	applyBackdrop(switch, { 0.050, 0.046, 0.038, 0.95 }, CARD_BORDER, "toggle")
 
 	switch.Knob = CreateFrame("Frame", nil, switch, "BackdropTemplate")
 	switch.Knob:SetSize(18, 18)
-	applyBackdrop(switch.Knob, { 0.62, 0.58, 0.49, 1.00 }, { 0.92, 0.82, 0.58, 0.80 })
+	applyBackdrop(switch.Knob, { 0.62, 0.58, 0.49, 1.00 }, { 0.92, 0.82, 0.58, 0.80 }, "toggleKnob")
 
 	function switch:SetChecked(checked)
 		self.checked = checked == true
@@ -3731,7 +3859,7 @@ local function addColorWidget(row, app, control, opts)
 	swatch._eqolOwner = row
 	swatch:SetSize(34, 24)
 	swatch:SetPoint("LEFT", currentLabel, "RIGHT", 8, 0)
-	applyBackdrop(swatch, { 0.02, 0.02, 0.02, 0.92 }, CARD_BORDER)
+	applyBackdrop(swatch, { 0.02, 0.02, 0.02, 0.92 }, CARD_BORDER, "swatch")
 	swatch.Texture = swatch:CreateTexture(nil, "OVERLAY")
 	swatch.Texture:SetPoint("TOPLEFT", swatch, "TOPLEFT", 4, -4)
 	swatch.Texture:SetPoint("BOTTOMRIGHT", swatch, "BOTTOMRIGHT", -4, 4)
@@ -3834,7 +3962,7 @@ local function addColorOverridesWidget(row, app, control, opts)
 		item.Swatch = CreateFrame("Button", nil, item, "BackdropTemplate")
 		item.Swatch:SetSize(24, 20)
 		item.Swatch:SetPoint("RIGHT", item, "RIGHT", -8, 0)
-		applyBackdrop(item.Swatch, { 0.02, 0.02, 0.02, 0.92 }, CARD_BORDER)
+		applyBackdrop(item.Swatch, { 0.02, 0.02, 0.02, 0.92 }, CARD_BORDER, "swatch")
 		item.Swatch.Texture = item.Swatch:CreateTexture(nil, "OVERLAY")
 		item.Swatch.Texture:SetPoint("TOPLEFT", item.Swatch, "TOPLEFT", 4, -4)
 		item.Swatch.Texture:SetPoint("BOTTOMRIGHT", item.Swatch, "BOTTOMRIGHT", -4, 4)
@@ -4056,7 +4184,7 @@ function lib.AddReorderListWidget(row, app, control, opts)
 			item:ClearAllPoints()
 			item:SetPoint("TOPLEFT", row, "TOPLEFT", FIELD_CONTROL_LEFT, top - 34 - ((index - 1) * 32))
 			item:SetPoint("RIGHT", row, "RIGHT", -14, 0)
-			applyBackdrop(item, { 0.045, 0.040, 0.032, 0.80 }, { 0.20, 0.16, 0.10, 0.45 })
+			applyBackdrop(item, { 0.045, 0.040, 0.032, 0.80 }, { 0.20, 0.16, 0.10, 0.45 }, "reorderItem")
 			item._eqolIndex = index
 			item._eqolEntryID = lib.ReorderList.GetEntryID(entry, index)
 			item.Icon:SetTexture(lib.ReorderList.GetEntryIcon(entry) or 134400)
@@ -4647,7 +4775,7 @@ local function addDashboardNewPanel(state, parent, entries, width, titleText)
 	local panel = CreateFrame("Frame", nil, parent, "BackdropTemplate")
 	panel:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, 0)
 	panel:SetSize(width, 250)
-	applyBackdrop(panel, CARD_BG, CARD_BORDER)
+	applyBackdrop(panel, CARD_BG, CARD_BORDER, "card")
 
 	local title = createText(panel, FONT_HEADER, titleText or L["configCenterSettings"] or "Settings", TEXT.gold)
 	title:SetPoint("TOPLEFT", panel, "TOPLEFT", 14, -12)
@@ -4778,7 +4906,7 @@ local function renderDashboard(state)
 		enabledPanel:SetPoint("TOPLEFT", panelRow, "TOPLEFT", 0, 0)
 	end
 	enabledPanel:SetSize(enabledWidth, 250)
-	applyBackdrop(enabledPanel, CARD_BG, CARD_BORDER)
+	applyBackdrop(enabledPanel, CARD_BG, CARD_BORDER, "card")
 	local enabledTitle = createText(
 		enabledPanel,
 		FONT_HEADER,
@@ -4798,7 +4926,7 @@ local function renderDashboard(state)
 			mini:SetPoint("TOPLEFT", enabledPanel, "TOPLEFT", 14, -38 - ((index - 1) * 39))
 			mini:SetPoint("RIGHT", enabledPanel, "RIGHT", -14, 0)
 			mini:SetHeight(34)
-			applyBackdrop(mini, CARD_BG, CARD_BORDER)
+			applyBackdrop(mini, CARD_BG, CARD_BORDER, "card")
 			applyHoverState(mini, CARD_BG, CARD_BG_HOVER, CARD_BORDER, CARD_BORDER_HOVER)
 			mini:SetScript("OnClick", function() state:SetPage(page.id) end)
 			local iconSource, iconIsAtlas = resolvePageIcon(app, page)
@@ -4904,7 +5032,7 @@ local function addPageLeftColumnShell(state)
 		-(PAGE_LAYOUT.contentPad + (state.pageRightWidth or PAGE_RIGHT_WIDTH) + PAGE_GAP + PAGE_LAYOUT.scrollbarGutter),
 		PAGE_LAYOUT.contentPad
 	)
-	applyBackdrop(shell, DETAIL_COLORS.columnBg, DETAIL_COLORS.columnBorder)
+	applyBackdrop(shell, DETAIL_COLORS.columnBg, DETAIL_COLORS.columnBorder, "detailColumn")
 	if state.frame.Scroll and shell.SetFrameLevel and state.frame.Scroll.GetFrameLevel then
 		shell:SetFrameLevel(math.max(0, (state.frame.Scroll:GetFrameLevel() or 1) - 1))
 	end
@@ -4919,7 +5047,7 @@ function addContentScrollbarRail(state)
 	rail:SetPoint("TOPLEFT", state.frame.Scroll, "TOPRIGHT", PAGE_LAYOUT.scrollbarOffset, 0)
 	rail:SetPoint("BOTTOMLEFT", state.frame.Scroll, "BOTTOMRIGHT", PAGE_LAYOUT.scrollbarOffset, 0)
 	rail:SetWidth(12)
-	applyBackdrop(rail, { 0.038, 0.034, 0.026, 0.58 }, { 0.48, 0.38, 0.22, 0.54 })
+	applyBackdrop(rail, { 0.038, 0.034, 0.026, 0.58 }, { 0.48, 0.38, 0.22, 0.54 }, "detailColumn")
 	if state.frame.Scroll and rail.SetFrameLevel and state.frame.Scroll.GetFrameLevel then
 		rail:SetFrameLevel(math.max(0, (state.frame.Scroll:GetFrameLevel() or 1) - 1))
 	end
@@ -4984,7 +5112,7 @@ local function addPageSidePanel(state, page, category)
 		-PAGE_LAYOUT.sidePanelTopOffset
 	)
 	panel:SetSize(state.pageRightWidth or PAGE_RIGHT_WIDTH, panelHeight)
-	applyBackdrop(panel, DETAIL_SECTION_BG, DETAIL_COLORS.sectionBorder)
+	applyBackdrop(panel, DETAIL_SECTION_BG, DETAIL_COLORS.sectionBorder, "detailSection")
 
 	local aboutTitle = createText(panel, FONT_HEADER, L["configCenterAbout"] or "About", TEXT.gold)
 	aboutTitle:SetPoint("TOPLEFT", panel, "TOPLEFT", 14, -14)
@@ -5010,14 +5138,14 @@ local function addGroupSection(state, group, pagePath)
 	local rowGap = collapsed and 0 or math.max(#group.controls - 1, 0) * 2
 	local height = collapsed and 40 or (46 + controlsHeight + rowGap + 14)
 	local section = createPageLeftFrame(state, height)
-	applyBackdrop(section, DETAIL_SECTION_BG, DETAIL_COLORS.sectionBorder)
+	applyBackdrop(section, DETAIL_SECTION_BG, DETAIL_COLORS.sectionBorder, "detailSection")
 	createPixelBorder(section, DETAIL_COLORS.sectionBorder)
 
 	local header = CreateFrame("Button", nil, section, "BackdropTemplate")
 	header:SetPoint("TOPLEFT", section, "TOPLEFT", 0, 0)
 	header:SetPoint("TOPRIGHT", section, "TOPRIGHT", 0, 0)
 	header:SetHeight(40)
-	applyBackdrop(header, DETAIL_COLORS.sectionHeaderBg, { 0, 0, 0, 0 })
+	applyBackdrop(header, DETAIL_COLORS.sectionHeaderBg, { 0, 0, 0, 0 }, "detailSection")
 	header.Text = header:CreateFontString(nil, "OVERLAY", FONT_HEADER)
 	header.Text:SetPoint("LEFT", header, "LEFT", 14, 0)
 	header.Text:SetPoint("RIGHT", header, "RIGHT", customizedCount > 0 and -78 or -34, 0)
@@ -5080,13 +5208,81 @@ function lib.GetInfoPageCommandText(entry)
 	return text
 end
 
+function lib.IsInfoPageWrappedButton(block, entry)
+	if type(entry) ~= "table" or (entry.type or "text") ~= "button" then
+		return false
+	end
+	if entry.inline == true or entry.wrap == true then
+		return true
+	end
+	local layout = type(block) == "table" and (block.buttonLayout or block.buttonsLayout or block.buttonFlow) or nil
+	layout = tostring(layout or ""):lower()
+	return layout == "wrap" or layout == "horizontal" or layout == "inline"
+end
+
+function lib.GetInfoPageButtonMetrics(block, entry)
+	local buttonWidth = tonumber(entry and entry.width) or tonumber(block and block.buttonWidth) or 180
+	local buttonHeight = tonumber(entry and entry.height) or tonumber(block and block.buttonHeight) or 28
+	local gap = tonumber(entry and entry.gap) or tonumber(block and block.buttonGap) or 10
+	local rowGap = tonumber(entry and entry.rowGap) or tonumber(block and block.buttonRowGap) or 10
+	return buttonWidth, buttonHeight, gap, rowGap
+end
+
+function lib.GetInfoPageButtonAlign(block)
+	local align = tostring((type(block) == "table" and (block.buttonAlign or block.buttonsAlign or block.alignButtons)) or "left"):lower()
+	if align == "center" or align == "middle" then
+		return "center"
+	end
+	if align == "right" or align == "end" then
+		return "right"
+	end
+	return "left"
+end
+
+function lib.GetInfoPageWrappedButtonRunHeight(entries, startIndex, width, block)
+	local contentWidth = math.max(120, (tonumber(width) or 0) - 28)
+	local index = startIndex
+	local rows = 0
+	local currentWidth = 0
+	local rowHeight = 0
+	local totalHeight = 0
+	while index <= #entries and lib.IsInfoPageWrappedButton(block, entries[index]) do
+		local buttonWidth, buttonHeight, gap, rowGap = lib.GetInfoPageButtonMetrics(block, entries[index])
+		local nextWidth = currentWidth > 0 and (currentWidth + gap + buttonWidth) or buttonWidth
+		if currentWidth > 0 and nextWidth > contentWidth then
+			totalHeight = totalHeight + rowHeight + (rows > 0 and rowGap or 0)
+			rows = rows + 1
+			currentWidth = buttonWidth
+			rowHeight = buttonHeight
+		else
+			currentWidth = nextWidth
+			rowHeight = math.max(rowHeight, buttonHeight)
+		end
+		index = index + 1
+	end
+	if currentWidth > 0 then
+		totalHeight = totalHeight + rowHeight + (rows > 0 and select(4, lib.GetInfoPageButtonMetrics(block, entries[startIndex])) or 0)
+	end
+	return totalHeight + 12, index
+end
+
 function lib.GetInfoPageBlockHeight(block, width, state, path)
 	if type(block) ~= "table" then
 		return 0
 	end
 	local height = block.title and 42 or 16
-	for index, entry in ipairs(block.entries or block.blocks or {}) do
-		height = height + lib.GetInfoPageEntryHeight(entry, width, state, tostring(path or "block") .. "." .. tostring(index), 0)
+	local entries = block.entries or block.blocks or {}
+	local index = 1
+	while index <= #entries do
+		local entry = entries[index]
+		if lib.IsInfoPageWrappedButton(block, entry) then
+			local runHeight, nextIndex = lib.GetInfoPageWrappedButtonRunHeight(entries, index, width, block)
+			height = height + runHeight
+			index = nextIndex
+		else
+			height = height + lib.GetInfoPageEntryHeight(entry, width, state, tostring(path or "block") .. "." .. tostring(index), 0)
+			index = index + 1
+		end
 	end
 	return math.max(64, height + 12)
 end
@@ -5149,7 +5345,7 @@ function lib.GetInfoPageEntryHeight(entry, width, state, path, depth)
 		return tonumber(entry.height) or 10
 	end
 	if entryType == "button" then
-		return 40
+		return (tonumber(entry.height) or 28) + 12
 	end
 	if entryType == "command" then
 		return lib.EstimateTextHeight(lib.GetInfoPageCommandText(entry), width, 15, 24) + 8
@@ -5212,7 +5408,7 @@ function lib.RenderInfoPageEntry(state, section, entry, y, width, path, depth)
 		return y - (tonumber(entry.height) or 10)
 	end
 	if entryType == "button" then
-		local button = makeFlatButton(section, entry.text or entry.label or (_G.OKAY or "OK"), tonumber(entry.width) or 190, 28, entry.icon, entry.iconAtlas == true)
+		local button = makeFlatButton(section, entry.text or entry.label or (_G.OKAY or "OK"), tonumber(entry.width) or 190, tonumber(entry.height) or 28, entry.icon, entry.iconAtlas == true)
 		button:SetPoint("TOPLEFT", section, "TOPLEFT", x, y)
 		button:SetScript("OnClick", function()
 			if type(entry.onClick) == "function" then
@@ -5246,7 +5442,7 @@ function lib.RenderInfoPageEntry(state, section, entry, y, width, path, depth)
 		header:SetPoint("TOPLEFT", section, "TOPLEFT", x, y)
 		header:SetPoint("RIGHT", section, "RIGHT", -14, 0)
 		header:SetHeight(headerHeight)
-		applyBackdrop(header, entry.headerBg or DETAIL_COLORS.sectionHeaderBg, { 0, 0, 0, 0 })
+		applyBackdrop(header, entry.headerBg or DETAIL_COLORS.sectionHeaderBg, { 0, 0, 0, 0 }, "detailSection")
 		header.Chevron = createCollapseArrow(header, state.app, 12, not expanded)
 		header.Chevron:SetPoint("LEFT", header, "LEFT", 10, 0)
 		header.Text = header:CreateFontString(nil, "OVERLAY", FONT_HEADER)
@@ -5302,6 +5498,63 @@ function lib.RenderInfoPageEntry(state, section, entry, y, width, path, depth)
 	return y - textHeight - 8
 end
 
+function lib.RenderInfoPageWrappedButtonRun(state, section, entries, startIndex, y, width, block)
+	local contentWidth = math.max(120, (tonumber(width) or 0) - 28)
+	local x = 14
+	local index = startIndex
+	local rows = {}
+	local currentRow
+	while index <= #entries and lib.IsInfoPageWrappedButton(block, entries[index]) do
+		local entry = entries[index]
+		local buttonWidth, buttonHeight, gap, entryRowGap = lib.GetInfoPageButtonMetrics(block, entry)
+		local projectedWidth = currentRow and (currentRow.width + gap + buttonWidth) or buttonWidth
+		if currentRow and projectedWidth > contentWidth then
+			rows[#rows + 1] = currentRow
+			currentRow = nil
+		end
+		if not currentRow then
+			currentRow = { entries = {}, width = 0, height = 0, rowGap = entryRowGap }
+		end
+		currentRow.entries[#currentRow.entries + 1] = {
+			entry = entry,
+			width = buttonWidth,
+			height = buttonHeight,
+			gap = #currentRow.entries > 0 and gap or 0,
+		}
+		currentRow.width = currentRow.width > 0 and (currentRow.width + gap + buttonWidth) or buttonWidth
+		currentRow.height = math.max(currentRow.height, buttonHeight)
+		currentRow.rowGap = math.max(currentRow.rowGap or 0, entryRowGap)
+		index = index + 1
+	end
+	if currentRow then
+		rows[#rows + 1] = currentRow
+	end
+	local align = lib.GetInfoPageButtonAlign(block)
+	for rowIndex, row in ipairs(rows) do
+		local rowOffset = 0
+		if align == "center" then
+			rowOffset = math.max(0, (contentWidth - row.width) / 2)
+		elseif align == "right" then
+			rowOffset = math.max(0, contentWidth - row.width)
+		end
+		local currentX = rowOffset
+		for _, item in ipairs(row.entries) do
+			currentX = currentX + item.gap
+			local entry = item.entry
+			local button = makeFlatButton(section, entry.text or entry.label or (_G.OKAY or "OK"), item.width, item.height, entry.icon, entry.iconAtlas == true)
+			button:SetPoint("TOPLEFT", section, "TOPLEFT", x + currentX, y)
+			button:SetScript("OnClick", function()
+				if type(entry.onClick) == "function" then
+					entry.onClick(entry, state.app)
+				end
+			end)
+			currentX = currentX + item.width
+		end
+		y = y - row.height - (rowIndex < #rows and row.rowGap or 12)
+	end
+	return y, index
+end
+
 function lib.RenderInfoPageBlock(state, block)
 	if type(block) ~= "table" then
 		return nil
@@ -5313,7 +5566,7 @@ function lib.RenderInfoPageBlock(state, block)
 	local blockPath = tostring(state.selectedPageID or "page") .. "." .. tostring(state.infoPageBlockIndex)
 	local height = lib.GetInfoPageBlockHeight(block, sectionWidth, state, blockPath)
 	local section = createPageLeftFrame(state, height)
-	applyBackdrop(section, DETAIL_SECTION_BG, DETAIL_COLORS.sectionBorder)
+	applyBackdrop(section, DETAIL_SECTION_BG, DETAIL_COLORS.sectionBorder, "detailSection")
 	createPixelBorder(section, DETAIL_COLORS.sectionBorder)
 
 	local y = -14
@@ -5325,8 +5578,16 @@ function lib.RenderInfoPageBlock(state, block)
 		y = y - 32
 	end
 
-	for index, entry in ipairs(block.entries or block.blocks or {}) do
-		y = lib.RenderInfoPageEntry(state, section, entry, y, sectionWidth, blockPath .. "." .. tostring(index), 0)
+	local entries = block.entries or block.blocks or {}
+	local index = 1
+	while index <= #entries do
+		local entry = entries[index]
+		if lib.IsInfoPageWrappedButton(block, entry) then
+			y, index = lib.RenderInfoPageWrappedButtonRun(state, section, entries, index, y, sectionWidth, block)
+		else
+			y = lib.RenderInfoPageEntry(state, section, entry, y, sectionWidth, blockPath .. "." .. tostring(index), 0)
+			index = index + 1
+		end
 	end
 	state.y = state.y - 12
 	return section
@@ -5355,7 +5616,7 @@ function lib.RenderInfoPage(state, page, pagePath)
 	local blocks = page.content or page.blocks or page.infoBlocks
 	if type(blocks) ~= "table" or #blocks == 0 then
 		local empty = createPageLeftFrame(state, 72)
-		applyBackdrop(empty, DETAIL_SECTION_BG, DETAIL_COLORS.sectionBorder)
+		applyBackdrop(empty, DETAIL_SECTION_BG, DETAIL_COLORS.sectionBorder, "detailSection")
 		local emptyText = createText(empty, FONT_MUTED, getLocale(app)["configCenterNoResults"] or "No settings found.", TEXT.muted)
 		emptyText:SetPoint("TOPLEFT", empty, "TOPLEFT", 14, -14)
 		emptyText:SetPoint("BOTTOMRIGHT", empty, "BOTTOMRIGHT", -14, 14)
@@ -5402,7 +5663,7 @@ local function renderPage(state, pageID)
 	local groups = collectPageGroups(app, page, nil)
 	if #groups == 0 then
 		local empty = createPageLeftFrame(state, 72)
-		applyBackdrop(empty, DETAIL_SECTION_BG, DETAIL_COLORS.sectionBorder)
+		applyBackdrop(empty, DETAIL_SECTION_BG, DETAIL_COLORS.sectionBorder, "detailSection")
 		local emptyLabel = getLocale(app)["configCenterNoResults"] or "No settings found."
 		local emptyText = createText(empty, FONT_MUTED, emptyLabel, TEXT.muted)
 		emptyText:SetPoint("TOPLEFT", empty, "TOPLEFT", 14, -14)
@@ -5471,7 +5732,7 @@ local function renderSearch(state, query)
 		else
 			local rowHeight = getSettingRowHeight(control, state)
 			local card = createContentFrame(state, rowHeight + 52)
-			applyBackdrop(card, CARD_BG, CARD_BORDER)
+			applyBackdrop(card, CARD_BG, CARD_BORDER, "card")
 			createPixelBorder(card, CARD_BORDER)
 
 			local rowWidth = (state.contentWidth or CONTENT_WIDTH) - 24
@@ -5535,7 +5796,26 @@ function StateMixin:RenderContent()
 		self.resetSearchScroll = nil
 	end
 	lib.FocusPendingControl(self)
+	self:RefreshSidebarNewBadges()
 	self:RefreshSidebarSelection()
+end
+
+function StateMixin:RefreshSidebarNewBadges()
+	for _, row in pairs(self.sidebarRows or {}) do
+		if row.categoryID and row.Text then
+			local isNewCategory = lib.IsCategoryNew(self.app, row.categoryID)
+			if isNewCategory and not row.NewBadge then
+				row.NewBadge = lib.CreateNewBadge(row)
+				row.NewBadge:SetPoint("RIGHT", row, "RIGHT", -10, 0)
+			end
+			if row.NewBadge and row.NewBadge.SetShown then
+				row.NewBadge:SetShown(isNewCategory)
+			end
+			row.Text:ClearAllPoints()
+			row.Text:SetPoint("LEFT", row.Icon, "RIGHT", 10, 0)
+			row.Text:SetPoint("RIGHT", row, "RIGHT", isNewCategory and -64 or -12, 0)
+		end
+	end
 end
 
 function StateMixin:RefreshSidebarSelection()
@@ -5560,7 +5840,7 @@ function StateMixin:RenderSidebar()
 	local L = getLocale(self.app)
 
 	local dashboard = createSidebarFrame(self, 44)
-	applyBackdrop(dashboard, SIDEBAR_BG, { 0.42, 0.34, 0.20, 0.16 })
+	applyBackdrop(dashboard, SIDEBAR_BG, { 0.42, 0.34, 0.20, 0.16 }, "sidebar")
 	dashboard.Accent = dashboard:CreateTexture(nil, "OVERLAY")
 	dashboard.Accent:SetColorTexture(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.85)
 	dashboard.Accent:SetPoint("TOPLEFT", dashboard, "TOPLEFT", 0, -6)
@@ -5596,7 +5876,7 @@ function StateMixin:RenderSidebar()
 		if category.hidden ~= true and category.visible ~= false then
 			local isNewCategory = lib.IsCategoryNew(self.app, category.id)
 			local row = createSidebarFrame(self, 44)
-			applyBackdrop(row, SIDEBAR_BG, { 0.42, 0.34, 0.20, 0.16 })
+			applyBackdrop(row, SIDEBAR_BG, { 0.42, 0.34, 0.20, 0.16 }, "sidebar")
 			row.Accent = row:CreateTexture(nil, "OVERLAY")
 			row.Accent:SetColorTexture(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.85)
 			row.Accent:SetPoint("TOPLEFT", row, "TOPLEFT", 0, -6)
@@ -5884,6 +6164,7 @@ local function createFrame(app)
 	local contentTop = topInset + topBarHeight + contentGap
 	local frame = CreateFrame("Frame", name, UIParent, "BackdropTemplate")
 	lib.ApplyThemeColors(app)
+	lib.ApplyThemeBorders(app)
 	local storedWidth, storedHeight = lib.GetStoredFrameSize(app)
 	local savedWidth = math.max(PAGE_LAYOUT.windowMinWidth, storedWidth or WINDOW_WIDTH)
 	local savedHeight = math.max(PAGE_LAYOUT.windowMinHeight, storedHeight or WINDOW_HEIGHT)
@@ -5942,7 +6223,7 @@ local function createFrame(app)
 	frame.TopBar:SetPoint("TOPLEFT", frame, "TOPLEFT", outerInsetLeft, -topInset)
 	frame.TopBar:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -outerInsetRight, -topInset)
 	frame.TopBar:SetHeight(topBarHeight)
-	applyBackdrop(frame.TopBar, TOPBAR_BG, lib.ThemeColors.topbarBorder)
+	applyBackdrop(frame.TopBar, TOPBAR_BG, lib.ThemeColors.topbarBorder, "topbar")
 
 	frame.TopBarAccent = frame.TopBar:CreateTexture(nil, "OVERLAY")
 	frame.TopBarAccent:SetColorTexture(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.38)
@@ -5984,21 +6265,21 @@ local function createFrame(app)
 
 	frame.ResetButton = makeFlatButton(frame.TopBar, _G.DEFAULTS or _G.RESET or "Defaults", 104, 28)
 	frame.ResetButton:SetPoint("RIGHT", frame.TopBar, "RIGHT", -12, 0)
-	setFrameBackdrop(frame.ResetButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
+	setFrameBackdrop(frame.ResetButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
 	setTextColor(frame.ResetButton.Text, TEXT.topbarGold)
 	frame.ResetButton:SetScript("OnEnter", function(self)
-		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarHoverBg, lib.ThemeColors.buttonHoverBorder)
+		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarHoverBg, lib.ThemeColors.buttonHoverBorder, "topbarButton")
 	end)
 	frame.ResetButton:SetScript("OnLeave", function(self)
-		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
+		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
 	end)
 
 	frame.LockButton = makeFlatButton(frame.TopBar, L["configCenterLockWindow"] or "Lock Window", 138, 28)
 	frame.LockButton:SetPoint("RIGHT", frame.ResetButton, "LEFT", -12, 0)
-	setFrameBackdrop(frame.LockButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
+	setFrameBackdrop(frame.LockButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
 	setTextColor(frame.LockButton.Text, TEXT.topbarGold)
 	frame.LockButton:SetScript("OnEnter", function(self)
-		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarHoverBg, lib.ThemeColors.buttonHoverBorder)
+		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarHoverBg, lib.ThemeColors.buttonHoverBorder, "topbarButton")
 		if _G.GameTooltip then
 			_G.GameTooltip:SetOwner(self, "ANCHOR_TOP")
 			_G.GameTooltip:SetText(L["configCenterLockWindowDesc"] or "Prevents the settings window from being moved by touch or mouse drags.")
@@ -6006,7 +6287,7 @@ local function createFrame(app)
 		end
 	end)
 	frame.LockButton:SetScript("OnLeave", function(self)
-		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
+		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
 		if _G.GameTooltip then
 			_G.GameTooltip:Hide()
 		end
@@ -6018,13 +6299,13 @@ local function createFrame(app)
 
 	frame.DensityButton = makeFlatButton(frame.TopBar, L["configCenterDensityComfortable"] or "Comfortable", 118, 28)
 	frame.DensityButton:SetPoint("RIGHT", frame.ResetButton, "LEFT", -12, 0)
-	setFrameBackdrop(frame.DensityButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
+	setFrameBackdrop(frame.DensityButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
 	setTextColor(frame.DensityButton.Text, TEXT.topbarGold)
 	frame.DensityButton:SetScript("OnEnter", function(self)
-		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarHoverBg, lib.ThemeColors.buttonHoverBorder)
+		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarHoverBg, lib.ThemeColors.buttonHoverBorder, "topbarButton")
 	end)
 	frame.DensityButton:SetScript("OnLeave", function(self)
-		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
+		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
 	end)
 	frame.DensityButton:SetShown(lib.ShouldShowDensityButton(app))
 	frame.LockButton:ClearAllPoints()
@@ -6043,7 +6324,7 @@ local function createFrame(app)
 		-12,
 		0
 	)
-	applyBackdrop(frame.SearchShell, lib.ThemeColors.searchBg, lib.ThemeColors.searchBorder)
+	applyBackdrop(frame.SearchShell, lib.ThemeColors.searchBg, lib.ThemeColors.searchBorder, "search")
 
 	frame.SearchIcon = frame.SearchShell:CreateTexture(nil, "OVERLAY")
 	frame.SearchIcon:SetSize(15, 15)
@@ -6113,7 +6394,7 @@ local function createFrame(app)
 	frame.SidebarShell:SetPoint("TOPLEFT", frame, "TOPLEFT", outerInsetLeft, -contentTop)
 	frame.SidebarShell:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", outerInsetLeft, outerInsetY)
 	frame.SidebarShell:SetWidth(SIDEBAR_WIDTH)
-	applyBackdrop(frame.SidebarShell, SIDEBAR_BG, PANEL_BORDER)
+	applyBackdrop(frame.SidebarShell, SIDEBAR_BG, PANEL_BORDER, "sidebar")
 
 	frame.SidebarScroll = CreateFrame("ScrollFrame", nil, frame.SidebarShell, "UIPanelScrollFrameTemplate")
 	frame.SidebarScroll:SetPoint("TOPLEFT", frame.SidebarShell, "TOPLEFT", 8, -8)
@@ -6208,7 +6489,7 @@ local function createFrame(app)
 	frame.ContentShell = CreateFrame("Frame", nil, frame, "BackdropTemplate")
 	frame.ContentShell:SetPoint("TOPLEFT", frame.SidebarShell, "TOPRIGHT", 8, 0)
 	frame.ContentShell:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -outerInsetRight, outerInsetY)
-	applyBackdrop(frame.ContentShell, CONTENT_BG, PANEL_BORDER)
+	applyBackdrop(frame.ContentShell, CONTENT_BG, PANEL_BORDER, "content")
 
 	frame.Scroll = CreateFrame("ScrollFrame", nil, frame.ContentShell, "UIPanelScrollFrameTemplate")
 	frame.Scroll:SetPoint("TOPLEFT", frame.ContentShell, "TOPLEFT", 12, -12)
@@ -6265,6 +6546,7 @@ local function refreshFrameTheme(frame, app)
 		return
 	end
 	lib.ApplyThemeColors(app)
+	lib.ApplyThemeBorders(app)
 	if frame.bg and frame.bg.SetColorTexture then
 		frame.bg:SetColorTexture(
 			lib.ThemeColors.frameBg[1],
@@ -6282,28 +6564,28 @@ local function refreshFrameTheme(frame, app)
 		)
 	end
 	if frame.TopBar then
-		setFrameBackdrop(frame.TopBar, TOPBAR_BG, lib.ThemeColors.topbarBorder)
+		setFrameBackdrop(frame.TopBar, TOPBAR_BG, lib.ThemeColors.topbarBorder, "topbar")
 	end
 	if frame.ResetButton then
-		setFrameBackdrop(frame.ResetButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
+		setFrameBackdrop(frame.ResetButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
 		setTextColor(frame.ResetButton.Text, TEXT.topbarGold)
 	end
 	if frame.LockButton then
-		setFrameBackdrop(frame.LockButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
+		setFrameBackdrop(frame.LockButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
 		setTextColor(frame.LockButton.Text, TEXT.topbarGold)
 	end
 	if frame.DensityButton then
-		setFrameBackdrop(frame.DensityButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
+		setFrameBackdrop(frame.DensityButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
 		setTextColor(frame.DensityButton.Text, TEXT.topbarGold)
 	end
 	if frame.SearchShell then
-		setFrameBackdrop(frame.SearchShell, lib.ThemeColors.searchBg, lib.ThemeColors.searchBorder)
+		setFrameBackdrop(frame.SearchShell, lib.ThemeColors.searchBg, lib.ThemeColors.searchBorder, "search")
 	end
 	if frame.SidebarShell then
-		setFrameBackdrop(frame.SidebarShell, SIDEBAR_BG, PANEL_BORDER)
+		setFrameBackdrop(frame.SidebarShell, SIDEBAR_BG, PANEL_BORDER, "sidebar")
 	end
 	if frame.ContentShell then
-		setFrameBackdrop(frame.ContentShell, CONTENT_BG, PANEL_BORDER)
+		setFrameBackdrop(frame.ContentShell, CONTENT_BG, PANEL_BORDER, "content")
 	end
 	if frame.Title then
 		setTextColor(frame.Title, TEXT.topbarGold)
@@ -6356,6 +6638,7 @@ function lib:Open(appOrID, pageID, focusControlID)
 		return nil
 	end
 	lib.ApplyThemeColors(app)
+	lib.ApplyThemeBorders(app)
 	local frame = frames[app.id]
 	if not frame then
 		frame = createFrame(app)

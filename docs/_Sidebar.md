@@ -44,4 +44,5 @@
 &nbsp; • [Search and New Badges](Examples/Search-And-New-Badges.md "Search and New Badges") \
 &nbsp; • [Runtime Refresh](Examples/Runtime-Refresh.md "Runtime Refresh") \
 &nbsp; • [Support Links](Examples/Support-Links.md "Support Links") \
-&nbsp; • [Theme Colors](Examples/Theme-Colors.md "Theme Colors")
+&nbsp; • [Theme Colors](Examples/Theme-Colors.md "Theme Colors") \
+&nbsp; • [Theme Borders](Examples/Theme-Borders.md "Theme Borders")

@@ -27,6 +27,36 @@ local SAMPLE_NEW_TAGS = {
 	["shortcuts"] = true,
 }
 
+local function markSampleNewTagSeen(tagID)
+	tagID = tostring(tagID or "")
+	if tagID == "" or not SAMPLE_NEW_TAGS[tagID] then
+		return
+	end
+	DB().seenNewTags = DB().seenNewTags or {}
+	DB().seenNewTags[tagID] = true
+end
+
+local function isSampleNewTagActive(tagID)
+	tagID = tostring(tagID or "")
+	return SAMPLE_NEW_TAGS[tagID] == true
+		and not (DB().seenNewTags and DB().seenNewTags[tagID] == true)
+end
+
+local function markSamplePageSeen(page)
+	if not page then
+		return
+	end
+	markSampleNewTagSeen(page.newTagID)
+	markSampleNewTagSeen(page.id)
+	markSampleNewTagSeen(page.pageKey)
+	markSampleNewTagSeen(page.key)
+	for _, control in ipairs(page.controls or {}) do
+		markSampleNewTagSeen(control.newTagID)
+		markSampleNewTagSeen(control.id)
+		markSampleNewTagSeen(control.key)
+	end
+end
+
 local function getSampleVersion()
 	return C_AddOns and C_AddOns.GetAddOnMetadata(addonName, "Version") or "1.0.0"
 end
@@ -88,9 +118,83 @@ local SAMPLE_THEME_COLORS = {
 	},
 }
 
+local SAMPLE_THEME_BORDERS = {
+	gold = {
+		default = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 12,
+			insets = { left = 3, right = 3, top = 3, bottom = 3 },
+		},
+		button = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 10,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+	},
+	midnight = {
+		default = {
+			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+			edgeSize = 16,
+			insets = { left = 4, right = 4, top = 4, bottom = 4 },
+		},
+		row = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 8,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+		button = {
+			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+			edgeSize = 12,
+			insets = { left = 3, right = 3, top = 3, bottom = 3 },
+		},
+		search = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 14,
+			insets = { left = 3, right = 3, top = 3, bottom = 3 },
+		},
+	},
+	ember = {
+		default = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 18,
+			insets = { left = 5, right = 5, top = 5, bottom = 5 },
+		},
+		topbar = {
+			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+			edgeSize = 18,
+			insets = { left = 5, right = 5, top = 5, bottom = 5 },
+		},
+		topbarButton = {
+			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+			edgeSize = 13,
+			insets = { left = 3, right = 3, top = 3, bottom = 3 },
+		},
+		button = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 9,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+		toggle = {
+			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+			edgeSize = 10,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+		swatch = {
+			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+			edgeSize = 11,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+	},
+}
+
 local function getSampleThemeColors()
 	local preset = DB().themePreset or "gold"
 	return SAMPLE_THEME_COLORS[preset]
+end
+
+local function getSampleThemeBorders()
+	local preset = DB().themePreset or "gold"
+	return SAMPLE_THEME_BORDERS[preset]
 end
 
 local function applySampleThemePreset(preset)
@@ -114,6 +218,7 @@ app = Config:RegisterAddOn(addonName, {
 	density = "compact",
 	showDensityButton = true,
 	colors = getSampleThemeColors,
+	borders = getSampleThemeBorders,
 	db = DB,
 	locale = addon.L,
 	version = function()
@@ -143,7 +248,7 @@ app = Config:RegisterAddOn(addonName, {
 		DB().settingsWindow.locked = locked == true
 	end,
 	isNewTag = function(tagID)
-		return SAMPLE_NEW_TAGS[tostring(tagID or "")] == true
+		return isSampleNewTagActive(tagID)
 	end,
 	blizzardSettingsRoot = true,
 	blizzardSettingsTitle = "LibSettingsDesigner Sample",
@@ -264,6 +369,7 @@ app:RegisterPage({
 	description = "Common settings rows for addon behavior.",
 	mainToggleID = "enabled",
 	iconKey = "settingspage",
+	onOpen = markSamplePageSeen,
 	order = 100,
 })
 app:RegisterGroup("general.behavior", { id = "core", title = "Core", order = 100 })
@@ -369,6 +475,7 @@ app:RegisterPage({
 	iconAtlas = "transmog-icon-revert",
 	mainToggleID = "visualsEnabled",
 	newTagID = "visuals.theme",
+	onOpen = markSamplePageSeen,
 	order = 100,
 })
 app:RegisterGroup("visuals.theme", { id = "layout", title = "Layout", order = 100 })
@@ -526,6 +633,7 @@ app:RegisterPage({
 	iconKey = "movementinput",
 	mainToggleID = "shortcutsEnabled",
 	newTagID = "shortcuts",
+	onOpen = markSamplePageSeen,
 	order = 100,
 })
 
@@ -596,6 +704,7 @@ app:RegisterPage({
 	layout = "info",
 	iconKey = "dashboard",
 	newTagID = "dashboard.showcase",
+	onOpen = markSamplePageSeen,
 	order = 80,
 	content = {
 		{
@@ -708,6 +817,11 @@ app:RegisterPage({
 	content = {
 		{
 			title = "Community and Support",
+			buttonLayout = "wrap",
+			buttonAlign = "center",
+			buttonWidth = 180,
+			buttonGap = 12,
+			buttonRowGap = 12,
 			entries = {
 				{ type = "text", text = "External links belong to the host addon. The sample prints URLs to chat; real addons can show a copy popup or custom link frame." },
 				{ type = "button", text = "Discord", width = 180, onClick = function() showSampleLink("Discord", "https://discord.gg/example") end },

@@ -68,6 +68,7 @@ wrapper bridges, documenting elements, or validating changes.
 - [Runtime Refresh](Examples/Runtime-Refresh.md)
 - [Support Links](Examples/Support-Links.md)
 - [Theme Colors](Examples/Theme-Colors.md)
+- [Theme Borders](Examples/Theme-Borders.md)
 
 ## [Principles][Top]
 
