@@ -1078,6 +1078,55 @@ change when titles or ordering change. Supported fields include `title`,
 `rightText` or `date`, `text` or `body`, nested `entries` or `blocks`,
 `defaultExpanded`, `expanded`, and `collapsed`.
 
+## Support Links
+
+For Discord, GitHub issues, Ko-fi, websites, bug reports, and similar external
+links, use an info page plus dashboard card instead of adding host-specific
+runtime behavior.
+
+Recommended pattern:
+
+```lua
+local function ShowSupportURL(label, url)
+  -- Host-owned behavior: print, show a copy popup, or open a custom copy frame.
+  print(("%s: %s"):format(label or "Link", url or ""))
+end
+
+dashboard = {
+  cards = {
+    {
+      title = "Support Links",
+      description = "Discord, GitHub issues, sponsors, and website.",
+      iconKey = "help",
+      pageID = "help.support",
+    },
+  },
+}
+
+app:RegisterPage({
+  id = "help.support",
+  category = "help",
+  title = "Support Links",
+  layout = "info",
+  content = {
+    {
+      title = "Community and Support",
+      entries = {
+        { type = "button", text = "Discord", width = 180, onClick = function() ShowSupportURL("Discord", "https://discord.gg/example") end },
+        { type = "button", text = "GitHub Issues", width = 180, onClick = function() ShowSupportURL("GitHub Issues", "https://github.com/example/MyAddon/issues") end },
+        { type = "button", text = "Ko-fi", width = 180, onClick = function() ShowSupportURL("Ko-fi", "https://ko-fi.com/example") end },
+        { type = "text", text = "Discord: https://discord.gg/example" },
+      },
+    },
+  },
+})
+```
+
+Do not put addon-specific URLs, Discord names, GitHub repos, Ko-fi links, or
+sponsor strings into generic LibSettingsDesigner runtime files. Do not make the
+generic library responsible for opening external browsers; World of Warcraft
+addons should expose copyable URLs through host-owned behavior.
+
 ## Wrapper Bridge Pattern
 
 If a host addon has settings wrappers, feature modules should use those wrappers
