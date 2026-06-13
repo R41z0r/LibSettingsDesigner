@@ -92,8 +92,11 @@ lib.LOCALES = {
 		configCenterDensityCompact = "Compact",
 		configCenterDropdownFallbackDesc = "Choose one of the available options.",
 		configCenterInputFallbackDesc = "Enter the value used by this setting.",
+		configCenterLockWindow = "Lock Window",
+		configCenterLockWindowDesc = "Prevents the settings window from being moved by mouse drags.",
 		configCenterMultiDropdownFallbackDesc = "Choose one or more options.",
 		configCenterNoResults = "No settings found.",
+		configCenterNone = "None",
 		configCenterOpenButton = "Open",
 		configCenterOpen = "Open Settings",
 		configCenterOpenDesc = "Opens the modern settings center.",
@@ -102,6 +105,7 @@ lib.LOCALES = {
 		configCenterSettings = "settings",
 		configCenterSliderFallbackDesc = "Adjust this value.",
 		configCenterTitle = "Settings",
+		configCenterUnlockWindow = "Unlock Window",
 	},
 	deDE = {
 		configCenterAbout = "Überblick",
@@ -122,8 +126,11 @@ lib.LOCALES = {
 		configCenterDensityCompact = "Kompakt",
 		configCenterDropdownFallbackDesc = "Wähle eine der verfügbaren Optionen.",
 		configCenterInputFallbackDesc = "Gib den Wert für diese Einstellung ein.",
+		configCenterLockWindow = "Fenster sperren",
+		configCenterLockWindowDesc = "Verhindert, dass das Einstellungsfenster per Maus verschoben wird.",
 		configCenterMultiDropdownFallbackDesc = "Wähle eine oder mehrere Optionen.",
 		configCenterNoResults = "Keine Einstellungen gefunden.",
+		configCenterNone = "Keine",
 		configCenterOpenButton = "Öffnen",
 		configCenterOpen = "Einstellungen öffnen",
 		configCenterOpenDesc = "Öffnet das moderne Einstellungscenter.",
@@ -132,6 +139,7 @@ lib.LOCALES = {
 		configCenterSettings = "Einstellungen",
 		configCenterSliderFallbackDesc = "Passe diesen Wert an.",
 		configCenterTitle = "Einstellungen",
+		configCenterUnlockWindow = "Fenster entsperren",
 	},
 	esES = {
 		configCenterAbout = "Acerca de",
@@ -152,8 +160,11 @@ lib.LOCALES = {
 		configCenterDensityCompact = "Compacto",
 		configCenterDropdownFallbackDesc = "Elige una de las opciones disponibles.",
 		configCenterInputFallbackDesc = "Introduce el valor usado por este ajuste.",
+		configCenterLockWindow = "Bloquear ventana",
+		configCenterLockWindowDesc = "Impide mover la ventana de ajustes arrastrándola con el ratón.",
 		configCenterMultiDropdownFallbackDesc = "Elige una o más opciones.",
 		configCenterNoResults = "No se encontraron ajustes.",
+		configCenterNone = "Ninguno",
 		configCenterOpenButton = "Abrir",
 		configCenterOpen = "Abrir ajustes",
 		configCenterOpenDesc = "Abre el centro de ajustes moderno.",
@@ -162,6 +173,7 @@ lib.LOCALES = {
 		configCenterSettings = "ajustes",
 		configCenterSliderFallbackDesc = "Ajusta este valor.",
 		configCenterTitle = "Ajustes",
+		configCenterUnlockWindow = "Desbloquear ventana",
 	},
 	esMX = {
 		configCenterAbout = "Acerca de",
@@ -182,8 +194,11 @@ lib.LOCALES = {
 		configCenterDensityCompact = "Compacto",
 		configCenterDropdownFallbackDesc = "Elige una de las opciones disponibles.",
 		configCenterInputFallbackDesc = "Introduce el valor usado por este ajuste.",
+		configCenterLockWindow = "Bloquear ventana",
+		configCenterLockWindowDesc = "Impide mover la ventana de ajustes arrastrándola con el ratón.",
 		configCenterMultiDropdownFallbackDesc = "Elige una o más opciones.",
 		configCenterNoResults = "No se encontraron ajustes.",
+		configCenterNone = "Ninguno",
 		configCenterOpenButton = "Abrir",
 		configCenterOpen = "Abrir ajustes",
 		configCenterOpenDesc = "Abre el centro de ajustes moderno.",
@@ -192,6 +207,7 @@ lib.LOCALES = {
 		configCenterSettings = "ajustes",
 		configCenterSliderFallbackDesc = "Ajusta este valor.",
 		configCenterTitle = "Ajustes",
+		configCenterUnlockWindow = "Desbloquear ventana",
 	},
 	frFR = {
 		configCenterAbout = "À propos",
@@ -212,8 +228,11 @@ lib.LOCALES = {
 		configCenterDensityCompact = "Compact",
 		configCenterDropdownFallbackDesc = "Choisissez une des options disponibles.",
 		configCenterInputFallbackDesc = "Saisissez la valeur utilisée par ce réglage.",
+		configCenterLockWindow = "Verrouiller la fenêtre",
+		configCenterLockWindowDesc = "Empêche le déplacement de la fenêtre de réglages avec la souris.",
 		configCenterMultiDropdownFallbackDesc = "Choisissez une ou plusieurs options.",
 		configCenterNoResults = "Aucun réglage trouvé.",
+		configCenterNone = "Aucun",
 		configCenterOpenButton = "Ouvrir",
 		configCenterOpen = "Ouvrir les réglages",
 		configCenterOpenDesc = "Ouvre le centre de réglages moderne.",
@@ -222,6 +241,7 @@ lib.LOCALES = {
 		configCenterSettings = "réglages",
 		configCenterSliderFallbackDesc = "Ajustez cette valeur.",
 		configCenterTitle = "Réglages",
+		configCenterUnlockWindow = "Déverrouiller la fenêtre",
 	},
 	itIT = {
 		configCenterAbout = "Informazioni",
@@ -242,8 +262,11 @@ lib.LOCALES = {
 		configCenterDensityCompact = "Compatta",
 		configCenterDropdownFallbackDesc = "Scegli una delle opzioni disponibili.",
 		configCenterInputFallbackDesc = "Inserisci il valore usato da questa impostazione.",
+		configCenterLockWindow = "Blocca finestra",
+		configCenterLockWindowDesc = "Impedisce di spostare la finestra delle impostazioni trascinandola con il mouse.",
 		configCenterMultiDropdownFallbackDesc = "Scegli una o più opzioni.",
 		configCenterNoResults = "Nessuna impostazione trovata.",
+		configCenterNone = "Nessuno",
 		configCenterOpenButton = "Apri",
 		configCenterOpen = "Apri impostazioni",
 		configCenterOpenDesc = "Apre il centro impostazioni moderno.",
@@ -252,6 +275,7 @@ lib.LOCALES = {
 		configCenterSettings = "impostazioni",
 		configCenterSliderFallbackDesc = "Regola questo valore.",
 		configCenterTitle = "Impostazioni",
+		configCenterUnlockWindow = "Sblocca finestra",
 	},
 	koKR = {
 		configCenterAbout = "정보",
@@ -272,8 +296,11 @@ lib.LOCALES = {
 		configCenterDensityCompact = "간결",
 		configCenterDropdownFallbackDesc = "사용 가능한 옵션 중 하나를 선택합니다.",
 		configCenterInputFallbackDesc = "이 설정에서 사용할 값을 입력합니다.",
+		configCenterLockWindow = "창 잠금",
+		configCenterLockWindowDesc = "마우스 드래그로 설정 창을 이동하지 못하게 합니다.",
 		configCenterMultiDropdownFallbackDesc = "하나 이상의 옵션을 선택합니다.",
 		configCenterNoResults = "설정을 찾을 수 없습니다.",
+		configCenterNone = "없음",
 		configCenterOpenButton = "열기",
 		configCenterOpen = "설정 열기",
 		configCenterOpenDesc = "최신 설정 센터를 엽니다.",
@@ -282,6 +309,7 @@ lib.LOCALES = {
 		configCenterSettings = "설정",
 		configCenterSliderFallbackDesc = "이 값을 조정합니다.",
 		configCenterTitle = "설정",
+		configCenterUnlockWindow = "창 잠금 해제",
 	},
 	ptBR = {
 		configCenterAbout = "Sobre",
@@ -302,8 +330,11 @@ lib.LOCALES = {
 		configCenterDensityCompact = "Compacto",
 		configCenterDropdownFallbackDesc = "Escolha uma das opções disponíveis.",
 		configCenterInputFallbackDesc = "Digite o valor usado por esta configuração.",
+		configCenterLockWindow = "Bloquear janela",
+		configCenterLockWindowDesc = "Impede que a janela de configurações seja movida ao arrastar com o mouse.",
 		configCenterMultiDropdownFallbackDesc = "Escolha uma ou mais opções.",
 		configCenterNoResults = "Nenhuma configuração encontrada.",
+		configCenterNone = "Nenhum",
 		configCenterOpenButton = "Abrir",
 		configCenterOpen = "Abrir configurações",
 		configCenterOpenDesc = "Abre a central moderna de configurações.",
@@ -312,6 +343,7 @@ lib.LOCALES = {
 		configCenterSettings = "configurações",
 		configCenterSliderFallbackDesc = "Ajuste este valor.",
 		configCenterTitle = "Configurações",
+		configCenterUnlockWindow = "Desbloquear janela",
 	},
 	ruRU = {
 		configCenterAbout = "Описание",
@@ -332,8 +364,11 @@ lib.LOCALES = {
 		configCenterDensityCompact = "Компактно",
 		configCenterDropdownFallbackDesc = "Выберите один из доступных вариантов.",
 		configCenterInputFallbackDesc = "Введите значение для этого параметра.",
+		configCenterLockWindow = "Закрепить окно",
+		configCenterLockWindowDesc = "Запрещает перемещать окно настроек перетаскиванием мышью.",
 		configCenterMultiDropdownFallbackDesc = "Выберите один или несколько вариантов.",
 		configCenterNoResults = "Настройки не найдены.",
+		configCenterNone = "Нет",
 		configCenterOpenButton = "Открыть",
 		configCenterOpen = "Открыть настройки",
 		configCenterOpenDesc = "Открывает современный центр настроек.",
@@ -342,6 +377,7 @@ lib.LOCALES = {
 		configCenterSettings = "настройки",
 		configCenterSliderFallbackDesc = "Измените это значение.",
 		configCenterTitle = "Настройки",
+		configCenterUnlockWindow = "Открепить окно",
 	},
 	zhCN = {
 		configCenterAbout = "关于",
@@ -362,8 +398,11 @@ lib.LOCALES = {
 		configCenterDensityCompact = "紧凑",
 		configCenterDropdownFallbackDesc = "选择一个可用选项。",
 		configCenterInputFallbackDesc = "输入此设置使用的值。",
+		configCenterLockWindow = "锁定窗口",
+		configCenterLockWindowDesc = "防止通过鼠标拖动移动设置窗口。",
 		configCenterMultiDropdownFallbackDesc = "选择一个或多个选项。",
 		configCenterNoResults = "未找到设置。",
+		configCenterNone = "无",
 		configCenterOpenButton = "打开",
 		configCenterOpen = "打开设置",
 		configCenterOpenDesc = "打开现代设置中心。",
@@ -372,6 +411,7 @@ lib.LOCALES = {
 		configCenterSettings = "设置",
 		configCenterSliderFallbackDesc = "调整此值。",
 		configCenterTitle = "设置",
+		configCenterUnlockWindow = "解锁窗口",
 	},
 	zhTW = {
 		configCenterAbout = "關於",
@@ -392,8 +432,11 @@ lib.LOCALES = {
 		configCenterDensityCompact = "精簡",
 		configCenterDropdownFallbackDesc = "選擇一個可用選項。",
 		configCenterInputFallbackDesc = "輸入此設定使用的值。",
+		configCenterLockWindow = "鎖定視窗",
+		configCenterLockWindowDesc = "防止透過滑鼠拖曳移動設定視窗。",
 		configCenterMultiDropdownFallbackDesc = "選擇一個或多個選項。",
 		configCenterNoResults = "找不到設定。",
+		configCenterNone = "無",
 		configCenterOpenButton = "開啟",
 		configCenterOpen = "開啟設定",
 		configCenterOpenDesc = "開啟現代設定中心。",
@@ -402,6 +445,7 @@ lib.LOCALES = {
 		configCenterSettings = "設定",
 		configCenterSliderFallbackDesc = "調整此值。",
 		configCenterTitle = "設定",
+		configCenterUnlockWindow = "解除鎖定視窗",
 	},
 }
 
@@ -1308,7 +1352,16 @@ end
 
 function lib.GetConfiguredDensity(app)
 	local opts = app and app.opts
-	local density = opts and opts.density
+	local density
+	if opts and type(opts.getDensity) == "function" then
+		local ok, value = pcall(opts.getDensity, app)
+		if ok then
+			density = value
+		end
+	end
+	if density ~= "compact" and density ~= "comfortable" then
+		density = opts and opts.density
+	end
 	if type(density) == "function" then
 		local ok, value = pcall(density, app)
 		if ok then
@@ -1323,6 +1376,12 @@ end
 
 function lib.ShouldShowDensityButton(app)
 	local opts = app and app.opts
+	if opts and type(opts.showDensityButton) == "function" then
+		local ok, value = pcall(opts.showDensityButton, app)
+		if ok then
+			return value ~= false
+		end
+	end
 	return not (opts and opts.showDensityButton == false)
 end
 
@@ -5396,22 +5455,21 @@ function StateMixin:SetPage(pageID, focusControlID)
 		self.frame.SearchBox:SetText("")
 		self.suppressSearchRender = nil
 	end
+	if type(page.onOpen) == "function" then
+		pcall(page.onOpen, page, self.app, self)
+	end
 	self:RenderContent()
 end
 
 function StateMixin:SetDensity(density)
-	local configuredDensity = lib.GetConfiguredDensity(self.app)
-	if configuredDensity then
-		density = configuredDensity
-	end
 	density = density == "compact" and "compact" or "comfortable"
 	if self.density == density then
 		return
 	end
 	self:SaveCurrentContentScroll()
 	self.density = density
-	if not configuredDensity and self.app and self.app.opts and type(self.app.opts.setDensity) == "function" then
-		pcall(self.app.opts.setDensity, density)
+	if self.app and self.app.opts and type(self.app.opts.setDensity) == "function" then
+		pcall(self.app.opts.setDensity, density, self.app)
 	end
 	lib._densityByApp = lib._densityByApp or {}
 	lib._densityByApp[self.app.id or self.app.title or "default"] = density
@@ -5480,14 +5538,15 @@ function lib.ApplyFrameLocked(frame, app)
 end
 
 local function initializeState(frame, app)
-	local density = lib.GetConfiguredDensity(app)
+	local appKey = app.id or app.title or "default"
+	local density
 	if app and app.opts and type(app.opts.getDensity) == "function" then
-		local ok, value = pcall(app.opts.getDensity)
-		if not density and ok and (value == "compact" or value == "comfortable") then
+		local ok, value = pcall(app.opts.getDensity, app)
+		if ok and (value == "compact" or value == "comfortable") then
 			density = value
 		end
 	end
-	density = density or (lib._densityByApp and lib._densityByApp[app.id or app.title or "default"]) or "comfortable"
+	density = density or (lib._densityByApp and lib._densityByApp[appKey]) or lib.GetConfiguredDensity(app) or "comfortable"
 	local state = {
 		app = app,
 		frame = frame,

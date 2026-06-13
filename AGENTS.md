@@ -33,6 +33,9 @@ It must remain:
   field.
 - Do not remove LibSettingsDesigner license notices from runtime Lua/XML files
   or vendored runtime copies.
+- Every user-facing string produced by the generic runtime must have a key in
+  every built-in `lib.LOCALES` locale. Host-addon feature strings still belong
+  to the host addon's locale table.
 - New runtime Lua/XML files must include the LibSettingsDesigner license notice:
 
 ```text

@@ -10,7 +10,7 @@
 - [GetFrame](#getframe)
 - [ResolveOpenTarget](#resolveopentarget)
 - [Frame State](#frame-state)
-- [Size and Lock Persistence](#size-and-lock-persistence)
+- [Size, Lock, and Density Persistence](#size-lock-and-density-persistence)
 - [Refresh Rules](#refresh-rules)
 - [Examples](#examples)
 
@@ -138,7 +138,7 @@ end
 Do not use frame state as a replacement for proper setters, wrapper callbacks,
 or control registration.
 
-## [Size and Lock Persistence][Top]
+## [Size, Lock, and Density Persistence][Top]
 
 The app can provide persistence callbacks:
 
@@ -161,10 +161,21 @@ local app = Config:RegisterAddOn(addonName, {
     MyAddonDB.profile.settingsWindow = MyAddonDB.profile.settingsWindow or {}
     MyAddonDB.profile.settingsWindow.locked = locked == true
   end,
+  getDensity = function()
+    return MyAddonDB.profile.settingsWindow
+      and MyAddonDB.profile.settingsWindow.density
+  end,
+  setDensity = function(value)
+    MyAddonDB.profile.settingsWindow = MyAddonDB.profile.settingsWindow or {}
+    MyAddonDB.profile.settingsWindow.density = value == "compact" and "compact" or "comfortable"
+  end,
 })
 ```
 
-Use these callbacks instead of hard-coding frame size state inside the library.
+Use these callbacks instead of hard-coding frame size, lock, or density state
+inside the library. `density` sets the initial layout; `getDensity` and
+`setDensity` persist the user's compact/comfortable choice. Set
+`showDensityButton = false` when the density switch should not be shown.
 
 ## [Refresh Rules][Top]
 

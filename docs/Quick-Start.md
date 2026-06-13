@@ -79,6 +79,11 @@ local app = Config:RegisterAddOn(addonName, {
   addonFolder = addonName,
   assetRoot = "Interface\\AddOns\\MyAddon\\libs\\LibSettingsDesigner\\Assets\\",
   density = "compact",
+  getDensity = function() return DB().settingsWindow and DB().settingsWindow.density end,
+  setDensity = function(value)
+    DB().settingsWindow = DB().settingsWindow or {}
+    DB().settingsWindow.density = value
+  end,
   db = DB,
   locale = addon.L,
 })

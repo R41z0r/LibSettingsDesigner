@@ -69,6 +69,13 @@ app = Config:RegisterAddOn(addonName, {
 		DB().settingsWindow.width = width
 		DB().settingsWindow.height = height
 	end,
+	getDensity = function()
+		return DB().settingsWindow and DB().settingsWindow.density
+	end,
+	setDensity = function(density)
+		DB().settingsWindow = DB().settingsWindow or {}
+		DB().settingsWindow.density = density == "compact" and "compact" or "comfortable"
+	end,
 	getLocked = function()
 		return DB().settingsWindow and DB().settingsWindow.locked == true
 	end,
@@ -116,6 +123,12 @@ app = Config:RegisterAddOn(addonName, {
 					description = "Open a changelog-style info page from a dashboard card or version tile.",
 					iconKey = "help",
 					pageID = "help.changelog",
+				},
+				{
+					title = "Density Modes",
+					description = "Compare compact and comfortable layouts and learn how to hide the switcher.",
+					iconKey = "settingspage",
+					pageID = "help.density-modes",
 				},
 			},
 			status = {
@@ -523,6 +536,33 @@ app:RegisterPage({
 				{ type = "text", text = "Version opens this page." },
 				{ type = "text", text = "New applies a tag:new search query." },
 				{ type = "text", text = "Shortcuts opens the editable shortcut list page." },
+			},
+		},
+	},
+})
+
+app:RegisterPage({
+	id = "help.density-modes",
+	category = "help",
+	title = "Density Modes",
+	description = "How compact and comfortable layouts work.",
+	layout = "info",
+	iconKey = "settingspage",
+	order = 95,
+	content = {
+		{
+			title = "Compact and Comfortable",
+			entries = {
+				{ type = "text", text = "The top-bar density button switches between compact rows and comfortable rows when showDensityButton is enabled." },
+				{ type = "text", text = "Use density = \"compact\" or density = \"comfortable\" as the initial layout for first open." },
+				{ type = "text", text = "Use getDensity and setDensity when the selected layout should persist in SavedVariables." },
+			},
+		},
+		{
+			title = "Host Addon Pattern",
+			entries = {
+				{ type = "text", text = "Set showDensityButton = false when a host addon wants one fixed layout and no user-facing density switch." },
+				{ type = "text", text = "The sample starts compact, then stores your button choice under settingsWindow.density." },
 			},
 		},
 	},

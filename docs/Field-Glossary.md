@@ -39,21 +39,28 @@ Config:RegisterAddOn(addonID, opts)
 | `settingsTitle` | string | Main window title. |
 | `dashboardTitle` | string | Label for the dashboard navigation entry. |
 | `icon` | string | Main addon icon texture path. |
-| `addonFolder` | string | Host addon folder name, used for fallback asset paths. |
+| `addonFolder` / `folder` | string | Host addon folder name, used for fallback asset paths. |
 | `assetRoot` | string | Explicit path to vendored LibSettingsDesigner assets. Should usually end with `\\Assets\\`. |
 | `db` | function | Returns the table used for simple DB-backed controls. |
-| `profile` | function | Optional profile provider for status/dashboard integrations. |
 | `locale` | table | Host addon locale table. |
-| `density` | string/function | Default density, usually `"compact"` or `"comfortable"`. |
-| `showDensityButton` | boolean/function | Controls whether users can switch density. |
-| `getSize` / `setSize` | function | Read/write persisted frame size. |
-| `getLocked` / `setLocked` | function | Read/write whether the frame is locked. |
+| `density` | string/function | Initial density, usually `"compact"` or `"comfortable"`. |
+| `getDensity(app)` / `setDensity(density, app)` | function | Read/write the user's selected density. |
+| `showDensityButton` / `showDensityButton(app)` | boolean/function | Controls whether users can switch density; only `false` hides the button. |
+| `getSize()` / `setSize(width, height)` | function | Read/write persisted frame size. |
+| `getLocked()` / `setLocked(locked)` | function | Read/write whether the frame is locked. |
 | `dashboard` | table/function | Dashboard configuration. |
-| `version` | string/function | Version text for status displays. |
 | `isNewTag` | function | Returns whether a `newTagID` should show a badge. |
 | `iconTextures` | table | Maps icon keys to texture paths. |
 | `categoryIconTextures` | table | Maps category ids/keys to texture paths. |
+| `pageDescriptionKeys` / `pageDescriptionLocaleKeys` | table | Maps page ids/keys to locale keys for descriptions. |
 | `openLegacySettings` | function | Called by bridge controls that jump to Blizzard settings. |
+| `blizzardSettingsRoot` | boolean | `true` registers a lightweight Blizzard Settings bridge entry. |
+| `blizzardSettingsTitle` | string | Optional title for the Blizzard Settings bridge entry. |
+| `openSettings(app)` | function | Called by the Blizzard Settings bridge button. |
+
+`profile` and `version` are host-owned metadata in the current runtime. They do
+not automatically render profile/status/version UI unless host addon code or a
+custom dashboard function reads them.
 
 Example:
 
@@ -65,6 +72,11 @@ local app = Config:RegisterAddOn(addonName, {
   addonFolder = addonName,
   assetRoot = "Interface\\AddOns\\MyAddon\\libs\\LibSettingsDesigner\\Assets\\",
   density = "compact",
+  getDensity = function() return MyAddonDB.profile.settingsWindow and MyAddonDB.profile.settingsWindow.density end,
+  setDensity = function(value)
+    MyAddonDB.profile.settingsWindow = MyAddonDB.profile.settingsWindow or {}
+    MyAddonDB.profile.settingsWindow.density = value
+  end,
   db = function() return MyAddonDB.profile end,
   locale = L,
 })
@@ -104,6 +116,7 @@ app:RegisterPage(data)
 | `icon`, `iconAtlas`, `iconKey` | string | Page icon source. |
 | `mainToggleID` | string | Control id used as main feature toggle. |
 | `newTagID` | string | New badge tag for the page. |
+| `onOpen` | function | Called as `onOpen(page, app, state)` when the page opens. |
 | `order` | number | Sort order. |
 | `layout` | string | Use `"info"` for static/help pages. |
 | `content` | table/function | Info page content blocks. |
@@ -138,23 +151,27 @@ app:RegisterControl(pageID, data)
 | :---- | :--- | :------ |
 | `id` | string | Stable control id. Defaults to `key`/`var` when omitted. |
 | `type` | string | Widget type, such as `toggle`, `slider`, `dropdown`. |
-| `key` / `var` | string | DB key for simple `opts.db()` persistence. |
-| `label` / `text` / `name` | string | User-visible row label. |
-| `description` / `desc` | string | Short row description. |
+| `key` | string | DB key for simple `opts.db()` persistence. |
+| `label` | string | User-visible row label. |
+| `description` | string | Short row description. |
 | `groupID` / `modernGroup` | string | Group assignment. |
 | `order` | number | Sort order within page/group. |
 | `default` | any/function | Default value used by reset/customized checks. |
 | `dbDefault` | any/function | Alternate DB default provider. |
-| `trackCustomized` | boolean/function | Overrides customized-count behavior. |
+| `trackCustomized` | boolean | Set exactly `false` to disable customized-count behavior. |
 | `refreshOnChange` | boolean | Re-render visible content after a value changes. |
+
+Direct `RegisterControl` calls should use canonical fields. Legacy aliases such
+as `var`, `text`, `name`, `desc`, `get`, and `set` are mapped by
+`RegisterLegacyControl`, not by plain direct controls.
 
 ## [Value Fields][Top]
 
 | Field | Use when |
 | :---- | :------- |
-| `key` / `var` | The value is directly under `opts.db()`. |
-| `getValue` / `get` | You need custom read logic. |
-| `setValue` / `set` | You need custom write logic or runtime refresh. |
+| `key` | The value is directly under `opts.db()`. |
+| `getValue` | You need custom read logic. |
+| `setValue` | You need custom write logic or runtime refresh. |
 | `getSelection` | MultiDropdown reads an entire boolean selection map. |
 | `setSelection` | MultiDropdown writes an entire boolean selection map. |
 | `isSelectedFunc` | MultiDropdown reads one option at a time. |
