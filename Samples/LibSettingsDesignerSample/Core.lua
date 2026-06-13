@@ -20,6 +20,7 @@ local DEFAULT_PROFILE = {
 		healer = { r = 0.25, g = 0.90, b = 0.45, a = 1 },
 		damage = { r = 1.00, g = 0.35, b = 0.25, a = 1 },
 	},
+	themePreset = "gold",
 	shortcuts = {
 		{ id = "open", label = "Open Settings", icon = 134400, formatKey = "slash" },
 		{ id = "reload", label = "Reload UI", icon = 136243, formatKey = "macro" },

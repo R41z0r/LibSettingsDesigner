@@ -487,6 +487,171 @@ local TEXT = {
 }
 local GREEN = { 0.36, 0.82, 0.36 }
 
+function lib.CopyThemeColor(color)
+	if type(color) ~= "table" then
+		return nil
+	end
+	return { color[1] or color.r or 0, color[2] or color.g or 0, color[3] or color.b or 0, color[4] or color.a or 1 }
+end
+
+function lib.CopyThemeColorMap(colors)
+	local copy = {}
+	for key, value in pairs(colors) do
+		copy[key] = lib.CopyThemeColor(value)
+	end
+	return copy
+end
+
+lib.DEFAULT_COLORS = lib.CopyThemeColorMap({
+	panelBorder = PANEL_BORDER,
+	topbarBg = TOPBAR_BG,
+	topbarBorder = { 0.52, 0.39, 0.19, 0.52 },
+	contentBg = CONTENT_BG,
+	cardBg = CARD_BG,
+	cardBgHover = CARD_BG_HOVER,
+	cardBorder = CARD_BORDER,
+	cardBorderHover = CARD_BORDER_HOVER,
+	dashboardCardBg = DASHBOARD_CARD_BG,
+	dashboardCardBgHover = DASHBOARD_CARD_BG_HOVER,
+	dashboardCardBorder = DASHBOARD_CARD_BORDER,
+	detailSectionBg = DETAIL_SECTION_BG,
+	detailColumnBg = DETAIL_COLORS.columnBg,
+	detailColumnBorder = DETAIL_COLORS.columnBorder,
+	detailSectionBorder = DETAIL_COLORS.sectionBorder,
+	detailSectionHeaderBg = DETAIL_COLORS.sectionHeaderBg,
+	rowBg = ROW_BG,
+	rowBorder = ROW_BORDER,
+	rowHoverBg = ROW_HOVER_BG,
+	rowHoverBorder = ROW_HOVER_BORDER,
+	rowSeparator = ROW_SEPARATOR,
+	selectedBg = SELECTED_BG,
+	sidebarBg = SIDEBAR_BG,
+	frameBg = { 0.035, 0.038, 0.043, 0.96 },
+	overlayTint = { 0.72, 0.78, 0.84, 1.00 },
+	buttonBg = { 0.070, 0.065, 0.055, 0.92 },
+	buttonBorder = CARD_BORDER,
+	buttonHoverBg = CARD_BG_HOVER,
+	buttonHoverBorder = CARD_BORDER_HOVER,
+	buttonTopbarBg = { 0.100, 0.090, 0.070, 0.88 },
+	buttonTopbarBorder = { 0.46, 0.36, 0.18, 0.70 },
+	buttonTopbarHoverBg = { 0.165, 0.135, 0.080, 0.98 },
+	searchBg = { 0.035, 0.034, 0.032, 0.95 },
+	searchBorder = { 0.30, 0.28, 0.22, 0.90 },
+	disabledControlBg = DISABLED_CONTROL_BG,
+	disabledControlBorder = DISABLED_CONTROL_BORDER,
+	disabledRowBg = DISABLED_ROW_BG,
+	disabledRowBorder = DISABLED_ROW_BORDER,
+	textMain = TEXT.main,
+	textMuted = TEXT.muted,
+	textSubtle = TEXT.subtle,
+	textDisabled = TEXT.disabled,
+	accent = TEXT.gold,
+	topbarAccent = TEXT.topbarGold,
+	success = GREEN,
+})
+lib.ThemeColors = lib.CopyThemeColorMap(lib.DEFAULT_COLORS)
+
+lib.COLOR_ALIASES = {
+	background = "frameBg",
+	overlay = "overlayTint",
+	panel = "contentBg",
+	panelBorder = "panelBorder",
+	topbarBorder = "topbarBorder",
+	content = "contentBg",
+	sidebar = "sidebarBg",
+	card = "cardBg",
+	cardHover = "cardBgHover",
+	cardBorder = "cardBorder",
+	cardHoverBorder = "cardBorderHover",
+	row = "rowBg",
+	rowBorder = "rowBorder",
+	rowHover = "rowHoverBg",
+	rowHoverBorder = "rowHoverBorder",
+	button = "buttonBg",
+	buttonBorder = "buttonBorder",
+	buttonHover = "buttonHoverBg",
+	buttonHoverBorder = "buttonHoverBorder",
+	search = "searchBg",
+	searchBorder = "searchBorder",
+	selected = "selectedBg",
+	text = "textMain",
+	mutedText = "textMuted",
+	subtleText = "textSubtle",
+	disabledText = "textDisabled",
+	accent = "accent",
+	topbarText = "topbarAccent",
+	green = "success",
+}
+
+function lib.ReadAppThemeColors(app)
+	local opts = app and app.opts
+	local colors = opts and (opts.colors or opts.colorTable or opts.themeColors)
+	if type(colors) == "function" then
+		local ok, result = pcall(colors, app)
+		colors = ok and result or nil
+	end
+	return type(colors) == "table" and colors or nil
+end
+
+function lib.ApplyThemeColorValue(target, source, sourceKey, targetKey)
+	local value = source[sourceKey]
+	if value ~= nil then
+		target[targetKey or sourceKey] = lib.CopyThemeColor(value)
+	end
+end
+
+function lib.ResolveThemeColors(app)
+	local colors = lib.CopyThemeColorMap(lib.DEFAULT_COLORS)
+	local overrides = lib.ReadAppThemeColors(app)
+	if overrides then
+		for key in pairs(lib.DEFAULT_COLORS) do
+			lib.ApplyThemeColorValue(colors, overrides, key)
+		end
+		for alias, key in pairs(lib.COLOR_ALIASES) do
+			lib.ApplyThemeColorValue(colors, overrides, alias, key)
+		end
+	end
+	return colors
+end
+
+function lib.ApplyThemeColors(app)
+	local colors = lib.ResolveThemeColors(app)
+	PANEL_BORDER = colors.panelBorder
+	TOPBAR_BG = colors.topbarBg
+	CONTENT_BG = colors.contentBg
+	CARD_BG = colors.cardBg
+	CARD_BG_HOVER = colors.cardBgHover
+	CARD_BORDER = colors.cardBorder
+	CARD_BORDER_HOVER = colors.cardBorderHover
+	DASHBOARD_CARD_BG = colors.dashboardCardBg
+	DASHBOARD_CARD_BG_HOVER = colors.dashboardCardBgHover
+	DASHBOARD_CARD_BORDER = colors.dashboardCardBorder
+	DETAIL_SECTION_BG = colors.detailSectionBg
+	DETAIL_COLORS.columnBg = colors.detailColumnBg
+	DETAIL_COLORS.columnBorder = colors.detailColumnBorder
+	DETAIL_COLORS.sectionBorder = colors.detailSectionBorder
+	DETAIL_COLORS.sectionHeaderBg = colors.detailSectionHeaderBg
+	ROW_BG = colors.rowBg
+	ROW_BORDER = colors.rowBorder
+	ROW_HOVER_BG = colors.rowHoverBg
+	ROW_HOVER_BORDER = colors.rowHoverBorder
+	ROW_SEPARATOR = colors.rowSeparator
+	SELECTED_BG = colors.selectedBg
+	SIDEBAR_BG = colors.sidebarBg
+	lib.ThemeColors = colors
+	DISABLED_CONTROL_BG = colors.disabledControlBg
+	DISABLED_CONTROL_BORDER = colors.disabledControlBorder
+	DISABLED_ROW_BG = colors.disabledRowBg
+	DISABLED_ROW_BORDER = colors.disabledRowBorder
+	TEXT.main = colors.textMain
+	TEXT.muted = colors.textMuted
+	TEXT.subtle = colors.textSubtle
+	TEXT.disabled = colors.textDisabled
+	TEXT.gold = colors.accent
+	TEXT.topbarGold = colors.topbarAccent
+	GREEN = colors.success
+end
+
 local ASSET = {
 	fallback = "Interface\\Icons\\INV_Misc_Gear_01",
 	statusEnabled = "Interface\\RaidFrame\\ReadyCheck-Ready",
@@ -812,7 +977,11 @@ function lib.ApplyFlatButtonVisual(button)
 	if button.selected then
 		setFrameBackdrop(button, SELECTED_BG, CARD_BORDER_HOVER)
 	else
-		setFrameBackdrop(button, button._eqolNormalBg or { 0.07, 0.065, 0.055, 0.92 }, button._eqolNormalBorder or CARD_BORDER)
+			setFrameBackdrop(
+				button,
+				button._eqolNormalBg or lib.ThemeColors.buttonBg,
+				button._eqolNormalBorder or lib.ThemeColors.buttonBorder
+			)
 	end
 	if button.Text then setTextColor(button.Text, TEXT.main) end
 	if button.Icon and button.Icon.SetAlpha then button.Icon:SetAlpha(1) end
@@ -988,7 +1157,7 @@ local function getSettingRowHeight(control, state)
 		if controlType == "slider" then
 			return 66
 		end
-		if controlType == "coloroverrides" then
+		if controlType == "colorpalette" then
 			return lib.GetColorOverridesRowHeight(control)
 		end
 		if controlType == "reorderlist" then
@@ -1005,7 +1174,7 @@ local function getSettingRowHeight(control, state)
 	if controlType == "slider" then
 		return hasUsefulDescription(control) and SLIDER_ROW_HEIGHT or SLIDER_ROW_HEIGHT_COMPACT
 	end
-	if controlType == "coloroverrides" then
+	if controlType == "colorpalette" then
 		return lib.GetColorOverridesRowHeight(control)
 	end
 	if controlType == "reorderlist" then
@@ -1652,6 +1821,8 @@ function getControlType(control)
 		return "toggle"
 	elseif controlType == "scrolldropdown" then
 		return "dropdown"
+	elseif controlType == "coloroverrides" or controlType == "coloroverride" then
+		return "colorpalette"
 	end
 	return controlType
 end
@@ -1669,7 +1840,7 @@ function lib.GetFallbackControlDescription(app, control)
 		return L["configCenterCheckboxDropdownFallbackDesc"] or "Enable this setting and choose its related option."
 	elseif controlType == "input" then
 		return L["configCenterInputFallbackDesc"] or "Enter the value used by this setting."
-	elseif controlType == "colorpicker" or controlType == "coloroverrides" then
+	elseif controlType == "colorpicker" or controlType == "colorpalette" then
 		return L["configCenterColorFallbackDesc"] or "Choose a color for this setting."
 	elseif controlType == "button" then
 		return L["configCenterButtonFallbackDesc"] or "Run this action."
@@ -2020,8 +2191,8 @@ local function makeFlatButton(parent, text, width, height, iconSource, iconIsAtl
 	local button = CreateFrame("Button", nil, parent, "BackdropTemplate")
 	button:SetSize(width or 120, height or 26)
 	button._eqolOwner = parent
-	button._eqolNormalBg = { 0.07, 0.065, 0.055, 0.92 }
-	button._eqolNormalBorder = CARD_BORDER
+	button._eqolNormalBg = lib.ThemeColors.buttonBg
+	button._eqolNormalBorder = lib.ThemeColors.buttonBorder
 	applyBackdrop(button, button._eqolNormalBg, button._eqolNormalBorder)
 	local leftInset = 10
 	if iconSource then
@@ -2042,7 +2213,7 @@ local function makeFlatButton(parent, text, width, height, iconSource, iconIsAtl
 			lib.ApplyFlatButtonVisual(self)
 			return
 		end
-		setFrameBackdrop(self, CARD_BG_HOVER, CARD_BORDER_HOVER)
+		setFrameBackdrop(self, lib.ThemeColors.buttonHoverBg, lib.ThemeColors.buttonHoverBorder)
 	end
 	button._eqolOnLeave = function(self)
 		lib.ApplyFlatButtonVisual(self)
@@ -2153,7 +2324,11 @@ local function refreshControlRow(app, control, row)
 			if button._eqolApplyVisual then
 				button._eqolApplyVisual(button)
 			elseif enabled then
-				setFrameBackdrop(button, button.selected and SELECTED_BG or { 0.07, 0.065, 0.055, 0.92 }, button.selected and CARD_BORDER_HOVER or CARD_BORDER)
+				setFrameBackdrop(
+					button,
+					button.selected and SELECTED_BG or lib.ThemeColors.buttonBg,
+					button.selected and CARD_BORDER_HOVER or lib.ThemeColors.buttonBorder
+				)
 				if button.Text then setTextColor(button.Text, TEXT.main) end
 			else
 				setFrameBackdrop(button, DISABLED_CONTROL_BG, DISABLED_CONTROL_BORDER)
@@ -4008,7 +4183,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 	elseif layoutType == "complex" then
 		local L = getLocale(app)
 		descText = L["configCenterAdvancedSettingDesc"] or "Open the related editor or action for this setting."
-	elseif layoutType == "stacked" or controlType == "button" or controlType == "coloroverrides" then
+	elseif layoutType == "stacked" or controlType == "button" or controlType == "colorpalette" then
 		descText = lib.GetFallbackControlDescription(app, control)
 	else
 		descText = ""
@@ -4161,7 +4336,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 				},
 			})
 		end
-	elseif controlType == "coloroverrides" then
+	elseif controlType == "colorpalette" then
 		title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and -154 or -18, 0)
 		desc.Text:SetText(control.description or "")
 		desc:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
@@ -5708,6 +5883,7 @@ local function createFrame(app)
 	local contentGap = 12
 	local contentTop = topInset + topBarHeight + contentGap
 	local frame = CreateFrame("Frame", name, UIParent, "BackdropTemplate")
+	lib.ApplyThemeColors(app)
 	local storedWidth, storedHeight = lib.GetStoredFrameSize(app)
 	local savedWidth = math.max(PAGE_LAYOUT.windowMinWidth, storedWidth or WINDOW_WIDTH)
 	local savedHeight = math.max(PAGE_LAYOUT.windowMinHeight, storedHeight or WINDOW_HEIGHT)
@@ -5735,12 +5911,22 @@ local function createFrame(app)
 	frame.bg = frame:CreateTexture(nil, "BACKGROUND", nil, -2)
 	frame.bg:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -8)
 	frame.bg:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 10)
-	frame.bg:SetColorTexture(0.035, 0.038, 0.043, 0.96)
+	frame.bg:SetColorTexture(
+		lib.ThemeColors.frameBg[1],
+		lib.ThemeColors.frameBg[2],
+		lib.ThemeColors.frameBg[3],
+		lib.ThemeColors.frameBg[4]
+	)
 	frame.MaterialOverlay = frame:CreateTexture(nil, "BACKGROUND", nil, -1)
 	frame.MaterialOverlay:SetPoint("TOPLEFT", frame.bg, "TOPLEFT", 0, 0)
 	frame.MaterialOverlay:SetPoint("BOTTOMRIGHT", frame.bg, "BOTTOMRIGHT", 0, 0)
 	frame.MaterialOverlay:SetTexture(getLibAssetPath(app, "LibSettingsDesigner_BackgroundDark.tga"))
-	frame.MaterialOverlay:SetVertexColor(0.72, 0.78, 0.84, 1)
+	frame.MaterialOverlay:SetVertexColor(
+		lib.ThemeColors.overlayTint[1],
+		lib.ThemeColors.overlayTint[2],
+		lib.ThemeColors.overlayTint[3],
+		lib.ThemeColors.overlayTint[4] or 1
+	)
 	frame.MaterialOverlay:SetBlendMode("BLEND")
 	frame.MaterialOverlay:SetAlpha(0.08)
 	applyWindowBorder(frame, app)
@@ -5756,7 +5942,7 @@ local function createFrame(app)
 	frame.TopBar:SetPoint("TOPLEFT", frame, "TOPLEFT", outerInsetLeft, -topInset)
 	frame.TopBar:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -outerInsetRight, -topInset)
 	frame.TopBar:SetHeight(topBarHeight)
-	applyBackdrop(frame.TopBar, TOPBAR_BG, { 0.52, 0.39, 0.19, 0.52 })
+	applyBackdrop(frame.TopBar, TOPBAR_BG, lib.ThemeColors.topbarBorder)
 
 	frame.TopBarAccent = frame.TopBar:CreateTexture(nil, "OVERLAY")
 	frame.TopBarAccent:SetColorTexture(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.38)
@@ -5798,21 +5984,21 @@ local function createFrame(app)
 
 	frame.ResetButton = makeFlatButton(frame.TopBar, _G.DEFAULTS or _G.RESET or "Defaults", 104, 28)
 	frame.ResetButton:SetPoint("RIGHT", frame.TopBar, "RIGHT", -12, 0)
-	setFrameBackdrop(frame.ResetButton, { 0.120, 0.105, 0.075, 0.95 }, { 0.55, 0.42, 0.18, 0.82 })
+	setFrameBackdrop(frame.ResetButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
 	setTextColor(frame.ResetButton.Text, TEXT.topbarGold)
 	frame.ResetButton:SetScript("OnEnter", function(self)
-		setFrameBackdrop(self, { 0.165, 0.135, 0.080, 0.98 }, CARD_BORDER_HOVER)
+		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarHoverBg, lib.ThemeColors.buttonHoverBorder)
 	end)
 	frame.ResetButton:SetScript("OnLeave", function(self)
-		setFrameBackdrop(self, { 0.120, 0.105, 0.075, 0.95 }, { 0.55, 0.42, 0.18, 0.82 })
+		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
 	end)
 
 	frame.LockButton = makeFlatButton(frame.TopBar, L["configCenterLockWindow"] or "Lock Window", 138, 28)
 	frame.LockButton:SetPoint("RIGHT", frame.ResetButton, "LEFT", -12, 0)
-	setFrameBackdrop(frame.LockButton, { 0.100, 0.090, 0.070, 0.88 }, { 0.46, 0.36, 0.18, 0.70 })
+	setFrameBackdrop(frame.LockButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
 	setTextColor(frame.LockButton.Text, TEXT.topbarGold)
 	frame.LockButton:SetScript("OnEnter", function(self)
-		setFrameBackdrop(self, { 0.165, 0.135, 0.080, 0.98 }, CARD_BORDER_HOVER)
+		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarHoverBg, lib.ThemeColors.buttonHoverBorder)
 		if _G.GameTooltip then
 			_G.GameTooltip:SetOwner(self, "ANCHOR_TOP")
 			_G.GameTooltip:SetText(L["configCenterLockWindowDesc"] or "Prevents the settings window from being moved by touch or mouse drags.")
@@ -5820,7 +6006,7 @@ local function createFrame(app)
 		end
 	end)
 	frame.LockButton:SetScript("OnLeave", function(self)
-		setFrameBackdrop(self, { 0.100, 0.090, 0.070, 0.88 }, { 0.46, 0.36, 0.18, 0.70 })
+		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
 		if _G.GameTooltip then
 			_G.GameTooltip:Hide()
 		end
@@ -5832,13 +6018,13 @@ local function createFrame(app)
 
 	frame.DensityButton = makeFlatButton(frame.TopBar, L["configCenterDensityComfortable"] or "Comfortable", 118, 28)
 	frame.DensityButton:SetPoint("RIGHT", frame.ResetButton, "LEFT", -12, 0)
-	setFrameBackdrop(frame.DensityButton, { 0.100, 0.090, 0.070, 0.88 }, { 0.46, 0.36, 0.18, 0.70 })
+	setFrameBackdrop(frame.DensityButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
 	setTextColor(frame.DensityButton.Text, TEXT.topbarGold)
 	frame.DensityButton:SetScript("OnEnter", function(self)
-		setFrameBackdrop(self, { 0.165, 0.135, 0.080, 0.98 }, CARD_BORDER_HOVER)
+		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarHoverBg, lib.ThemeColors.buttonHoverBorder)
 	end)
 	frame.DensityButton:SetScript("OnLeave", function(self)
-		setFrameBackdrop(self, { 0.100, 0.090, 0.070, 0.88 }, { 0.46, 0.36, 0.18, 0.70 })
+		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
 	end)
 	frame.DensityButton:SetShown(lib.ShouldShowDensityButton(app))
 	frame.LockButton:ClearAllPoints()
@@ -5857,7 +6043,7 @@ local function createFrame(app)
 		-12,
 		0
 	)
-	applyBackdrop(frame.SearchShell, { 0.035, 0.034, 0.032, 0.95 }, { 0.30, 0.28, 0.22, 0.90 })
+	applyBackdrop(frame.SearchShell, lib.ThemeColors.searchBg, lib.ThemeColors.searchBorder)
 
 	frame.SearchIcon = frame.SearchShell:CreateTexture(nil, "OVERLAY")
 	frame.SearchIcon:SetSize(15, 15)
@@ -6074,6 +6260,73 @@ local function createFrame(app)
 	return frame
 end
 
+local function refreshFrameTheme(frame, app)
+	if not frame then
+		return
+	end
+	lib.ApplyThemeColors(app)
+	if frame.bg and frame.bg.SetColorTexture then
+		frame.bg:SetColorTexture(
+			lib.ThemeColors.frameBg[1],
+			lib.ThemeColors.frameBg[2],
+			lib.ThemeColors.frameBg[3],
+			lib.ThemeColors.frameBg[4]
+		)
+	end
+	if frame.MaterialOverlay and frame.MaterialOverlay.SetVertexColor then
+		frame.MaterialOverlay:SetVertexColor(
+			lib.ThemeColors.overlayTint[1],
+			lib.ThemeColors.overlayTint[2],
+			lib.ThemeColors.overlayTint[3],
+			lib.ThemeColors.overlayTint[4] or 1
+		)
+	end
+	if frame.TopBar then
+		setFrameBackdrop(frame.TopBar, TOPBAR_BG, lib.ThemeColors.topbarBorder)
+	end
+	if frame.ResetButton then
+		setFrameBackdrop(frame.ResetButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
+		setTextColor(frame.ResetButton.Text, TEXT.topbarGold)
+	end
+	if frame.LockButton then
+		setFrameBackdrop(frame.LockButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
+		setTextColor(frame.LockButton.Text, TEXT.topbarGold)
+	end
+	if frame.DensityButton then
+		setFrameBackdrop(frame.DensityButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder)
+		setTextColor(frame.DensityButton.Text, TEXT.topbarGold)
+	end
+	if frame.SearchShell then
+		setFrameBackdrop(frame.SearchShell, lib.ThemeColors.searchBg, lib.ThemeColors.searchBorder)
+	end
+	if frame.SidebarShell then
+		setFrameBackdrop(frame.SidebarShell, SIDEBAR_BG, PANEL_BORDER)
+	end
+	if frame.ContentShell then
+		setFrameBackdrop(frame.ContentShell, CONTENT_BG, PANEL_BORDER)
+	end
+	if frame.Title then
+		setTextColor(frame.Title, TEXT.topbarGold)
+	end
+	if frame.TopBarAccent and frame.TopBarAccent.SetColorTexture then
+		frame.TopBarAccent:SetColorTexture(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.38)
+	end
+	if frame.SearchPlaceholder then
+		setTextColor(frame.SearchPlaceholder, TEXT.subtle)
+	end
+	if frame.ResizeGrip then
+		if frame.ResizeGrip:GetNormalTexture() then
+			frame.ResizeGrip:GetNormalTexture():SetVertexColor(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.62)
+		end
+		if frame.ResizeGrip:GetHighlightTexture() then
+			frame.ResizeGrip:GetHighlightTexture():SetVertexColor(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.92)
+		end
+		if frame.ResizeGrip:GetPushedTexture() then
+			frame.ResizeGrip:GetPushedTexture():SetVertexColor(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.82)
+		end
+	end
+end
+
 function lib.ResolveOpenTarget(app, pageID, focusControlID)
 	if not pageID or pageID == "dashboard" or app:GetPage(pageID) then
 		return pageID, focusControlID
@@ -6102,11 +6355,13 @@ function lib:Open(appOrID, pageID, focusControlID)
 	if not app then
 		return nil
 	end
+	lib.ApplyThemeColors(app)
 	local frame = frames[app.id]
 	if not frame then
 		frame = createFrame(app)
 		frames[app.id] = frame
 	else
+		refreshFrameTheme(frame, app)
 		frame._LibSettingsDesignerState:RenderSidebar()
 	end
 	local state = frame._LibSettingsDesignerState

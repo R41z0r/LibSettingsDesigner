@@ -46,6 +46,7 @@ wrapper bridges, documenting elements, or validating changes.
 - [Input](Elements/Input.md)
 - [Button](Elements/Button.md)
 - [ColorPicker](Elements/ColorPicker.md)
+- [ColorPalette](Elements/ColorPalette.md)
 - [ColorOverrides](Elements/ColorOverrides.md)
 - [SoundDropdown](Elements/SoundDropdown.md)
 - [CheckboxDropdown](Elements/CheckboxDropdown.md)
@@ -66,6 +67,7 @@ wrapper bridges, documenting elements, or validating changes.
 - [Search and New Badges](Examples/Search-And-New-Badges.md)
 - [Runtime Refresh](Examples/Runtime-Refresh.md)
 - [Support Links](Examples/Support-Links.md)
+- [Theme Colors](Examples/Theme-Colors.md)
 
 ## [Principles][Top]
 

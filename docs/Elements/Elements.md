@@ -38,7 +38,8 @@ For all shared fields and aliases, see [Field Glossary](../Field-Glossary.md).
 | [Input](Input.md) | Text, numeric, or multiline input. |
 | [Button](Button.md) | Action row. |
 | [ColorPicker](ColorPicker.md) | Single color value. |
-| [ColorOverrides](ColorOverrides.md) | Multiple keyed color overrides. |
+| [ColorPalette](ColorPalette.md) | Multiple keyed colors in one row. |
+| [ColorOverrides](ColorOverrides.md) | Legacy alias for ColorPalette. |
 | [SoundDropdown](SoundDropdown.md) | Single sound choice with preview support. |
 | [CheckboxDropdown](CheckboxDropdown.md) | Boolean setting plus related dropdown. |
 | [ReorderList](ReorderList.md) | Ordered editable list. |
@@ -63,7 +64,7 @@ For all shared fields and aliases, see [Field Glossary](../Field-Glossary.md).
 | Free text or number entry | [Input](Input.md) |
 | Run an action instead of storing a setting | [Button](Button.md) |
 | Store one color | [ColorPicker](ColorPicker.md) |
-| Store several keyed colors | [ColorOverrides](ColorOverrides.md) |
+| Store several keyed colors | [ColorPalette](ColorPalette.md) |
 | Pick and preview a sound | [SoundDropdown](SoundDropdown.md) |
 | Toggle plus related mode/threshold | [CheckboxDropdown](CheckboxDropdown.md) |
 | Let users reorder entries | [ReorderList](ReorderList.md) |

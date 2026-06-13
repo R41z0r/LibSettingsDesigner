@@ -1,54 +1,28 @@
 <a name="Top"></a>
 <details open><summary><strong>Contents</strong></summary><br />
 
-- [Overview](#overview)
-- [Preview](#preview)
-- [Fields](#fields)
-- [Example](#example)
+- [Legacy Alias](#legacy-alias)
+- [Migration](#migration)
 
 </details>
 
-## [Overview][Top]
+## [Legacy Alias][Top]
 
-ColorOverrides manages multiple keyed color values in one row.
+ColorOverrides is the old name for [ColorPalette](ColorPalette.md).
 
-## [Preview][Top]
+Existing controls with `type = "coloroverrides"` still work. The runtime maps
+that legacy type to `type = "colorpalette"` before rendering.
 
-![ColorOverrides example](../assets/images/color-overrides-example.png)
+## [Migration][Top]
 
-## [Fields][Top]
-
-| Field | Type | Description |
-| :---- | :--- | :---------- |
-| `entries` | table | List of `{ key, label }` color entries. |
-| `getColor` | function | Reads current color by key. |
-| `setColor` | function | Writes color by key. |
-| `hasOpacity` | boolean | Show alpha channel. |
-| `colorizeLabel` | boolean | Tint entry labels with current colors. |
-
-`getDefaultColor` is currently metadata/pass-through only and is not consumed by
-the UI renderer.
-
-## [Example][Top]
+For new code, rename the control type:
 
 ```lua
-app:RegisterControl("bars.colors", {
-  id = "classColors",
-  type = "coloroverrides",
-  label = "Class colors",
-  entries = {
-    { key = "WARRIOR", label = "Warrior" },
-    { key = "MAGE", label = "Mage" },
-  },
-  getColor = function(key)
-    return MyAddonDB.profile.classColors[key]
-  end,
-  setColor = function(key, color)
-    MyAddonDB.profile.classColors[key] = color
-    MyAddon.RefreshClassColors()
-  end,
-})
+type = "colorpalette"
 ```
+
+No field changes are required. `entries`, `getColor`, `setColor`, `hasOpacity`,
+and `colorizeLabel` behave the same as before.
 
 [//]: # (Links)
 [Top]: #Top

@@ -24,7 +24,8 @@
 &nbsp; • [Input](Elements/Input.md "Input") \
 &nbsp; • [Button](Elements/Button.md "Button") \
 &nbsp; • [ColorPicker](Elements/ColorPicker.md "ColorPicker") \
-&nbsp; • [ColorOverrides](Elements/ColorOverrides.md "ColorOverrides") \
+&nbsp; • [ColorPalette](Elements/ColorPalette.md "ColorPalette") \
+&nbsp; • [ColorOverrides](Elements/ColorOverrides.md "ColorOverrides Legacy Alias") \
 &nbsp; • [SoundDropdown](Elements/SoundDropdown.md "SoundDropdown") \
 &nbsp; • [CheckboxDropdown](Elements/CheckboxDropdown.md "CheckboxDropdown") \
 &nbsp; • [ReorderList](Elements/ReorderList.md "ReorderList") \
@@ -42,4 +43,5 @@
 &nbsp; • [Nested Database Values](Examples/Nested-Database-Values.md "Nested Database Values") \
 &nbsp; • [Search and New Badges](Examples/Search-And-New-Badges.md "Search and New Badges") \
 &nbsp; • [Runtime Refresh](Examples/Runtime-Refresh.md "Runtime Refresh") \
-&nbsp; • [Support Links](Examples/Support-Links.md "Support Links")
+&nbsp; • [Support Links](Examples/Support-Links.md "Support Links") \
+&nbsp; • [Theme Colors](Examples/Theme-Colors.md "Theme Colors")
