@@ -18,7 +18,8 @@
 &nbsp; • [Input](Input.md "Input") \
 &nbsp; • [Button](Button.md "Button") \
 &nbsp; • [ColorPicker](ColorPicker.md "ColorPicker") \
-&nbsp; • [ColorOverrides](ColorOverrides.md "ColorOverrides") \
+&nbsp; • [ColorPalette](ColorPalette.md "ColorPalette") \
+&nbsp; • [ColorOverrides](ColorOverrides.md "ColorOverrides Legacy Alias") \
 &nbsp; • [SoundDropdown](SoundDropdown.md "SoundDropdown") \
 &nbsp; • [CheckboxDropdown](CheckboxDropdown.md "CheckboxDropdown") \
 &nbsp; • [ReorderList](ReorderList.md "ReorderList") \

@@ -452,7 +452,7 @@ app:RegisterControl("visuals.theme", {
 	key = "roleColors",
 	groupID = "colors",
 	groupTitle = "Colors",
-	type = "coloroverrides",
+	type = "colorpalette",
 	label = "Role Colors",
 	description = "Multiple keyed color swatches in one setting row.",
 	entries = {

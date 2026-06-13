@@ -46,6 +46,7 @@ wrapper bridges, documenting elements, or validating changes.
 - [Input](Elements/Input.md)
 - [Button](Elements/Button.md)
 - [ColorPicker](Elements/ColorPicker.md)
+- [ColorPalette](Elements/ColorPalette.md)
 - [ColorOverrides](Elements/ColorOverrides.md)
 - [SoundDropdown](Elements/SoundDropdown.md)
 - [CheckboxDropdown](Elements/CheckboxDropdown.md)

@@ -24,7 +24,8 @@
 &nbsp; • [Input](Elements/Input.md "Input") \
 &nbsp; • [Button](Elements/Button.md "Button") \
 &nbsp; • [ColorPicker](Elements/ColorPicker.md "ColorPicker") \
-&nbsp; • [ColorOverrides](Elements/ColorOverrides.md "ColorOverrides") \
+&nbsp; • [ColorPalette](Elements/ColorPalette.md "ColorPalette") \
+&nbsp; • [ColorOverrides](Elements/ColorOverrides.md "ColorOverrides Legacy Alias") \
 &nbsp; • [SoundDropdown](Elements/SoundDropdown.md "SoundDropdown") \
 &nbsp; • [CheckboxDropdown](Elements/CheckboxDropdown.md "CheckboxDropdown") \
 &nbsp; • [ReorderList](Elements/ReorderList.md "ReorderList") \

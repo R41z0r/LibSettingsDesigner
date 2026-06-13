@@ -253,7 +253,8 @@ app:RegisterControl("interface.names", {
 | Input | `numeric`, `min`, `max`, `maxChars`, `multiline`, `readOnly` | [Input](Elements/Input.md) |
 | Button | `buttonText`, `onClick`, `setValue` | [Button](Elements/Button.md) |
 | ColorPicker | `getColor`, `setColor`, `hasOpacity` | [ColorPicker](Elements/ColorPicker.md) |
-| ColorOverrides | `entries`, `getColor`, `setColor`, `hasOpacity`, `colorizeLabel` | [ColorOverrides](Elements/ColorOverrides.md) |
+| ColorPalette | `entries`, `getColor`, `setColor`, `hasOpacity`, `colorizeLabel` | [ColorPalette](Elements/ColorPalette.md) |
+| ColorOverrides | Legacy alias for ColorPalette. | [ColorOverrides](Elements/ColorOverrides.md) |
 | SoundDropdown | `soundResolver`, `previewSoundFunc`, `playbackChannel` | [SoundDropdown](Elements/SoundDropdown.md) |
 | CheckboxDropdown | `dropdownKey`, `dropdownList`, `dropdownOrder`, `dropdownDefault` | [CheckboxDropdown](Elements/CheckboxDropdown.md) |
 | ReorderList | `getEntries`, `moveEntry`, `removeEntry`, `setEntryFormat` | [ReorderList](Elements/ReorderList.md) |

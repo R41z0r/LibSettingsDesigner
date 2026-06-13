@@ -1157,7 +1157,7 @@ local function getSettingRowHeight(control, state)
 		if controlType == "slider" then
 			return 66
 		end
-		if controlType == "coloroverrides" then
+		if controlType == "colorpalette" then
 			return lib.GetColorOverridesRowHeight(control)
 		end
 		if controlType == "reorderlist" then
@@ -1174,7 +1174,7 @@ local function getSettingRowHeight(control, state)
 	if controlType == "slider" then
 		return hasUsefulDescription(control) and SLIDER_ROW_HEIGHT or SLIDER_ROW_HEIGHT_COMPACT
 	end
-	if controlType == "coloroverrides" then
+	if controlType == "colorpalette" then
 		return lib.GetColorOverridesRowHeight(control)
 	end
 	if controlType == "reorderlist" then
@@ -1821,6 +1821,8 @@ function getControlType(control)
 		return "toggle"
 	elseif controlType == "scrolldropdown" then
 		return "dropdown"
+	elseif controlType == "coloroverrides" or controlType == "coloroverride" then
+		return "colorpalette"
 	end
 	return controlType
 end
@@ -1838,7 +1840,7 @@ function lib.GetFallbackControlDescription(app, control)
 		return L["configCenterCheckboxDropdownFallbackDesc"] or "Enable this setting and choose its related option."
 	elseif controlType == "input" then
 		return L["configCenterInputFallbackDesc"] or "Enter the value used by this setting."
-	elseif controlType == "colorpicker" or controlType == "coloroverrides" then
+	elseif controlType == "colorpicker" or controlType == "colorpalette" then
 		return L["configCenterColorFallbackDesc"] or "Choose a color for this setting."
 	elseif controlType == "button" then
 		return L["configCenterButtonFallbackDesc"] or "Run this action."
@@ -4181,7 +4183,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 	elseif layoutType == "complex" then
 		local L = getLocale(app)
 		descText = L["configCenterAdvancedSettingDesc"] or "Open the related editor or action for this setting."
-	elseif layoutType == "stacked" or controlType == "button" or controlType == "coloroverrides" then
+	elseif layoutType == "stacked" or controlType == "button" or controlType == "colorpalette" then
 		descText = lib.GetFallbackControlDescription(app, control)
 	else
 		descText = ""
@@ -4334,7 +4336,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 				},
 			})
 		end
-	elseif controlType == "coloroverrides" then
+	elseif controlType == "colorpalette" then
 		title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and -154 or -18, 0)
 		desc.Text:SetText(control.description or "")
 		desc:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)

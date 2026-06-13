@@ -568,11 +568,15 @@ runtime actively consumes as UI behavior:
 | Input | `numeric`, `min`, `max`, `step`, `clampToRange`, `maxChars`, `readOnly`, `inputWidth`, `multiline` |
 | Button | `buttonText`, `onClick`, `setValue`, `trackCustomized = false` |
 | ColorPicker | `getColor`, `setColor`, `hasOpacity` |
-| ColorOverrides | `entries`, `getColor`, `setColor`, `hasOpacity`, `colorizeLabel` |
+| ColorPalette | `entries`, `getColor`, `setColor`, `hasOpacity`, `colorizeLabel` |
 | SoundDropdown | `soundResolver`, `previewSoundFunc`, `previewTooltip`, `playbackChannel`, `getPlaybackChannel`, `menuHeight` |
 | CheckboxDropdown | `dropdownKey`, `dropdownDefault`, `dropdownValues`, `dropdownOptions`, `dropdownList`, `dropdownOrder`, `dropdownGet`, `dropdownSet` |
 | ReorderList | `getEntries`, `addEntry`, `removeEntry`, `moveEntry`, `setEntryFormat`, `formatOptions`, `formatOrder`, `emptyText`, `addButtonText`, `addPopupText`, `addPopupTitle`, `numeric`, `maxChars`, `rowHeight` |
 | Keybind | Legacy/fallback bridge control; prefer host wrapper or `openLegacySettings` patterns. |
+
+Use `type = "colorpalette"` for multiple keyed colors in new code.
+`type = "coloroverrides"` and `type = "coloroverride"` are legacy aliases and
+must remain accepted for old host addons.
 
 Do not document these as active UI behavior unless runtime support is added:
 
@@ -580,7 +584,7 @@ Do not document these as active UI behavior unless runtime support is added:
 - Input `multilineHeight`
 - ColorPicker `callback`
 - ColorPicker `colorizeLabel`
-- ColorOverrides `getDefaultColor`
+- ColorPalette `getDefaultColor`
 
 ## Value Resolution Contract
 
@@ -736,7 +740,7 @@ Read the specific element page before changing examples or behavior:
 | Text/numeric/multiline entry | `docs/Elements/Input.md` |
 | Action rows | `docs/Elements/Button.md` |
 | Single colors | `docs/Elements/ColorPicker.md` |
-| Multiple keyed colors | `docs/Elements/ColorOverrides.md` |
+| Multiple keyed colors | `docs/Elements/ColorPalette.md` |
 | Sound selection/preview | `docs/Elements/SoundDropdown.md` |
 | Checkbox plus dropdown rows | `docs/Elements/CheckboxDropdown.md` |
 | Ordered editable lists | `docs/Elements/ReorderList.md` |
