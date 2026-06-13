@@ -19,6 +19,33 @@ local function moveEntry(list, fromIndex, toIndex)
 	table.insert(list, toIndex, entry)
 end
 
+local SAMPLE_NEW_TAGS = {
+	["dashboard.showcase"] = true,
+	["visuals.theme"] = true,
+	["mode"] = true,
+	["accentColor"] = true,
+	["shortcuts"] = true,
+}
+
+local function getSampleVersion()
+	return C_AddOns and C_AddOns.GetAddOnMetadata(addonName, "Version") or "1.0.0"
+end
+
+local function splitVersionBadge(version)
+	version = tostring(version or "")
+	local base, suffix = version:match("^(.-)%-beta([%w%.%-]*)$")
+	if base and base ~= "" then
+		local number = tostring(suffix or ""):match("^(%d+)")
+		return base, number and ("Beta " .. number) or "Beta"
+	end
+	base, suffix = version:match("^(.-)%-alpha([%w%.%-]*)$")
+	if base and base ~= "" then
+		local number = tostring(suffix or ""):match("^(%d+)")
+		return base, number and ("Alpha " .. number) or "Alpha"
+	end
+	return version, nil
+end
+
 local app
 app = Config:RegisterAddOn(addonName, {
 	title = "LibSettingsDesigner Sample",
@@ -31,7 +58,7 @@ app = Config:RegisterAddOn(addonName, {
 	db = DB,
 	locale = addon.L,
 	version = function()
-		return C_AddOns and C_AddOns.GetAddOnMetadata(addonName, "Version") or "1.0.0"
+		return getSampleVersion()
 	end,
 	getSize = function()
 		local window = DB().settingsWindow or {}
@@ -50,7 +77,7 @@ app = Config:RegisterAddOn(addonName, {
 		DB().settingsWindow.locked = locked == true
 	end,
 	isNewTag = function(tagID)
-		return tagID == "visuals.theme" or tagID == "shortcuts"
+		return SAMPLE_NEW_TAGS[tostring(tagID or "")] == true
 	end,
 	blizzardSettingsRoot = true,
 	blizzardSettingsTitle = "LibSettingsDesigner Sample",
@@ -58,24 +85,90 @@ app = Config:RegisterAddOn(addonName, {
 		ConfigUI:Open(app)
 	end,
 	dashboard = function(_, stats)
+		local versionValue, versionBadge = splitVersionBadge(getSampleVersion())
 		return {
 			hero = {
 				title = "LibSettingsDesigner Sample",
-				subtitle = "Preview dashboard cards, grouped rows, notes, search, density, reset state, and info pages.",
+				subtitle = "Preview dashboard cards, clickable status tiles, feature summaries, new-in-version entries, grouped rows, search, density, reset state, and info pages.",
 				iconKey = "dashboard",
 			},
 			cards = {
-				{ title = "Behavior", description = "Toggles, dropdowns, multi-select rows, and dependent settings.", iconKey = "settingspage", pageID = "general.behavior" },
-				{ title = "Visuals", description = "Sliders, text input, color picker, and color override swatches.", iconKey = "appearance", pageID = "visuals.theme" },
-				{ title = "Shortcuts", description = "Editable ordered rows with move, remove, and format controls.", iconKey = "movementinput", pageID = "advanced.shortcuts" },
+				{
+					title = "Dashboard Showcase",
+					description = "See which dashboard blocks are available and what each click target does.",
+					iconKey = "dashboard",
+					pageID = "help.dashboard-showcase",
+				},
+				{
+					title = "Behavior",
+					description = "Toggles, dropdowns, multi-select rows, and dependent settings.",
+					iconKey = "settingspage",
+					pageID = "general.behavior",
+				},
+				{
+					title = "Visuals",
+					description = "Sliders, text input, color picker, and color override swatches.",
+					iconKey = "appearance",
+					pageID = "visuals.theme",
+				},
+				{
+					title = "Version Notes",
+					description = "Open a changelog-style info page from a dashboard card or version tile.",
+					iconKey = "help",
+					pageID = "help.changelog",
+				},
 			},
 			status = {
 				title = "Sample Status",
-				tiles = {
-					{ title = "Pages", value = tostring(stats.pages or 0), atlas = "UI-HUD-MicroMenu-Spellbook-Mouseover" },
-					{ title = "Controls", value = tostring(stats.controls or 0), atlas = "UI-HUD-MicroMenu-GameMenu-Mouseover" },
-					{ title = "Customized", value = tostring(stats.customized or 0), atlas = "worldquest-tracker-questmarker" },
-				},
+				tiles = function()
+					return {
+						{
+							title = "Customized",
+							value = tostring(stats.customized or 0) .. " / " .. tostring(stats.customizable or stats.controls or 0),
+							atlas = "worldquest-tracker-questmarker",
+							searchQuery = "scale color shortcut",
+						},
+						{
+							title = "New",
+							value = tostring(stats.newControls or 0),
+							badge = "tag:new",
+							atlas = "collections-icon-favorites",
+							searchQuery = "tag:new",
+						},
+						{
+							title = "Version",
+							value = versionValue,
+							badge = versionBadge,
+							atlas = "UI-HUD-MicroMenu-Spellbook-Mouseover",
+							onClick = function(state)
+								if state and state.SetPage then
+									state:SetPage("help.changelog")
+								end
+							end,
+						},
+						{
+							title = "Shortcuts",
+							value = tostring(#(DB().shortcuts or {})),
+							icon = "Interface\\Icons\\INV_Misc_Note_05",
+							onClick = function(state)
+								if state and state.SetPage then
+									state:SetPage("advanced.shortcuts")
+								end
+							end,
+						},
+					}
+				end,
+			},
+			features = {
+				enabledTitle = "Enabled Sample Pages",
+				customizedTitle = "Customized Sample Pages",
+				enabledBadge = ENABLED or "Enabled",
+				customizedBadge = "Changed",
+				limit = 5,
+			},
+			newEntries = {
+				title = "New in this Version",
+				limit = 5,
 			},
 		}
 	end,
@@ -120,6 +213,7 @@ app:RegisterControl("general.behavior", {
 	type = "dropdown",
 	label = "Mode",
 	description = "Single-choice dropdown with deterministic ordering.",
+	newTagID = "mode",
 	list = { minimal = "Minimal", balanced = "Balanced", detailed = "Detailed" },
 	orderList = { "minimal", "balanced", "detailed" },
 	default = "balanced",
@@ -195,11 +289,26 @@ app:RegisterPage({
 	title = "Theme and Layout",
 	description = "Visual controls for layout, text, and colors.",
 	iconAtlas = "transmog-icon-revert",
+	mainToggleID = "visualsEnabled",
 	newTagID = "visuals.theme",
 	order = 100,
 })
 app:RegisterGroup("visuals.theme", { id = "layout", title = "Layout", order = 100 })
 app:RegisterGroup("visuals.theme", { id = "colors", title = "Colors", order = 200 })
+
+app:RegisterControl("visuals.theme", {
+	id = "visualsEnabled",
+	key = "visualsEnabled",
+	groupID = "layout",
+	groupTitle = "Layout",
+	type = "toggle",
+	label = "Enable Visuals",
+	description = "Makes this page appear in the dashboard enabled-feature panel.",
+	default = true,
+	parentCheck = function() return DB().enabled == true end,
+	order = 90,
+	refreshOnChange = true,
+})
 
 app:RegisterControl("visuals.theme", {
 	id = "scale",
@@ -218,7 +327,7 @@ app:RegisterControl("visuals.theme", {
 		DB().scale = tonumber(value) or 1
 		addon.RefreshPreview()
 	end,
-	parentCheck = function() return DB().enabled == true end,
+	parentCheck = function() return DB().enabled == true and DB().visualsEnabled == true end,
 	order = 100,
 })
 
@@ -233,7 +342,7 @@ app:RegisterControl("visuals.theme", {
 	default = "Sample Settings",
 	maxChars = 32,
 	inputWidth = 260,
-	parentCheck = function() return DB().enabled == true end,
+	parentCheck = function() return DB().enabled == true and DB().visualsEnabled == true end,
 	order = 110,
 })
 
@@ -245,6 +354,7 @@ app:RegisterControl("visuals.theme", {
 	type = "colorpicker",
 	label = "Accent Color",
 	description = "Single color picker with alpha support.",
+	newTagID = "accentColor",
 	default = { r = 0.96, g = 0.76, b = 0.28, a = 1 },
 	hasOpacity = true,
 	getColor = function()
@@ -255,7 +365,7 @@ app:RegisterControl("visuals.theme", {
 		DB().accentColor = { r = r, g = g, b = b, a = a or 1 }
 		addon.RefreshPreview()
 	end,
-	parentCheck = function() return DB().enabled == true end,
+	parentCheck = function() return DB().enabled == true and DB().visualsEnabled == true end,
 	order = 200,
 })
 
@@ -287,7 +397,7 @@ app:RegisterControl("visuals.theme", {
 		addon.RefreshPreview()
 	end,
 	colorizeLabel = true,
-	parentCheck = function() return DB().enabled == true end,
+	parentCheck = function() return DB().enabled == true and DB().visualsEnabled == true end,
 	order = 210,
 })
 
@@ -297,8 +407,21 @@ app:RegisterPage({
 	title = "Shortcuts",
 	description = "A larger row type for editable ordered entries.",
 	iconKey = "movementinput",
+	mainToggleID = "shortcutsEnabled",
 	newTagID = "shortcuts",
 	order = 100,
+})
+
+app:RegisterControl("advanced.shortcuts", {
+	id = "shortcutsEnabled",
+	key = "shortcutsEnabled",
+	type = "toggle",
+	label = "Enable Shortcuts",
+	description = "Makes this page appear in the dashboard enabled-feature panel.",
+	default = true,
+	parentCheck = function() return DB().enabled == true end,
+	order = 90,
+	refreshOnChange = true,
 })
 
 app:RegisterControl("advanced.shortcuts", {
@@ -306,6 +429,7 @@ app:RegisterControl("advanced.shortcuts", {
 	type = "reorderlist",
 	label = "Shortcut Order",
 	description = "Add, remove, move, drag, and format controls.",
+	newTagID = "shortcuts",
 	rowHeight = 250,
 	addButtonText = ADD or "Add",
 	addPopupTitle = "Add Shortcut",
@@ -332,7 +456,7 @@ app:RegisterControl("advanced.shortcuts", {
 			if entry.id == entryID then entry.formatKey = formatKey return end
 		end
 	end,
-	parentCheck = function() return DB().enabled == true end,
+	parentCheck = function() return DB().enabled == true and DB().shortcutsEnabled == true end,
 	order = 100,
 })
 
@@ -343,7 +467,65 @@ app:RegisterControl("advanced.shortcuts", {
 	description = "Plain action row.",
 	buttonText = "Refresh",
 	onClick = function() addon.RefreshPreview() end,
+	parentCheck = function() return DB().enabled == true and DB().shortcutsEnabled == true end,
 	order = 200,
+})
+
+app:RegisterPage({
+	id = "help.dashboard-showcase",
+	category = "help",
+	title = "Dashboard Showcase",
+	description = "What the dashboard can display and how users interact with it.",
+	layout = "info",
+	iconKey = "dashboard",
+	newTagID = "dashboard.showcase",
+	order = 80,
+	content = {
+		{
+			title = "Dashboard Blocks",
+			entries = {
+				{ type = "text", text = "Hero blocks introduce the settings center and can use any app icon key." },
+				{ type = "text", text = "Cards open important pages directly. This sample links to behavior, visuals, version notes, and this showcase." },
+				{ type = "text", text = "Status tiles can show live values, badges, and click actions. Try the Version, New, and Shortcuts tiles on the dashboard." },
+				{ type = "text", text = "Feature and new-entry panels are generated from page main toggles, customized values, and newTagID metadata." },
+			},
+		},
+		{
+			title = "Host Addon Pattern",
+			entries = {
+				{ type = "text", text = "Use dashboard cards for help, support, changelog, or the most common feature pages." },
+				{ type = "text", text = "Use the version tile to open a changelog page, and use a new-entry tile with searchQuery = \"tag:new\"." },
+			},
+		},
+	},
+})
+
+app:RegisterPage({
+	id = "help.changelog",
+	category = "help",
+	title = "Version Notes",
+	description = "A changelog-style info page opened from the dashboard version tile.",
+	layout = "info",
+	iconKey = "help",
+	order = 90,
+	content = {
+		{
+			title = "1.0.0",
+			entries = {
+				{ type = "text", text = "Added dashboard cards for direct navigation." },
+				{ type = "text", text = "Added clickable status tiles for customized counts, new settings, version notes, and shortcut count." },
+				{ type = "text", text = "Added generated enabled-feature and new-in-version panels." },
+			},
+		},
+		{
+			title = "Dashboard Click Targets",
+			entries = {
+				{ type = "text", text = "Version opens this page." },
+				{ type = "text", text = "New applies a tag:new search query." },
+				{ type = "text", text = "Shortcuts opens the editable shortcut list page." },
+			},
+		},
+	},
 })
 
 app:RegisterPage({
@@ -361,6 +543,8 @@ app:RegisterPage({
 				{ type = "command", commands = { "/lsdsample" }, desc = "Toggle the settings window." },
 				{ type = "command", commands = { "/lsdsample behavior" }, desc = "Open the behavior page." },
 				{ type = "command", commands = { "/lsdsample visuals" }, desc = "Open the visuals page." },
+				{ type = "command", commands = { "/lsdsample dashboard" }, desc = "Open the dashboard." },
+				{ type = "command", commands = { "/lsdsample changelog" }, desc = "Open version notes." },
 				{ type = "command", commands = { "/lsdsample reset" }, desc = "Reset the sample profile and reopen settings." },
 			},
 		},
@@ -383,6 +567,10 @@ SlashCmdList.LIBSETTINGSDESIGNERSAMPLE = function(input)
 		ConfigUI:Open(app, "visuals.theme")
 	elseif input == "shortcuts" then
 		ConfigUI:Open(app, "advanced.shortcuts")
+	elseif input == "dashboard" then
+		ConfigUI:Open(app, "dashboard")
+	elseif input == "changelog" then
+		ConfigUI:Open(app, "help.changelog")
 	elseif input == "help" then
 		ConfigUI:Open(app, "help.quick-reference")
 	elseif input == "reset" then

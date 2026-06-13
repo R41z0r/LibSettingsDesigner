@@ -5,6 +5,8 @@ addon.L = addon.L or {}
 
 local DEFAULT_PROFILE = {
 	enabled = true,
+	visualsEnabled = true,
+	shortcutsEnabled = true,
 	mode = "balanced",
 	scale = 1,
 	frameTitle = "Sample Settings",
