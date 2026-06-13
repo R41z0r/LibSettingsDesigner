@@ -1,0 +1,402 @@
+<a name="Top"></a>
+<details open>
+<summary><strong>Contents</strong></summary><br />
+
+- [Overview](#overview)
+- [Getting the API](#getting-the-api)
+- [Top-Level Methods](#top-level-methods)
+- [RegisterAddOn](#registeraddon)
+- [App Options](#app-options)
+- [Registration Methods](#registration-methods)
+- [Legacy Bridge Methods](#legacy-bridge-methods)
+- [Lookup and Navigation Methods](#lookup-and-navigation-methods)
+- [Value Methods](#value-methods)
+- [Visibility and Enablement Methods](#visibility-and-enablement-methods)
+- [Search and Stats](#search-and-stats)
+- [Registration Order Example](#registration-order-example)
+
+</details>
+
+## [Overview][Top]
+
+The Config API owns the settings data model:
+
+- apps
+- categories
+- pages
+- groups
+- controls
+- page/control notes
+- defaults
+- value reads/writes
+- customized-state checks
+- reset handling
+- visibility and enabled-state checks
+- search metadata
+- legacy wrapper bridge registration
+
+It does not render the settings center. Rendering belongs to
+`addon.LibSettingsDesigner.UI`.
+
+## [Getting the API][Top]
+
+```lua
+local addonName, addon = ...
+local Config = addon.LibSettingsDesigner and addon.LibSettingsDesigner.Config
+```
+
+Always load `libs\LibSettingsDesigner\LibSettingsDesigner.xml` before the file
+that uses `Config`.
+
+## [Top-Level Methods][Top]
+
+| Method | Purpose |
+| :----- | :------ |
+| `RegisterAddOn(id, opts)` | Creates or updates one settings app and returns the app object. |
+| `GetAddOn(id)` | Returns a registered app by id. |
+| `NormalizeID(text)` | Normalizes display-ish text into stable id-like text. Prefer explicit ids when possible. |
+
+## [RegisterAddOn][Top]
+
+```lua
+local app = Config:RegisterAddOn(addonName, opts)
+```
+
+`addonName` should normally be the host addon's real addon id from:
+
+```lua
+local addonName, addon = ...
+```
+
+Minimal example:
+
+```lua
+local app = Config:RegisterAddOn(addonName, {
+  title = "My Addon",
+  settingsTitle = "My Addon Settings",
+  addonFolder = addonName,
+  assetRoot = "Interface\\AddOns\\MyAddon\\libs\\LibSettingsDesigner\\Assets\\",
+  db = function() return MyAddonDB.profile end,
+  locale = L,
+})
+```
+
+Calling `RegisterAddOn` again with the same id should be treated as updating or
+reusing the same app registration. Keep registration deterministic and avoid
+registering the same page/control from multiple unrelated code paths.
+
+## [App Options][Top]
+
+| Field | Type | Purpose |
+| :---- | :--- | :------ |
+| `title` | string | Short addon title used in dashboard/sidebar areas. |
+| `settingsTitle` | string | Window title. |
+| `dashboardTitle` | string | Dashboard sidebar label. |
+| `icon` | string | Main addon icon texture. |
+| `addonFolder` | string | Folder name used for fallback asset paths. |
+| `assetRoot` | string | Explicit path to vendored LibSettingsDesigner assets. |
+| `db` | function | Returns the table used for simple `control.key` reads/writes. |
+| `profile` | function | Optional profile table provider. |
+| `locale` | table | Host addon locale table. |
+| `density` | string/function | `"compact"` or `"comfortable"`. |
+| `showDensityButton` | boolean/function | Whether users can switch density. |
+| `getSize` / `setSize` | function | Persist settings window size. |
+| `getLocked` / `setLocked` | function | Persist whether the frame can be moved/resized. |
+| `dashboard` | table/function | Dashboard hero, cards, status, features, new entries. |
+| `version` | function/string | Version text for status displays. |
+| `isNewTag` | function | Returns whether a tag should show a new badge. |
+| `iconTextures` | table | Map `iconKey` to texture path. |
+| `categoryIconTextures` | table | Map category ids/keys to texture path. |
+| `openLegacySettings` | function | Called by controls that should jump to legacy/Blizzard settings. |
+
+## [Registration Methods][Top]
+
+### `app:RegisterCategory(data)`
+
+Registers a top-level sidebar/category bucket.
+
+```lua
+app:RegisterCategory({
+  id = "interface",
+  title = INTERFACE_LABEL or "Interface",
+  order = 100,
+  iconAtlas = "hud-microbutton-character-up",
+})
+```
+
+Required: `id`.
+
+Common fields: `title`, `order`, `icon`, `iconAtlas`, `iconKey`.
+
+### `app:RegisterPage(data)`
+
+Registers a page under a category.
+
+```lua
+app:RegisterPage({
+  id = "interface.action-bars",
+  category = "interface",
+  title = "Action Bars",
+  description = "Configure action bar behavior.",
+  iconKey = "actionbar",
+  mainToggleID = "actionBarsEnabled",
+  order = 100,
+})
+```
+
+Required: `id`, `category`, `title`.
+
+Use `layout = "info"` and `content` for help/static pages.
+
+### `app:RegisterGroup(pageID, data)`
+
+Registers a heading/section inside one page.
+
+```lua
+app:RegisterGroup("interface.action-bars", {
+  id = "visibility",
+  title = "Visibility",
+  order = 200,
+})
+```
+
+Controls join the group with:
+
+```lua
+groupID = "visibility"
+```
+
+or wrapper-era alias:
+
+```lua
+modernGroup = "visibility"
+```
+
+### `app:RegisterControl(pageID, data)`
+
+Registers a settings row/control inside a page.
+
+```lua
+app:RegisterControl("interface.action-bars", {
+  id = "actionBarMouseover",
+  key = "actionBarMouseover",
+  type = "toggle",
+  label = "Mouseover",
+  description = "Fade action bars until hovered.",
+  default = false,
+})
+```
+
+Core fields are documented in [Field Glossary](../Field-Glossary.md). Element
+specific fields are documented under [Elements](../Elements/Elements.md).
+
+### `app:RegisterPageNote(pageID, data)`
+
+Adds note/help content to a page.
+
+```lua
+app:RegisterPageNote("interface.action-bars", {
+  title = "Combat lockdown",
+  text = "Some layout changes may only apply out of combat.",
+  order = 10,
+})
+```
+
+### `app:RegisterControlNote(controlID, data)`
+
+Adds note/help content to a control.
+
+```lua
+app:RegisterControlNote("actionBarMouseover", {
+  title = "Tip",
+  text = "Use this together with opacity controls for a cleaner UI.",
+  order = 10,
+})
+```
+
+## [Legacy Bridge Methods][Top]
+
+These methods are for host addons that already have settings wrapper helpers.
+Feature modules should normally call the host wrapper, and the wrapper calls
+LibSettingsDesigner.
+
+| Method | Purpose |
+| :----- | :------ |
+| `RegisterLegacyCategory(category, data)` | Maps a legacy/Blizzard settings category to a modern category. |
+| `RegisterLegacySection(section, data)` | Maps an expandable section to a modern page. |
+| `RegisterLegacyControl(data)` | Converts wrapper metadata to a modern control. |
+
+Wrapper-side example:
+
+```lua
+app:RegisterLegacyControl({
+  parentSection = data.parentSection,
+  id = data.id or data.var,
+  key = data.var,
+  type = "toggle",
+  label = data.text,
+  description = data.desc,
+  default = data.default,
+  setValue = data.func,
+})
+```
+
+See [Wrapper Bridge Pattern](../Examples/Wrapper-Bridge-Pattern.md).
+
+## [Lookup and Navigation Methods][Top]
+
+| Method | Returns / does |
+| :----- | :------------- |
+| `GetCategories()` | Sorted visible categories. |
+| `GetPages(categoryID)` | Visible pages, optionally filtered by category. |
+| `GetPage(pageID)` | One registered page. |
+| `GetPageControls(pageOrID)` | Visible controls for one page. |
+| `SetDefaultPage(pageID)` | Sets the app default page. |
+| `GetDefaultPageID()` | Returns the app default page id. |
+
+Use stable ids when opening pages or wiring page cards:
+
+```lua
+ConfigUI:Open(app, "interface.action-bars", "actionBarMouseover")
+```
+
+## [Value Methods][Top]
+
+| Method | Purpose |
+| :----- | :------ |
+| `GetControlValue(control)` | Reads a control value using documented resolution order. |
+| `SetControlValue(control, value)` | Writes a control value using documented resolution order. |
+| `GetControlDefault(control)` | Resolves a control default. |
+| `ResetControl(control)` | Resets one control to default. |
+| `ResetPage(pageOrID)` | Resets controls on one page. |
+| `IsControlCustomized(control)` | Returns whether the current value differs from default. |
+
+Default resolution order:
+
+1. `control.default`
+2. `control.dbDefault`
+3. `control.setting:GetDefaultValue()` or `control.setting:GetDefault()`
+
+Value read order:
+
+1. `control.setting:GetValue()`
+2. `control.getSelection(control)` or `control.getSelection()`
+3. `control.getValue()`
+4. `opts.db()[control.key]`
+5. `control.default`
+
+Value write order:
+
+1. `control.setting:SetValue(value)`
+2. `control.setSelection(selection)` for MultiDropdown map writes
+3. `control.setValue(value)`
+4. `opts.db()[control.key] = value`
+
+Use explicit getter/setter fields for nested DB values:
+
+```lua
+app:RegisterControl("bars.layout", {
+  id = "scale",
+  type = "slider",
+  label = "Scale",
+  min = 0.5,
+  max = 2,
+  step = 0.05,
+  default = 1,
+  getValue = function()
+    return MyAddonDB.profile.bars and MyAddonDB.profile.bars.scale or 1
+  end,
+  setValue = function(value)
+    MyAddonDB.profile.bars = MyAddonDB.profile.bars or {}
+    MyAddonDB.profile.bars.scale = tonumber(value) or 1
+    MyAddon.RefreshBars()
+  end,
+})
+```
+
+## [Visibility and Enablement Methods][Top]
+
+| Method | Purpose |
+| :----- | :------ |
+| `IsControlEnabled(control)` | Resolves whether a row is interactive. |
+| `IsControlVisible(control)` | Resolves whether a control should render. |
+| `IsPageVisible(page)` | Resolves whether a page should render. |
+
+Use visibility gates to remove a row/page:
+
+```lua
+visibleWhen = function(control, app)
+  return MyAddon.HasAdvancedMode()
+end
+```
+
+Use enabled gates to keep a row visible but disabled:
+
+```lua
+parentCheck = function()
+  return MyAddonDB.profile.enabled == true
+end
+```
+
+## [Search and Stats][Top]
+
+| Method | Purpose |
+| :----- | :------ |
+| `Search(query)` | Returns matching pages and controls. |
+| `GetStats()` | Returns counts for dashboard/status UI. |
+
+Search uses labels, ids, keys, descriptions, page/group/category text, notes, and
+explicit `keywords`/`searchtags`.
+
+Example:
+
+```lua
+app:RegisterControl("interface.names", {
+  id = "showNicknames",
+  key = "showNicknames",
+  type = "toggle",
+  label = "Show nicknames",
+  keywords = { "alias", "display name", "social" },
+  default = false,
+})
+```
+
+## [Registration Order Example][Top]
+
+```lua
+local app = Config:RegisterAddOn(addonName, {
+  title = "My Addon",
+  settingsTitle = "My Addon Settings",
+  addonFolder = addonName,
+  assetRoot = "Interface\\AddOns\\MyAddon\\libs\\LibSettingsDesigner\\Assets\\",
+  db = function() return MyAddonDB.profile end,
+})
+
+app:RegisterCategory({ id = "general", title = GENERAL or "General", order = 100 })
+
+app:RegisterPage({
+  id = "general.core",
+  category = "general",
+  title = "Core",
+  description = "Main addon behavior.",
+  order = 100,
+})
+
+app:RegisterGroup("general.core", {
+  id = "behavior",
+  title = "Behavior",
+  order = 100,
+})
+
+app:RegisterControl("general.core", {
+  id = "enabled",
+  key = "enabled",
+  groupID = "behavior",
+  type = "toggle",
+  label = ENABLE or "Enable",
+  default = true,
+})
+```
+
+[//]: # (Links)
+[Top]: #Top

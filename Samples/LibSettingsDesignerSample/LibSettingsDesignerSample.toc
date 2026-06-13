@@ -1,0 +1,10 @@
+## Interface: 120005
+## Title: LibSettingsDesigner Sample
+## Notes: Standalone sample addon for previewing LibSettingsDesigner settings in game.
+## Author: LibSettingsDesigner
+## Version: 1.0.0
+## SavedVariables: LibSettingsDesignerSampleDB
+
+libs\LibSettingsDesigner\LibSettingsDesigner.xml
+Core.lua
+Settings.lua
