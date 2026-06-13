@@ -36,10 +36,15 @@ Info pages render static/help content instead of settings controls. Use
 | :--- | :----- | :---------- |
 | `text` | `text` | Paragraph or bullet text. |
 | `command` | `commands`, `usage`, `desc`, `note` | Slash command display. |
-| `button` | `text`, `width`, `onClick` | Action button. |
+| `button` | `text`, `width`, `height`, `onClick`, `inline` | Action button. |
 | `expandable` | `id`, `title`, `rightText`, `entries` | Collapsible text/details section. |
 | `image` | `image` / `texture`, `width`, `height` | Static image. |
 | `spacer` | `height` | Vertical spacing. |
+
+Set `buttonLayout = "wrap"` on a content block to render consecutive buttons
+horizontally and wrap them onto the next row when they no longer fit. Optional
+block fields are `buttonWidth`, `buttonHeight`, `buttonGap`, and
+`buttonRowGap`. A single button can opt in with `inline = true`.
 
 ## [Expandable Entries][Top]
 
@@ -72,6 +77,8 @@ app:RegisterPage({
   content = {
     {
       title = "Slash Commands",
+      buttonLayout = "wrap",
+      buttonWidth = 180,
       entries = {
         { type = "text", text = "Use these commands in chat." },
         { type = "command", commands = { "/myaddon" }, desc = "Open settings." },
@@ -82,6 +89,13 @@ app:RegisterPage({
           width = 180,
           onClick = function()
             MyAddon.ShowCopyURLPopup()
+          end,
+        },
+        {
+          type = "button",
+          text = "Open Discord",
+          onClick = function()
+            MyAddon.OpenDiscord()
           end,
         },
       },

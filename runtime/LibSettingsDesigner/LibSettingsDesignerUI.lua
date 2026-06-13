@@ -5208,13 +5208,70 @@ function lib.GetInfoPageCommandText(entry)
 	return text
 end
 
+function lib.IsInfoPageWrappedButton(block, entry)
+	if type(entry) ~= "table" or (entry.type or "text") ~= "button" then
+		return false
+	end
+	if entry.inline == true or entry.wrap == true then
+		return true
+	end
+	local layout = type(block) == "table" and (block.buttonLayout or block.buttonsLayout or block.buttonFlow) or nil
+	layout = tostring(layout or ""):lower()
+	return layout == "wrap" or layout == "horizontal" or layout == "inline"
+end
+
+function lib.GetInfoPageButtonMetrics(block, entry)
+	local buttonWidth = tonumber(entry and entry.width) or tonumber(block and block.buttonWidth) or 180
+	local buttonHeight = tonumber(entry and entry.height) or tonumber(block and block.buttonHeight) or 28
+	local gap = tonumber(entry and entry.gap) or tonumber(block and block.buttonGap) or 10
+	local rowGap = tonumber(entry and entry.rowGap) or tonumber(block and block.buttonRowGap) or 10
+	return buttonWidth, buttonHeight, gap, rowGap
+end
+
+function lib.GetInfoPageWrappedButtonRunHeight(entries, startIndex, width, block)
+	local contentWidth = math.max(120, (tonumber(width) or 0) - 28)
+	local index = startIndex
+	local rows = 0
+	local currentWidth = 0
+	local rowHeight = 0
+	local totalHeight = 0
+	while index <= #entries and lib.IsInfoPageWrappedButton(block, entries[index]) do
+		local buttonWidth, buttonHeight, gap, rowGap = lib.GetInfoPageButtonMetrics(block, entries[index])
+		local nextWidth = currentWidth > 0 and (currentWidth + gap + buttonWidth) or buttonWidth
+		if currentWidth > 0 and nextWidth > contentWidth then
+			totalHeight = totalHeight + rowHeight + (rows > 0 and rowGap or 0)
+			rows = rows + 1
+			currentWidth = buttonWidth
+			rowHeight = buttonHeight
+		else
+			currentWidth = nextWidth
+			rowHeight = math.max(rowHeight, buttonHeight)
+		end
+		index = index + 1
+	end
+	if currentWidth > 0 then
+		totalHeight = totalHeight + rowHeight + (rows > 0 and select(4, lib.GetInfoPageButtonMetrics(block, entries[startIndex])) or 0)
+	end
+	return totalHeight + 12, index
+end
+
 function lib.GetInfoPageBlockHeight(block, width, state, path)
 	if type(block) ~= "table" then
 		return 0
 	end
 	local height = block.title and 42 or 16
-	for index, entry in ipairs(block.entries or block.blocks or {}) do
-		height = height + lib.GetInfoPageEntryHeight(entry, width, state, tostring(path or "block") .. "." .. tostring(index), 0)
+	local entries = block.entries or block.blocks or {}
+	local index = 1
+	while index <= #entries do
+		local entry = entries[index]
+		if lib.IsInfoPageWrappedButton(block, entry) then
+			local runHeight, nextIndex = lib.GetInfoPageWrappedButtonRunHeight(entries, index, width, block)
+			height = height + runHeight
+			index = nextIndex
+		else
+			height = height + lib.GetInfoPageEntryHeight(entry, width, state, tostring(path or "block") .. "." .. tostring(index), 0)
+			index = index + 1
+		end
 	end
 	return math.max(64, height + 12)
 end
@@ -5277,7 +5334,7 @@ function lib.GetInfoPageEntryHeight(entry, width, state, path, depth)
 		return tonumber(entry.height) or 10
 	end
 	if entryType == "button" then
-		return 40
+		return (tonumber(entry.height) or 28) + 12
 	end
 	if entryType == "command" then
 		return lib.EstimateTextHeight(lib.GetInfoPageCommandText(entry), width, 15, 24) + 8
@@ -5340,7 +5397,7 @@ function lib.RenderInfoPageEntry(state, section, entry, y, width, path, depth)
 		return y - (tonumber(entry.height) or 10)
 	end
 	if entryType == "button" then
-		local button = makeFlatButton(section, entry.text or entry.label or (_G.OKAY or "OK"), tonumber(entry.width) or 190, 28, entry.icon, entry.iconAtlas == true)
+		local button = makeFlatButton(section, entry.text or entry.label or (_G.OKAY or "OK"), tonumber(entry.width) or 190, tonumber(entry.height) or 28, entry.icon, entry.iconAtlas == true)
 		button:SetPoint("TOPLEFT", section, "TOPLEFT", x, y)
 		button:SetScript("OnClick", function()
 			if type(entry.onClick) == "function" then
@@ -5430,6 +5487,37 @@ function lib.RenderInfoPageEntry(state, section, entry, y, width, path, depth)
 	return y - textHeight - 8
 end
 
+function lib.RenderInfoPageWrappedButtonRun(state, section, entries, startIndex, y, width, block)
+	local contentWidth = math.max(120, (tonumber(width) or 0) - 28)
+	local x = 14
+	local currentX = 0
+	local rowHeight = 0
+	local index = startIndex
+	while index <= #entries and lib.IsInfoPageWrappedButton(block, entries[index]) do
+		local entry = entries[index]
+		local buttonWidth, buttonHeight, gap, entryRowGap = lib.GetInfoPageButtonMetrics(block, entry)
+		if currentX > 0 and currentX + gap + buttonWidth > contentWidth then
+			y = y - rowHeight - entryRowGap
+			currentX = 0
+			rowHeight = 0
+		end
+		local button = makeFlatButton(section, entry.text or entry.label or (_G.OKAY or "OK"), buttonWidth, buttonHeight, entry.icon, entry.iconAtlas == true)
+		button:SetPoint("TOPLEFT", section, "TOPLEFT", x + currentX, y)
+		button:SetScript("OnClick", function()
+			if type(entry.onClick) == "function" then
+				entry.onClick(entry, state.app)
+			end
+		end)
+		currentX = currentX > 0 and (currentX + gap + buttonWidth) or buttonWidth
+		rowHeight = math.max(rowHeight, buttonHeight)
+		index = index + 1
+	end
+	if currentX > 0 then
+		y = y - rowHeight - 12
+	end
+	return y, index
+end
+
 function lib.RenderInfoPageBlock(state, block)
 	if type(block) ~= "table" then
 		return nil
@@ -5453,8 +5541,16 @@ function lib.RenderInfoPageBlock(state, block)
 		y = y - 32
 	end
 
-	for index, entry in ipairs(block.entries or block.blocks or {}) do
-		y = lib.RenderInfoPageEntry(state, section, entry, y, sectionWidth, blockPath .. "." .. tostring(index), 0)
+	local entries = block.entries or block.blocks or {}
+	local index = 1
+	while index <= #entries do
+		local entry = entries[index]
+		if lib.IsInfoPageWrappedButton(block, entry) then
+			y, index = lib.RenderInfoPageWrappedButtonRun(state, section, entries, index, y, sectionWidth, block)
+		else
+			y = lib.RenderInfoPageEntry(state, section, entry, y, sectionWidth, blockPath .. "." .. tostring(index), 0)
+			index = index + 1
+		end
 	end
 	state.y = state.y - 12
 	return section

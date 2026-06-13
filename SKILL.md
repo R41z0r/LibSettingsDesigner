@@ -1148,6 +1148,8 @@ Typical blocks:
 content = {
   {
     title = "Commands",
+    buttonLayout = "wrap",
+    buttonWidth = 180,
     entries = {
       { type = "command", commands = { "/myaddon", "/myaddon config" }, desc = "Open settings." },
       { type = "button", text = "Open Website", onClick = function(entry, app) end },
@@ -1158,6 +1160,12 @@ content = {
   },
 }
 ```
+
+For horizontal button groups, set `buttonLayout = "wrap"` on the info block.
+Consecutive button entries then render left-to-right and automatically wrap when
+they exceed the available width. Optional block fields are `buttonWidth`,
+`buttonHeight`, `buttonGap`, and `buttonRowGap`. A single button can opt in with
+`inline = true`.
 
 Use `type = "expandable"` inside info-page `entries` for changelogs, FAQs, or
 release notes. Prefer stable `id` or `key` values so expansion state does not
@@ -1198,10 +1206,12 @@ app:RegisterPage({
   content = {
     {
       title = "Community and Support",
+      buttonLayout = "wrap",
+      buttonWidth = 180,
       entries = {
-        { type = "button", text = "Discord", width = 180, onClick = function() ShowSupportURL("Discord", "https://discord.gg/example") end },
-        { type = "button", text = "GitHub Issues", width = 180, onClick = function() ShowSupportURL("GitHub Issues", "https://github.com/example/MyAddon/issues") end },
-        { type = "button", text = "Ko-fi", width = 180, onClick = function() ShowSupportURL("Ko-fi", "https://ko-fi.com/example") end },
+        { type = "button", text = "Discord", onClick = function() ShowSupportURL("Discord", "https://discord.gg/example") end },
+        { type = "button", text = "GitHub Issues", onClick = function() ShowSupportURL("GitHub Issues", "https://github.com/example/MyAddon/issues") end },
+        { type = "button", text = "Ko-fi", onClick = function() ShowSupportURL("Ko-fi", "https://ko-fi.com/example") end },
         { type = "text", text = "Discord: https://discord.gg/example" },
       },
     },
