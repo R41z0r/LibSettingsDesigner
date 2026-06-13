@@ -85,6 +85,11 @@ Calling `RegisterAddOn` again with the same id should be treated as updating or
 reusing the same app registration. Keep registration deterministic and avoid
 registering the same page/control from multiple unrelated code paths.
 
+`density` controls the initial layout only. If the density button is visible,
+users can switch between compact and comfortable layouts. Provide `getDensity`
+and `setDensity` when that choice should persist in SavedVariables. Set
+`showDensityButton = false` for a fixed layout with no user-facing switch.
+
 ## [App Options][Top]
 
 | Field | Type | Purpose |
@@ -93,21 +98,28 @@ registering the same page/control from multiple unrelated code paths.
 | `settingsTitle` | string | Window title. |
 | `dashboardTitle` | string | Dashboard sidebar label. |
 | `icon` | string | Main addon icon texture. |
-| `addonFolder` | string | Folder name used for fallback asset paths. |
+| `addonFolder` / `folder` | string | Folder name used for fallback asset paths. |
 | `assetRoot` | string | Explicit path to vendored LibSettingsDesigner assets. |
 | `db` | function | Returns the table used for simple `control.key` reads/writes. |
-| `profile` | function | Optional profile table provider. |
 | `locale` | table | Host addon locale table. |
-| `density` | string/function | `"compact"` or `"comfortable"`. |
-| `showDensityButton` | boolean/function | Whether users can switch density. |
-| `getSize` / `setSize` | function | Persist settings window size. |
-| `getLocked` / `setLocked` | function | Persist whether the frame can be moved/resized. |
+| `density` | string/function | Initial density, `"compact"` or `"comfortable"`. |
+| `getDensity(app)` / `setDensity(density, app)` | function | Read/write the user's selected density. |
+| `showDensityButton` / `showDensityButton(app)` | boolean/function | Whether users can switch density; only `false` hides the button. |
+| `getSize()` / `setSize(width, height)` | function | Persist settings window size. |
+| `getLocked()` / `setLocked(locked)` | function | Persist whether the frame can be moved/resized. |
 | `dashboard` | table/function | Dashboard hero, cards, status, features, new entries. |
-| `version` | function/string | Version text for status displays. |
 | `isNewTag` | function | Returns whether a tag should show a new badge. |
 | `iconTextures` | table | Map `iconKey` to texture path. |
 | `categoryIconTextures` | table | Map category ids/keys to texture path. |
+| `pageDescriptionKeys` / `pageDescriptionLocaleKeys` | table | Map page ids/keys to locale keys for page descriptions. |
 | `openLegacySettings` | function | Called by controls that should jump to legacy/Blizzard settings. |
+| `blizzardSettingsRoot` | boolean | `true` registers a lightweight Blizzard Settings bridge category. |
+| `blizzardSettingsTitle` | string | Title used for the Blizzard Settings bridge category. |
+| `openSettings(app)` | function | Called by the Blizzard Settings bridge button. |
+
+`profile` and `version` are host-owned metadata in the current runtime. Do not
+expect automatic profile/status/version rendering from these fields unless host
+addon code or a custom dashboard function explicitly reads them.
 
 ## [Registration Methods][Top]
 
@@ -146,7 +158,12 @@ app:RegisterPage({
 
 Required: `id`, `category`, `title`.
 
-Use `layout = "info"` and `content` for help/static pages.
+Pages may provide `onOpen = function(page, app, state)` for host-addon side
+effects such as marking a `newTagID` as seen. Keep the callback lightweight and
+avoid rebuilding the settings frame from it.
+
+Use `layout = "info"` or `type = "info"` and table-based `content`, `blocks`,
+or `infoBlocks` for help/static pages.
 
 ### `app:RegisterGroup(pageID, data)`
 
@@ -267,8 +284,6 @@ ConfigUI:Open(app, "interface.action-bars", "actionBarMouseover")
 | `GetControlValue(control)` | Reads a control value using documented resolution order. |
 | `SetControlValue(control, value)` | Writes a control value using documented resolution order. |
 | `GetControlDefault(control)` | Resolves a control default. |
-| `ResetControl(control)` | Resets one control to default. |
-| `ResetPage(pageOrID)` | Resets controls on one page. |
 | `IsControlCustomized(control)` | Returns whether the current value differs from default. |
 
 Default resolution order:
@@ -288,9 +303,13 @@ Value read order:
 Value write order:
 
 1. `control.setting:SetValue(value)`
-2. `control.setSelection(selection)` for MultiDropdown map writes
-3. `control.setValue(value)`
+2. `control.setSelection(value, control)` or `control.setSelection(value)`
+3. `control.setValue(value)` or `control.setValue(nil, value)`
 4. `opts.db()[control.key] = value`
+
+There is no public `app:ResetControl` or `app:ResetPage` runtime API. The UI
+Defaults button resets the current page internally by resolving each visible
+control default and calling `app:SetControlValue(control, default)`.
 
 Use explicit getter/setter fields for nested DB values:
 
@@ -342,11 +361,13 @@ end
 
 | Method | Purpose |
 | :----- | :------ |
-| `Search(query)` | Returns matching pages and controls. |
+| `GetSearchResults(query, limit)` | Returns matching controls. |
 | `GetStats()` | Returns counts for dashboard/status UI. |
 
-Search uses labels, ids, keys, descriptions, page/group/category text, notes, and
-explicit `keywords`/`searchtags`.
+Search returns controls. It uses control labels, ids, keys, descriptions,
+owning page/group/category titles, control notes, and explicit
+`control.keywords or control.searchtags`. Page `keywords` and `searchtags` are
+not indexed by the current runtime.
 
 Example:
 

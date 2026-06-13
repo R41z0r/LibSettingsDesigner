@@ -25,7 +25,7 @@ local DEFAULT_PROFILE = {
 		{ id = "reload", label = "Reload UI", icon = 136243, formatKey = "macro" },
 		{ id = "help", label = "Open Help", icon = 134227, formatKey = "slash" },
 	},
-	settingsWindow = { width = 1080, height = 700, locked = false },
+	settingsWindow = { width = 1080, height = 700, locked = false, density = "compact" },
 }
 
 local function copyDefaults(source, target)

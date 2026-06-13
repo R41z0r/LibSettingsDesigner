@@ -44,6 +44,33 @@ repository root:
 lua -e 'assert(loadfile("runtime/LibSettingsDesigner/LibSettingsDesignerConfig.lua")); assert(loadfile("runtime/LibSettingsDesigner/LibSettingsDesignerUI.lua"))'
 ```
 
+When runtime code adds or changes `L["..."]` strings, verify every key exists
+in every built-in locale:
+
+```bash
+python3 - <<'PY'
+from pathlib import Path
+import re
+texts = '\n'.join(p.read_text() for p in Path('runtime/LibSettingsDesigner').glob('*.lua'))
+used = set(re.findall(r'L\["([^"]+)"\]', texts))
+ui = Path('runtime/LibSettingsDesigner/LibSettingsDesignerUI.lua').read_text()
+failed = False
+locales = re.findall(r'\n\t([a-z][a-z][A-Z][A-Z]) = \{', ui)
+for locale in locales:
+    start = ui.index(f'\n\t{locale} = {{')
+    match = re.search(r'\n\t[a-z][a-z][A-Z][A-Z] = \{|\n}\n', ui[start + 1:])
+    end = start + 1 + match.start() if match else len(ui)
+    keys = set(re.findall(r'\n\t\t([A-Za-z0-9_]+) = ', ui[start:end]))
+    missing = sorted(used - keys)
+    if missing:
+        failed = True
+        print(f'{locale} missing: {", ".join(missing)}')
+if failed:
+    raise SystemExit(1)
+print(f'ok locales={len(locales)} keys={len(used)}')
+PY
+```
+
 When validating a host addon that vendors the library, run the same check
 against that addon's local copy:
 

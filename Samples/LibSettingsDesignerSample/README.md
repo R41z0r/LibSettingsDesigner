@@ -20,4 +20,5 @@ notes, generated enabled-feature and new-in-version panels, categories, pages,
 groups, notes, info pages, toggles, sliders, dropdowns, multi-dropdowns,
 checkbox-dropdowns, sound preview dropdowns, input rows, color pickers, color
 override swatches, reorder lists, action buttons, search, new badges,
-customized counters, density switching, and window size/lock persistence.
+customized counters, compact and comfortable density switching, optional
+density-button behavior, and window size/lock persistence.
