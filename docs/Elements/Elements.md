@@ -50,6 +50,7 @@ For all shared fields and aliases, see [Field Glossary](../Field-Glossary.md).
 | [Notes](Notes.md) | Hover notes, rich notes, text, images, and spacers. |
 | [Dashboard](Dashboard.md) | Landing dashboard configuration. |
 | [InfoPage](InfoPage.md) | Static/help pages with text, commands, buttons, and spacers. |
+| [Expandable](Expandable.md) | Collapsible info-page sections for changelogs, FAQs, and release notes. |
 
 ## [Choosing the Right Element][Top]
 
@@ -68,6 +69,7 @@ For all shared fields and aliases, see [Field Glossary](../Field-Glossary.md).
 | Let users reorder entries | [ReorderList](ReorderList.md) |
 | Add long explanatory hover help | [Notes](Notes.md) |
 | Create a non-settings help page | [InfoPage](InfoPage.md) |
+| Add collapsible changelog text | [Expandable](Expandable.md) |
 | Create a landing overview | [Dashboard](Dashboard.md) |
 
 ## [Common Control Fields][Top]

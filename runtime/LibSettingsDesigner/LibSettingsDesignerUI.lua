@@ -4949,26 +4949,226 @@ function lib.GetInfoPageCommandText(entry)
 	return text
 end
 
-function lib.GetInfoPageBlockHeight(block, width)
+function lib.GetInfoPageBlockHeight(block, width, state, path)
 	if type(block) ~= "table" then
 		return 0
 	end
 	local height = block.title and 42 or 16
-	for _, entry in ipairs(block.entries or block.blocks or {}) do
-		local entryType = entry.type or "text"
-		if entryType == "spacer" then
-			height = height + (tonumber(entry.height) or 10)
-		elseif entryType == "button" then
-			height = height + 40
-		elseif entryType == "command" then
-			height = height + lib.EstimateTextHeight(lib.GetInfoPageCommandText(entry), width, 15, 24) + 8
-		elseif entryType == "image" or entry.image or entry.texture then
-			height = height + (tonumber(entry.height) or 180) + 10
-		else
-			height = height + lib.EstimateTextHeight(entry.text or entry.desc or "", width, 15, 22) + 8
-		end
+	for index, entry in ipairs(block.entries or block.blocks or {}) do
+		height = height + lib.GetInfoPageEntryHeight(entry, width, state, tostring(path or "block") .. "." .. tostring(index), 0)
 	end
 	return math.max(64, height + 12)
+end
+
+function lib.GetInfoPageExpandableKey(entry, path)
+	if type(entry) ~= "table" then
+		return tostring(path or "entry")
+	end
+	return tostring(entry.id or entry.key or entry.tag or entry.title or entry.label or path or "entry")
+end
+
+function lib.IsInfoPageEntryExpanded(state, entry, path)
+	if type(entry) ~= "table" then
+		return false
+	end
+	local key = lib.GetInfoPageExpandableKey(entry, path)
+	local store = state and state.expandedInfoEntries
+	if store and store[key] ~= nil then
+		return store[key] == true
+	end
+	if entry.collapsed == true then
+		return false
+	end
+	return entry.expanded == true or entry.defaultExpanded == true
+end
+
+function lib.GetInfoPageExpandableTitle(entry)
+	if type(entry) ~= "table" then
+		return ""
+	end
+	return entry.title or entry.label or entry.text or ""
+end
+
+function lib.GetInfoPageExpandableBody(entry)
+	if type(entry) ~= "table" then
+		return nil
+	end
+	if entry.body ~= nil then
+		return entry.body
+	end
+	if entry.desc ~= nil then
+		return entry.desc
+	end
+	if (entry.title or entry.label) and entry.text ~= nil then
+		return entry.text
+	end
+	return nil
+end
+
+function lib.GetInfoPageEntryHeight(entry, width, state, path, depth)
+	depth = tonumber(depth) or 0
+	if type(entry) == "string" then
+		return lib.EstimateTextHeight(entry, width, 15, 22) + 8
+	end
+	if type(entry) ~= "table" then
+		return 0
+	end
+	local entryType = entry.type or "text"
+	if entryType == "spacer" then
+		return tonumber(entry.height) or 10
+	end
+	if entryType == "button" then
+		return 40
+	end
+	if entryType == "command" then
+		return lib.EstimateTextHeight(lib.GetInfoPageCommandText(entry), width, 15, 24) + 8
+	end
+	if entryType == "image" or entry.image or entry.texture then
+		return (tonumber(entry.height) or 180) + 10
+	end
+	if entryType == "expandable" or entryType == "collapsible" or entryType == "collapse" then
+		local height = tonumber(entry.headerHeight) or 34
+		if lib.IsInfoPageEntryExpanded(state, entry, path) then
+			local childWidth = math.max(120, width - 24)
+			local text = lib.GetInfoPageExpandableBody(entry)
+			if text and text ~= "" then
+				height = height + lib.EstimateTextHeight(text, childWidth, 15, 22) + 8
+			end
+			for index, child in ipairs(entry.entries or entry.blocks or {}) do
+				height = height + lib.GetInfoPageEntryHeight(child, childWidth, state, tostring(path or "entry") .. "." .. tostring(index), depth + 1)
+			end
+			height = height + 4
+		end
+		return height + 4
+	end
+	return lib.EstimateTextHeight(entry.text or entry.desc or entry.title or "", width, 15, 22) + 8
+end
+
+function lib.ToggleInfoPageEntry(state, entry, path)
+	if not state or type(entry) ~= "table" then
+		return
+	end
+	state.expandedInfoEntries = state.expandedInfoEntries or {}
+	local key = lib.GetInfoPageExpandableKey(entry, path)
+	state.expandedInfoEntries[key] = not lib.IsInfoPageEntryExpanded(state, entry, path)
+	if state.SaveCurrentContentScroll then
+		state:SaveCurrentContentScroll()
+	end
+	if state.GetContentScrollKey then
+		state.restoreContentScrollKey = state:GetContentScrollKey()
+		state.resetContentScroll = true
+	end
+	state:RenderContent()
+end
+
+function lib.RenderInfoPageEntry(state, section, entry, y, width, path, depth)
+	depth = tonumber(depth) or 0
+	local x = 14 + (depth * 18)
+	local entryWidth = math.max(120, width - (depth * 18))
+	if type(entry) == "string" then
+		local textHeight = lib.EstimateTextHeight(entry, entryWidth, 15, 22)
+		local text = createText(section, FONT_TEXT, entry, TEXT.muted)
+		text:SetPoint("TOPLEFT", section, "TOPLEFT", x, y)
+		text:SetPoint("RIGHT", section, "RIGHT", -14, 0)
+		text:SetHeight(textHeight)
+		return y - textHeight - 8
+	end
+	if type(entry) ~= "table" then
+		return y
+	end
+	local entryType = entry.type or "text"
+	if entryType == "spacer" then
+		return y - (tonumber(entry.height) or 10)
+	end
+	if entryType == "button" then
+		local button = makeFlatButton(section, entry.text or entry.label or (_G.OKAY or "OK"), tonumber(entry.width) or 190, 28, entry.icon, entry.iconAtlas == true)
+		button:SetPoint("TOPLEFT", section, "TOPLEFT", x, y)
+		button:SetScript("OnClick", function()
+			if type(entry.onClick) == "function" then
+				entry.onClick(entry, state.app)
+			end
+		end)
+		return y - 40
+	end
+	if entryType == "command" then
+		local text = lib.GetInfoPageCommandText(entry)
+		local textHeight = lib.EstimateTextHeight(text, entryWidth - 12, 15, 24)
+		local line = createText(section, FONT_TEXT, text, TEXT.main)
+		line:SetPoint("TOPLEFT", section, "TOPLEFT", x + 12, y)
+		line:SetPoint("RIGHT", section, "RIGHT", -14, 0)
+		line:SetHeight(textHeight)
+		return y - textHeight - 8
+	end
+	if entryType == "image" or entry.image or entry.texture then
+		local imageWidth = math.min(entryWidth, tonumber(entry.width) or entryWidth)
+		local imageHeight = tonumber(entry.height) or math.floor(imageWidth * 0.56)
+		local image = section:CreateTexture(nil, "ARTWORK")
+		image:SetTexture(entry.image or entry.texture)
+		image:SetPoint("TOPLEFT", section, "TOPLEFT", x, y)
+		image:SetSize(imageWidth, imageHeight)
+		return y - imageHeight - 10
+	end
+	if entryType == "expandable" or entryType == "collapsible" or entryType == "collapse" then
+		local expanded = lib.IsInfoPageEntryExpanded(state, entry, path)
+		local headerHeight = tonumber(entry.headerHeight) or 34
+		local header = CreateFrame("Button", nil, section, "BackdropTemplate")
+		header:SetPoint("TOPLEFT", section, "TOPLEFT", x, y)
+		header:SetPoint("RIGHT", section, "RIGHT", -14, 0)
+		header:SetHeight(headerHeight)
+		applyBackdrop(header, entry.headerBg or DETAIL_COLORS.sectionHeaderBg, { 0, 0, 0, 0 })
+		header.Chevron = createCollapseArrow(header, state.app, 12, not expanded)
+		header.Chevron:SetPoint("LEFT", header, "LEFT", 10, 0)
+		header.Text = header:CreateFontString(nil, "OVERLAY", FONT_HEADER)
+		header.Text:SetPoint("LEFT", header.Chevron, "RIGHT", 10, 0)
+		local rightInset = (entry.rightText or entry.date) and -160 or -14
+		header.Text:SetPoint("RIGHT", header, "RIGHT", rightInset, 0)
+		header.Text:SetJustifyH("LEFT")
+		header.Text:SetText(lib.GetInfoPageExpandableTitle(entry))
+		setTextColor(header.Text, entry.titleColor or TEXT.gold)
+		local rightTextValue = entry.rightText or entry.date
+		if rightTextValue then
+			header.RightText = header:CreateFontString(nil, "OVERLAY", FONT_TEXT)
+			header.RightText:SetPoint("RIGHT", header, "RIGHT", -12, 0)
+			header.RightText:SetWidth(140)
+			header.RightText:SetJustifyH("RIGHT")
+			header.RightText:SetText(tostring(rightTextValue))
+			setTextColor(header.RightText, entry.rightColor or TEXT.gold)
+		end
+		header:SetScript("OnEnter", function(button)
+			setFrameBackdrop(button, { 0.16, 0.12, 0.065, 0.58 }, { 0, 0, 0, 0 })
+		end)
+		header:SetScript("OnLeave", function(button)
+			setFrameBackdrop(button, entry.headerBg or DETAIL_COLORS.sectionHeaderBg, { 0, 0, 0, 0 })
+		end)
+		header:SetScript("OnClick", function()
+			lib.ToggleInfoPageEntry(state, entry, path)
+		end)
+		y = y - headerHeight - 4
+		if expanded then
+			local childWidth = math.max(120, entryWidth - 24)
+			local body = lib.GetInfoPageExpandableBody(entry)
+			if body and body ~= "" then
+				local textHeight = lib.EstimateTextHeight(body, childWidth, 15, 22)
+				local text = createText(section, entry.font or FONT_TEXT, body, entry.color or TEXT.muted)
+				text:SetPoint("TOPLEFT", section, "TOPLEFT", x + 24, y)
+				text:SetPoint("RIGHT", section, "RIGHT", -14, 0)
+				text:SetHeight(textHeight)
+				y = y - textHeight - 8
+			end
+			for index, child in ipairs(entry.entries or entry.blocks or {}) do
+				y = lib.RenderInfoPageEntry(state, section, child, y, childWidth, tostring(path or "entry") .. "." .. tostring(index), depth + 1)
+			end
+			y = y - 4
+		end
+		return y
+	end
+	local textValue = entry.text or entry.desc or entry.title or ""
+	local text = createText(section, entry.font or FONT_TEXT, textValue, entry.color or TEXT.muted)
+	local textHeight = lib.EstimateTextHeight(textValue, entryWidth, 15, 22)
+	text:SetPoint("TOPLEFT", section, "TOPLEFT", x, y)
+	text:SetPoint("RIGHT", section, "RIGHT", -14, 0)
+	text:SetHeight(textHeight)
+	return y - textHeight - 8
 end
 
 function lib.RenderInfoPageBlock(state, block)
@@ -4977,7 +5177,10 @@ function lib.RenderInfoPageBlock(state, block)
 	end
 	local width = state.pageSectionWidth or state.pageLeftWidth or 420
 	local sectionWidth = math.max(240, width - 28)
-	local height = lib.GetInfoPageBlockHeight(block, sectionWidth)
+	local blockIndex = state.infoPageBlockIndex or 0
+	state.infoPageBlockIndex = blockIndex + 1
+	local blockPath = tostring(state.selectedPageID or "page") .. "." .. tostring(state.infoPageBlockIndex)
+	local height = lib.GetInfoPageBlockHeight(block, sectionWidth, state, blockPath)
 	local section = createPageLeftFrame(state, height)
 	applyBackdrop(section, DETAIL_SECTION_BG, DETAIL_COLORS.sectionBorder)
 	createPixelBorder(section, DETAIL_COLORS.sectionBorder)
@@ -4991,43 +5194,8 @@ function lib.RenderInfoPageBlock(state, block)
 		y = y - 32
 	end
 
-	for _, entry in ipairs(block.entries or block.blocks or {}) do
-		local entryType = entry.type or "text"
-		if entryType == "spacer" then
-			y = y - (tonumber(entry.height) or 10)
-		elseif entryType == "button" then
-			local button = makeFlatButton(section, entry.text or entry.label or (_G.OKAY or "OK"), tonumber(entry.width) or 190, 28, entry.icon, entry.iconAtlas == true)
-			button:SetPoint("TOPLEFT", section, "TOPLEFT", 14, y)
-			button:SetScript("OnClick", function()
-				if type(entry.onClick) == "function" then
-					entry.onClick(entry, state.app)
-				end
-			end)
-			y = y - 40
-		elseif entryType == "command" then
-			local text = lib.GetInfoPageCommandText(entry)
-			local textHeight = lib.EstimateTextHeight(text, sectionWidth - 12, 15, 24)
-			local line = createText(section, FONT_TEXT, text, TEXT.main)
-			line:SetPoint("TOPLEFT", section, "TOPLEFT", 26, y)
-			line:SetPoint("RIGHT", section, "RIGHT", -14, 0)
-			line:SetHeight(textHeight)
-			y = y - textHeight - 8
-		elseif entryType == "image" or entry.image or entry.texture then
-			local imageWidth = math.min(sectionWidth, tonumber(entry.width) or sectionWidth)
-			local imageHeight = tonumber(entry.height) or math.floor(imageWidth * 0.56)
-			local image = section:CreateTexture(nil, "ARTWORK")
-			image:SetTexture(entry.image or entry.texture)
-			image:SetPoint("TOPLEFT", section, "TOPLEFT", 14, y)
-			image:SetSize(imageWidth, imageHeight)
-			y = y - imageHeight - 10
-		else
-			local text = createText(section, entry.font or FONT_TEXT, entry.text or entry.desc or "", entry.color or TEXT.muted)
-			local textHeight = lib.EstimateTextHeight(entry.text or entry.desc or "", sectionWidth, 15, 22)
-			text:SetPoint("TOPLEFT", section, "TOPLEFT", 14, y)
-			text:SetPoint("RIGHT", section, "RIGHT", -14, 0)
-			text:SetHeight(textHeight)
-			y = y - textHeight - 8
-		end
+	for index, entry in ipairs(block.entries or block.blocks or {}) do
+		y = lib.RenderInfoPageEntry(state, section, entry, y, sectionWidth, blockPath .. "." .. tostring(index), 0)
 	end
 	state.y = state.y - 12
 	return section
@@ -5061,6 +5229,7 @@ function lib.RenderInfoPage(state, page, pagePath)
 		emptyText:SetPoint("TOPLEFT", empty, "TOPLEFT", 14, -14)
 		emptyText:SetPoint("BOTTOMRIGHT", empty, "BOTTOMRIGHT", -14, 14)
 	else
+		state.infoPageBlockIndex = 0
 		for _, block in ipairs(blocks) do
 			lib.RenderInfoPageBlock(state, block)
 		end
@@ -5556,6 +5725,7 @@ local function initializeState(frame, app)
 		sidebarFrames = {},
 		sidebarRows = {},
 		collapsedGroups = {},
+		expandedInfoEntries = {},
 		scrollPositions = {},
 		contentWidth = CONTENT_WIDTH,
 		view = "dashboard",

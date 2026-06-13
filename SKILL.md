@@ -400,7 +400,7 @@ Canonical direct fields:
 | Category | `id`, `title`, `description`, `order`, `icon`, `iconAtlas`, `iconKey` |
 | Page | `id`, `category`, `title`, `description`, `descriptionKey`, `order`, `icon`, `iconAtlas`, `iconKey`, `mainToggleID`, `pageKey`, `newTagID`, `onOpen`, `layout`, `type`, `content`, `blocks`, `infoBlocks` |
 | Group | `id`, `title`, `order` |
-| Control | `id`, `key`, `type`, `sType`, `label`, `description`, `default`, `dbDefault`, `getValue`, `setValue`, `getSelection`, `setSelection`, `setting`, `parentCheck`, `isEnabled`, visibility fields, search fields |
+| Control | `id`, `key`, `type`, `label`, `description`, `default`, `dbDefault`, `getValue`, `setValue`, `getSelection`, `setSelection`, `setting`, `parentCheck`, `isEnabled`, visibility fields, search fields |
 
 Legacy aliases are mapped by `RegisterLegacyCategory`,
 `RegisterLegacySection`, and `RegisterLegacyControl`, not by plain direct
@@ -413,10 +413,22 @@ controls:
 | `desc` | `description` |
 | `get` | `getValue` |
 | `set` | `setValue` |
+| `modernGroup` | `groupID` |
 | `sType` | `type` or UI type alias |
 
 Important: in direct `RegisterControl`, `var` may become the generated control
 id, but it does not become `key`. DB-backed controls must set `key`.
+In direct `RegisterControl`, use `groupID`. `modernGroup` is only normalized by
+`RegisterLegacyControl` / wrapper bridge code.
+`sType` is accepted by legacy/UI type resolution, but new direct registrations
+should always set `type`. Some Config-side logic checks `control.type` directly.
+
+Migration rule: when creating new settings code or substantially touching an
+existing direct LibSettingsDesigner registration, migrate it to canonical direct
+fields instead of preserving legacy aliases. Keep legacy aliases only at wrapper
+boundaries or inside `RegisterLegacy*` bridge code. Do not mass-migrate
+unrelated host-addon settings in the same change; migrate incrementally where
+the touched code can be validated.
 
 ## Category and Page Fields
 
@@ -460,14 +472,14 @@ Common fields:
 | :---- | :-- |
 | `id` | Stable control identity. |
 | `key` | Direct DB key under `opts.db()`. |
-| `type` / `sType` | Widget type. |
+| `type` | Canonical widget type. |
 | `label` | Display label. |
 | `description` | Short description. |
 | `default` / `dbDefault` | Reset/customized default. |
 | `getValue` | Explicit reader. |
 | `setValue` | Explicit writer. |
 | `setting` | Existing settings object with `GetValue`/`SetValue`/default methods. |
-| `groupID` / `modernGroup` | Group assignment. |
+| `groupID` | Direct group assignment. |
 | `isEnabled` / `parentCheck` | Disabled-state gates. |
 | `visible` / `isVisible` / `visibleWhen` | Visibility show gates. |
 | `hidden` / `hiddenWhen` | Visibility hide gates. |
@@ -688,6 +700,7 @@ Read the specific element page before changing examples or behavior:
 | Hover help/rich notes | `docs/Elements/Notes.md` |
 | Dashboard content | `docs/Elements/Dashboard.md` |
 | Static help pages | `docs/Elements/InfoPage.md` |
+| Collapsible info text/changelogs | `docs/Elements/Expandable.md` |
 
 ## Element Patterns
 
@@ -773,6 +786,22 @@ app:RegisterPage({
     },
   },
 })
+```
+
+Expandable changelog entry:
+
+```lua
+{
+  type = "expandable",
+  id = "version-1.1.0",
+  title = "Version 1.1.0",
+  rightText = "2026-06-13",
+  defaultExpanded = true,
+  entries = {
+    { type = "text", text = "|cffffd100Added|r" },
+    { type = "text", text = "- Collapsible changelog sections." },
+  },
+}
 ```
 
 ## Dropdown and MultiDropdown Rules
@@ -979,7 +1008,8 @@ dashboard = {
     },
   },
 
-  -- Set status = true for default status tiles, or provide a table.
+  -- Provide status.tiles as a table or function if a status panel should render.
+  -- status = true alone does not create default tiles in the current runtime.
   status = {
     title = "Status",
     tiles = {
@@ -1016,11 +1046,14 @@ dashboard = {
 
 ## Info Pages
 
-Info pages render when `page.layout == "info"`, `page.type == "info"`, or the
-page has `content`, `blocks`, or `infoBlocks`.
+Info pages render when `page.layout == "info"`, `page.type == "info"`,
+`page.content`, or `page.infoBlocks` is set.
 
 Current runtime expects `content`, `blocks`, or `infoBlocks` to be a table, not
 a provider function.
+`page.blocks` is consumed by the info renderer, but `blocks` alone does not
+currently select info-page rendering. Use `layout = "info"` or `type = "info"`
+when using `blocks`.
 
 Typical blocks:
 
@@ -1038,6 +1071,12 @@ content = {
   },
 }
 ```
+
+Use `type = "expandable"` inside info-page `entries` for changelogs, FAQs, or
+release notes. Prefer stable `id` or `key` values so expansion state does not
+change when titles or ordering change. Supported fields include `title`,
+`rightText` or `date`, `text` or `body`, nested `entries` or `blocks`,
+`defaultExpanded`, `expanded`, and `collapsed`.
 
 ## Wrapper Bridge Pattern
 

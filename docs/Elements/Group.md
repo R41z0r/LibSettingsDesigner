@@ -9,8 +9,9 @@
 
 ## [Overview][Top]
 
-A group organizes controls inside a page. Controls join a group through
-`groupID` or `modernGroup`.
+A group organizes controls inside a page. Direct controls join a group through
+`groupID`. `modernGroup` is a wrapper/legacy alias and must be mapped before or
+through `RegisterLegacyControl`.
 
 ## [Fields][Top]
 
@@ -41,4 +42,3 @@ app:RegisterControl("interface.action-bars", {
 
 [//]: # (Links)
 [Top]: #Top
-

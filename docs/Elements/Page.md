@@ -25,7 +25,8 @@ inside a category.
 | `mainToggleID` | string | Control id used as main feature toggle. |
 | `newTagID` | string | New badge tag. |
 | `layout` | string | Use `"info"` for static content pages. |
-| `content` | table/function | Info page content. |
+| `content` | table | Info page content. |
+| `blocks` / `infoBlocks` | table | Alternate info content tables. `blocks` alone does not select info-page rendering. |
 | `visible`, `isVisible`, `visibleWhen` | boolean/function | Show gates. |
 | `hidden`, `hiddenWhen` | boolean/function | Hide gates. |
 | `order` | number | Sort order. |
@@ -65,4 +66,3 @@ app:RegisterPage({
 
 [//]: # (Links)
 [Top]: #Top
-

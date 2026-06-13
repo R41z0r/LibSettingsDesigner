@@ -119,7 +119,8 @@ app:RegisterPage(data)
 | `onOpen` | function | Called as `onOpen(page, app, state)` when the page opens. |
 | `order` | number | Sort order. |
 | `layout` | string | Use `"info"` for static/help pages. |
-| `content` | table/function | Info page content blocks. |
+| `content` | table | Info page content blocks. |
+| `blocks` / `infoBlocks` | table | Alternate info content tables. `blocks` alone does not select info-page rendering. |
 | `visible`, `isVisible`, `visibleWhen` | boolean/function | Show gates. |
 | `hidden`, `hiddenWhen` | boolean/function | Hide gates. |
 
@@ -137,7 +138,8 @@ app:RegisterGroup(pageID, data)
 | `title` | string | Group heading. |
 | `order` | number | Sort order. |
 
-Controls can join a group with `groupID` or `modernGroup`.
+Direct controls join a group with `groupID`. `modernGroup` is a wrapper/legacy
+alias and must be mapped before or through `RegisterLegacyControl`.
 
 ## [Common Control Fields][Top]
 
@@ -149,12 +151,12 @@ app:RegisterControl(pageID, data)
 
 | Field | Type | Meaning |
 | :---- | :--- | :------ |
-| `id` | string | Stable control id. Defaults to `key`/`var` when omitted. |
+| `id` | string | Stable control id. Defaults to `key` when omitted. |
 | `type` | string | Widget type, such as `toggle`, `slider`, `dropdown`. |
 | `key` | string | DB key for simple `opts.db()` persistence. |
 | `label` | string | User-visible row label. |
 | `description` | string | Short row description. |
-| `groupID` / `modernGroup` | string | Group assignment. |
+| `groupID` | string | Direct group assignment. |
 | `order` | number | Sort order within page/group. |
 | `default` | any/function | Default value used by reset/customized checks. |
 | `dbDefault` | any/function | Alternate DB default provider. |
@@ -249,19 +251,23 @@ app:RegisterControl("interface.names", {
 | MultiDropdown | `getSelection`, `setSelection`, `isSelectedFunc`, `setSelectedFunc` | [MultiDropdown](Elements/MultiDropdown.md) |
 | Input | `numeric`, `min`, `max`, `maxChars`, `multiline`, `readOnly` | [Input](Elements/Input.md) |
 | Button | `buttonText`, `onClick`, `setValue` | [Button](Elements/Button.md) |
-| ColorPicker | `hasOpacity`, `colorizeLabel`, `callback` | [ColorPicker](Elements/ColorPicker.md) |
-| ColorOverrides | `entries`, `getColor`, `setColor`, `getDefaultColor` | [ColorOverrides](Elements/ColorOverrides.md) |
+| ColorPicker | `getColor`, `setColor`, `hasOpacity` | [ColorPicker](Elements/ColorPicker.md) |
+| ColorOverrides | `entries`, `getColor`, `setColor`, `hasOpacity`, `colorizeLabel` | [ColorOverrides](Elements/ColorOverrides.md) |
 | SoundDropdown | `soundResolver`, `previewSoundFunc`, `playbackChannel` | [SoundDropdown](Elements/SoundDropdown.md) |
 | CheckboxDropdown | `dropdownKey`, `dropdownList`, `dropdownOrder`, `dropdownDefault` | [CheckboxDropdown](Elements/CheckboxDropdown.md) |
 | ReorderList | `getEntries`, `moveEntry`, `removeEntry`, `setEntryFormat` | [ReorderList](Elements/ReorderList.md) |
 | Notes | `note`, `notes`, `richNote`, `richNotes`, `blocks` | [Notes](Elements/Notes.md) |
 | Dashboard | `hero`, `cards`, `status`, `features`, `newEntries` | [Dashboard](Elements/Dashboard.md) |
 | InfoPage | `layout = "info"`, `content`, `entries` | [InfoPage](Elements/InfoPage.md) |
+| Expandable | `type = "expandable"`, `id`, `title`, `rightText`, `entries` | [Expandable](Elements/Expandable.md) |
 
 ## [Alias Rules][Top]
 
 Aliases exist to support wrapper bridges and older settings helper names.
-Prefer the canonical field in new direct LibSettingsDesigner examples.
+Prefer the canonical field in new direct LibSettingsDesigner examples. Legacy
+aliases such as `var`, `text`, `desc`, `get`, `set`, and `modernGroup` are safe
+when a wrapper or `RegisterLegacyControl` maps them first; do not assume every
+alias is consumed by plain direct registration.
 
 | Prefer | Accepted aliases |
 | :----- | :--------------- |

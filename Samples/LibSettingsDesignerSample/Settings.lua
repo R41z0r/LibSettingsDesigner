@@ -523,19 +523,44 @@ app:RegisterPage({
 	order = 90,
 	content = {
 		{
-			title = "1.0.0",
+			title = "Expandable Changelog",
 			entries = {
-				{ type = "text", text = "Added dashboard cards for direct navigation." },
-				{ type = "text", text = "Added clickable status tiles for customized counts, new settings, version notes, and shortcut count." },
-				{ type = "text", text = "Added generated enabled-feature and new-in-version panels." },
-			},
-		},
-		{
-			title = "Dashboard Click Targets",
-			entries = {
-				{ type = "text", text = "Version opens this page." },
-				{ type = "text", text = "New applies a tag:new search query." },
-				{ type = "text", text = "Shortcuts opens the editable shortcut list page." },
+				{
+					type = "expandable",
+					id = "sample-1.1.0",
+					title = "Version 1.1.0",
+					rightText = "2026-06-13",
+					defaultExpanded = true,
+					entries = {
+						{ type = "text", text = "|cffffd100Added|r" },
+						{ type = "text", text = "- Expandable info-page entries for changelogs, FAQs, and release notes." },
+						{ type = "text", text = "- Version rows can show a right-aligned date or badge." },
+						{ type = "text", text = "|cffffd100Improved|r" },
+						{ type = "text", text = "- Changelog pages can stay compact until a user opens the version they care about." },
+					},
+				},
+				{
+					type = "expandable",
+					id = "sample-1.0.0",
+					title = "Version 1.0.0",
+					rightText = "2026-06-12",
+					entries = {
+						{ type = "text", text = "- Added dashboard cards for direct navigation." },
+						{ type = "text", text = "- Added clickable status tiles for customized counts, new settings, version notes, and shortcut count." },
+						{ type = "text", text = "- Added generated enabled-feature and new-in-version panels." },
+					},
+				},
+				{
+					type = "expandable",
+					id = "sample-dashboard-click-targets",
+					title = "Dashboard Click Targets",
+					rightText = "Guide",
+					entries = {
+						{ type = "text", text = "- Version opens this page." },
+						{ type = "text", text = "- New applies a tag:new search query." },
+						{ type = "text", text = "- Shortcuts opens the editable shortcut list page." },
+					},
+				},
 			},
 		},
 	},

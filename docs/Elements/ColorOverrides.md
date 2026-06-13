@@ -18,7 +18,11 @@ ColorOverrides manages multiple keyed color values in one row.
 | `entries` | table | List of `{ key, label }` color entries. |
 | `getColor` | function | Reads current color by key. |
 | `setColor` | function | Writes color by key. |
-| `getDefaultColor` | function | Reads default color by key. |
+| `hasOpacity` | boolean | Show alpha channel. |
+| `colorizeLabel` | boolean | Tint entry labels with current colors. |
+
+`getDefaultColor` is currently metadata/pass-through only and is not consumed by
+the UI renderer.
 
 ## [Example][Top]
 
@@ -38,12 +42,8 @@ app:RegisterControl("bars.colors", {
     MyAddonDB.profile.classColors[key] = color
     MyAddon.RefreshClassColors()
   end,
-  getDefaultColor = function(key)
-    return MyAddon.DefaultClassColors[key]
-  end,
 })
 ```
 
 [//]: # (Links)
 [Top]: #Top
-

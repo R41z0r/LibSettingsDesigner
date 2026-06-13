@@ -4,6 +4,7 @@
 - [Overview](#overview)
 - [Content Blocks](#content-blocks)
 - [Entry Types](#entry-types)
+- [Expandable Entries](#expandable-entries)
 - [Example](#example)
 
 </details>
@@ -31,7 +32,29 @@ Info pages render static/help content instead of settings controls. Use
 | `text` | `text` | Paragraph or bullet text. |
 | `command` | `commands`, `usage`, `desc`, `note` | Slash command display. |
 | `button` | `text`, `width`, `onClick` | Action button. |
+| `expandable` | `id`, `title`, `rightText`, `entries` | Collapsible text/details section. |
+| `image` | `image` / `texture`, `width`, `height` | Static image. |
 | `spacer` | `height` | Vertical spacing. |
+
+## [Expandable Entries][Top]
+
+Use `type = "expandable"` for changelogs, FAQs, and dense help sections.
+
+```lua
+{
+  type = "expandable",
+  id = "version-1.1.0",
+  title = "Version 1.1.0",
+  rightText = "2026-06-13",
+  defaultExpanded = true,
+  entries = {
+    { type = "text", text = "|cffffd100Added|r" },
+    { type = "text", text = "- Expandable changelog sections." },
+  },
+}
+```
+
+See [Expandable](Expandable.md) for the full field list.
 
 ## [Example][Top]
 
@@ -64,4 +87,3 @@ app:RegisterPage({
 
 [//]: # (Links)
 [Top]: #Top
-

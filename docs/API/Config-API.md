@@ -177,17 +177,14 @@ app:RegisterGroup("interface.action-bars", {
 })
 ```
 
-Controls join the group with:
+Direct controls join the group with:
 
 ```lua
 groupID = "visibility"
 ```
 
-or wrapper-era alias:
-
-```lua
-modernGroup = "visibility"
-```
+`modernGroup` is a wrapper/legacy alias and should be mapped through
+`RegisterLegacyControl` or host wrapper code before direct registration.
 
 ### `app:RegisterControl(pageID, data)`
 

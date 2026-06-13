@@ -210,9 +210,18 @@ app:RegisterControl("general.core", {
 ## Control Rules
 
 - `id` is the stable UI identity.
-- `key` / `var` is for direct DB-backed values under `opts.db()`.
-- `label` / `text` / `name` is user-facing text and can be localized.
-- `description` / `desc` is short row help.
+- Direct `RegisterControl` calls should use canonical runtime fields:
+  `key`, `type`, `label`, `description`, `getValue`, `setValue`, and
+  `groupID`.
+- Legacy/wrapper aliases such as `var`, `text`, `name`, `desc`, `get`, `set`,
+  and `modernGroup` are bridge inputs. Do not use them in new direct
+  LibSettingsDesigner examples unless a wrapper maps them first.
+- Use `groupID` for direct group assignment. `modernGroup` is only normalized by
+  the legacy bridge.
+- When creating new settings code or substantially touching an existing direct
+  registration, migrate it to canonical direct fields. Keep legacy aliases at
+  wrapper boundaries or inside `RegisterLegacy*` bridge code. Do not mass-migrate
+  unrelated settings in the same change.
 - `note`, `notes`, `richNote`, and `richNotes` are for longer hover help.
 - `default` or `dbDefault` is required for reliable reset/customized behavior.
 - `getValue` / `setValue` should be used for nested tables, private DBs,
