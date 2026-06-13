@@ -2,6 +2,7 @@
 <details open><summary><strong>Contents</strong></summary><br />
 
 - [Overview](#overview)
+- [Preview](#preview)
 - [Fields](#fields)
 - [Example](#example)
 - [Formatting](#formatting)
@@ -11,6 +12,10 @@
 ## [Overview][Top]
 
 A slider stores a numeric value in a bounded range.
+
+## [Preview][Top]
+
+![Slider layout example](../assets/images/slider-layout-example.png)
 
 ## [Fields][Top]
 
@@ -48,4 +53,3 @@ end
 
 [//]: # (Links)
 [Top]: #Top
-

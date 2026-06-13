@@ -2,6 +2,7 @@
 <details open><summary><strong>Contents</strong></summary><br />
 
 - [Overview](#overview)
+- [Preview](#preview)
 - [Fields](#fields)
 - [Entry Shape](#entry-shape)
 - [Example](#example)
@@ -12,6 +13,10 @@
 
 ReorderList renders an ordered list with move/remove/format controls. The
 consumer owns the backing table and callbacks.
+
+## [Preview][Top]
+
+![ReorderList example](../assets/images/reorder-list-example.png)
 
 ## [Fields][Top]
 
@@ -66,4 +71,3 @@ app:RegisterControl("bars.layout", {
 
 [//]: # (Links)
 [Top]: #Top
-

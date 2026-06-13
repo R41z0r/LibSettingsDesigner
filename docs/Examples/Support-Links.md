@@ -2,6 +2,7 @@
 <details open><summary><strong>Contents</strong></summary><br />
 
 - [Overview](#overview)
+- [Preview](#preview)
 - [Recommended Pattern](#recommended-pattern)
 - [Example](#example)
 - [Notes](#notes)
@@ -15,6 +16,10 @@ forms should live in host-addon metadata, not in the generic library runtime.
 
 Use an info page for the links, then expose that page from a dashboard card,
 slash command, minimap button, or existing addon UI.
+
+## [Preview][Top]
+
+![Support links example](../assets/images/support-links-example.png)
 
 ## [Recommended Pattern][Top]
 

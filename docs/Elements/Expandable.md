@@ -2,6 +2,7 @@
 <details open><summary><strong>Contents</strong></summary><br />
 
 - [Overview](#overview)
+- [Preview](#preview)
 - [Fields](#fields)
 - [Changelog Example](#changelog-example)
 - [Behavior](#behavior)
@@ -16,6 +17,10 @@ headings first and open details only when needed.
 
 Expandable entries are info-page entries, not settings controls. They do not
 store SavedVariables and do not count as customized settings.
+
+## [Preview][Top]
+
+![Expandable changelog example](../assets/images/expandable-changelog-example.png)
 
 ## [Fields][Top]
 
