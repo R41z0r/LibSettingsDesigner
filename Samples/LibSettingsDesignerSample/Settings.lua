@@ -51,6 +51,60 @@ local function showSampleLink(label, url)
 end
 
 local app
+
+local SAMPLE_THEME_COLORS = {
+	gold = {
+		background = { 0.028, 0.030, 0.034, 0.97 },
+		overlay = { 0.70, 0.78, 0.90, 1 },
+		button = { 0.082, 0.072, 0.052, 0.94 },
+		buttonHover = { 0.160, 0.120, 0.060, 0.98 },
+		searchBorder = { 0.55, 0.44, 0.24, 0.90 },
+		accent = { 1.00, 0.82, 0.36, 1 },
+	},
+	midnight = {
+		background = { 0.020, 0.024, 0.032, 0.98 },
+		overlay = { 0.42, 0.62, 0.88, 1 },
+		panel = { 0.030, 0.036, 0.047, 0.92 },
+		sidebar = { 0.018, 0.022, 0.030, 0.94 },
+		card = { 0.040, 0.050, 0.064, 0.94 },
+		cardHover = { 0.065, 0.080, 0.105, 0.98 },
+		button = { 0.035, 0.045, 0.060, 0.94 },
+		buttonHover = { 0.075, 0.100, 0.135, 0.98 },
+		searchBorder = { 0.30, 0.48, 0.72, 0.90 },
+		accent = { 0.42, 0.72, 1.00, 1 },
+		topbarText = { 0.70, 0.86, 1.00, 1 },
+	},
+	ember = {
+		background = { 0.034, 0.024, 0.020, 0.98 },
+		overlay = { 0.92, 0.50, 0.32, 1 },
+		panel = { 0.050, 0.034, 0.027, 0.92 },
+		card = { 0.075, 0.044, 0.032, 0.94 },
+		cardHover = { 0.130, 0.070, 0.040, 0.98 },
+		button = { 0.095, 0.050, 0.030, 0.94 },
+		buttonHover = { 0.180, 0.090, 0.040, 0.98 },
+		searchBorder = { 0.68, 0.34, 0.16, 0.90 },
+		accent = { 1.00, 0.56, 0.22, 1 },
+		topbarBorder = { 0.72, 0.36, 0.16, 0.72 },
+	},
+}
+
+local function getSampleThemeColors()
+	local preset = DB().themePreset or "gold"
+	return SAMPLE_THEME_COLORS[preset]
+end
+
+local function applySampleThemePreset(preset)
+	DB().themePreset = SAMPLE_THEME_COLORS[preset] and preset or "gold"
+	addon.Print(("Theme preset applied: %s."):format(DB().themePreset))
+	if C_Timer and C_Timer.After then
+		C_Timer.After(0, function()
+			ConfigUI:Open(app, "visuals.theme")
+		end)
+	else
+		ConfigUI:Open(app, "visuals.theme")
+	end
+end
+
 app = Config:RegisterAddOn(addonName, {
 	title = "LibSettingsDesigner Sample",
 	settingsTitle = "LibSettingsDesigner Sample Settings",
@@ -59,14 +113,7 @@ app = Config:RegisterAddOn(addonName, {
 	assetRoot = "Interface\\AddOns\\LibSettingsDesignerSample\\libs\\LibSettingsDesigner\\Assets\\",
 	density = "compact",
 	showDensityButton = true,
-	colors = {
-		background = { 0.028, 0.030, 0.034, 0.97 },
-		overlay = { 0.70, 0.78, 0.90, 1 },
-		button = { 0.082, 0.072, 0.052, 0.94 },
-		buttonHover = { 0.160, 0.120, 0.060, 0.98 },
-		searchBorder = { 0.55, 0.44, 0.24, 0.90 },
-		accent = { 1.00, 0.82, 0.36, 1 },
-	},
+	colors = getSampleThemeColors,
 	db = DB,
 	locale = addon.L,
 	version = function()
@@ -430,6 +477,45 @@ app:RegisterControl("visuals.theme", {
 	colorizeLabel = true,
 	parentCheck = function() return DB().enabled == true and DB().visualsEnabled == true end,
 	order = 210,
+})
+
+app:RegisterControl("visuals.theme", {
+	id = "themePresetGold",
+	groupID = "colors",
+	groupTitle = "Colors",
+	type = "button",
+	label = "Apply Gold Theme",
+	description = "Switches the sample app color table to the partial gold preset.",
+	buttonText = "Gold",
+	onClick = function() applySampleThemePreset("gold") end,
+	parentCheck = function() return DB().enabled == true and DB().visualsEnabled == true end,
+	order = 220,
+})
+
+app:RegisterControl("visuals.theme", {
+	id = "themePresetMidnight",
+	groupID = "colors",
+	groupTitle = "Colors",
+	type = "button",
+	label = "Apply Midnight Theme",
+	description = "Switches the sample app color table to a cooler blue preset.",
+	buttonText = "Midnight",
+	onClick = function() applySampleThemePreset("midnight") end,
+	parentCheck = function() return DB().enabled == true and DB().visualsEnabled == true end,
+	order = 230,
+})
+
+app:RegisterControl("visuals.theme", {
+	id = "themePresetEmber",
+	groupID = "colors",
+	groupTitle = "Colors",
+	type = "button",
+	label = "Apply Ember Theme",
+	description = "Switches the sample app color table to a warmer orange preset.",
+	buttonText = "Ember",
+	onClick = function() applySampleThemePreset("ember") end,
+	parentCheck = function() return DB().enabled == true and DB().visualsEnabled == true end,
+	order = 240,
 })
 
 app:RegisterPage({
