@@ -123,8 +123,15 @@ git clone https://github.com/R41z0r/LibSettingsDesigner.wiki.git
 ```
 
 `docs/` remains the source copy for review and pull requests. After a
-documentation pull request is merged to `main`, sync the wiki repository in a
-separate commit.
+documentation pull request is merged to `main`, `.github/workflows/sync-wiki.yml`
+syncs the wiki repository automatically.
+
+If the workflow is unavailable, run the same sync locally:
+
+```bash
+git clone https://github.com/R41z0r/LibSettingsDesigner.wiki.git
+python3 scripts/sync_wiki_docs.py docs LibSettingsDesigner.wiki
+```
 
 Do not treat the wiki as a normal subfolder of this repository. The wiki uses a
 flat page layout:
