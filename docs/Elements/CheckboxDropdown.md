@@ -2,6 +2,7 @@
 <details open><summary><strong>Contents</strong></summary><br />
 
 - [Overview](#overview)
+- [Preview](#preview)
 - [Fields](#fields)
 - [Example](#example)
 
@@ -11,6 +12,10 @@
 
 CheckboxDropdown combines a boolean setting with one related single-choice
 dropdown in the same row.
+
+## [Preview][Top]
+
+![CheckboxDropdown example](../assets/images/checkbox-dropdown-example.png)
 
 ## [Fields][Top]
 
@@ -48,4 +53,3 @@ app:RegisterControl("alerts.health", {
 
 [//]: # (Links)
 [Top]: #Top
-

@@ -2,6 +2,7 @@
 <details open><summary><strong>Contents</strong></summary><br />
 
 - [Overview](#overview)
+- [Preview](#preview)
 - [Fields](#fields)
 - [Example](#example)
 
@@ -10,6 +11,10 @@
 ## [Overview][Top]
 
 ColorOverrides manages multiple keyed color values in one row.
+
+## [Preview][Top]
+
+![ColorOverrides example](../assets/images/color-overrides-example.png)
 
 ## [Fields][Top]
 

@@ -2,6 +2,7 @@
 <details open><summary><strong>Contents</strong></summary><br />
 
 - [Overview](#overview)
+- [Preview](#preview)
 - [Fields](#fields)
 - [Simple Note](#simple-note)
 - [Rich Note](#rich-note)
@@ -19,6 +20,12 @@ Supported control fields:
 - `notes`
 - `richNote`
 - `richNotes`
+
+## [Preview][Top]
+
+![Control note example](../assets/images/control-note-example.png)
+
+![Rich note image example](../assets/images/rich-note-image-example.png)
 
 ## [Fields][Top]
 
@@ -67,4 +74,3 @@ from the final panel height. This keeps top and bottom padding visually even.
 
 [//]: # (Links)
 [Top]: #Top
-

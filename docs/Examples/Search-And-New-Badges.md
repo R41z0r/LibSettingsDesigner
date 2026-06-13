@@ -3,6 +3,7 @@
 <summary><strong>Contents</strong></summary><br />
 
 - [Search Sources](#search-sources)
+- [Preview](#preview)
 - [Per-Setting Search Tags](#per-setting-search-tags)
 - [Renamed Setting Example](#renamed-setting-example)
 - [New Badge Setup](#new-badge-setup)
@@ -28,6 +29,10 @@ Search text is built from the metadata users can reasonably know:
 
 Runtime search returns controls, not standalone pages. Use aliases when users
 might search for a different term than the visible label.
+
+## [Preview][Top]
+
+![New tag search example](../assets/images/search-new-tag-example.png)
 
 ## [Per-Setting Search Tags][Top]
 

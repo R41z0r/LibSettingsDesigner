@@ -2,6 +2,7 @@
 <details open><summary><strong>Contents</strong></summary><br />
 
 - [Overview](#overview)
+- [Preview](#preview)
 - [Content Blocks](#content-blocks)
 - [Entry Types](#entry-types)
 - [Expandable Entries](#expandable-entries)
@@ -13,6 +14,10 @@
 
 Info pages render static/help content instead of settings controls. Use
 `layout = "info"`.
+
+## [Preview][Top]
+
+![InfoPage dashboard showcase example](../assets/images/info-page-dashboard-showcase-example.png)
 
 ## [Content Blocks][Top]
 

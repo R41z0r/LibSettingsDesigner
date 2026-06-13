@@ -2,6 +2,7 @@
 <details open><summary><strong>Contents</strong></summary><br />
 
 - [Overview](#overview)
+- [Preview](#preview)
 - [Fields](#fields)
 - [Simple DB Toggle](#simple-db-toggle)
 - [Explicit Getter and Setter](#explicit-getter-and-setter)
@@ -12,6 +13,10 @@
 ## [Overview][Top]
 
 A toggle stores a boolean value. Use `type = "toggle"` or `type = "checkbox"`.
+
+## [Preview][Top]
+
+![Toggle parent check example](../assets/images/toggle-parent-check-example.png)
 
 ## [Fields][Top]
 
