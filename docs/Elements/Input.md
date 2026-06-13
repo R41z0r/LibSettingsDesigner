@@ -2,6 +2,7 @@
 <details open><summary><strong>Contents</strong></summary><br />
 
 - [Overview](#overview)
+- [Preview](#preview)
 - [Fields](#fields)
 - [Text](#text)
 - [Numeric](#numeric)
@@ -12,6 +13,10 @@
 ## [Overview][Top]
 
 Input controls store text or numbers.
+
+## [Preview][Top]
+
+![Input text example](../assets/images/input-text-example.png)
 
 ## [Fields][Top]
 
