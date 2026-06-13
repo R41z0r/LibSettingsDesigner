@@ -155,7 +155,8 @@ matches the setting.
 
 ### Simple DB-backed setting
 
-Use `key` or `var` when the value lives directly under `opts.db()`:
+Use `key` when the value lives directly under `opts.db()`. `var` is a
+legacy/wrapper alias and is not mapped to `key` by direct `RegisterControl`:
 
 ```lua
 app:RegisterControl("general.core", {

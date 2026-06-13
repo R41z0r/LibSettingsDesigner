@@ -24,6 +24,7 @@
 &nbsp; • [ReorderList](ReorderList.md "ReorderList") \
 &nbsp; • [Notes](Notes.md "Notes") \
 &nbsp; • [Dashboard](Dashboard.md "Dashboard") \
+&nbsp; • [Expandable](Expandable.md "Expandable") \
 &nbsp; • [InfoPage](InfoPage.md "InfoPage")
 
 **Other** \

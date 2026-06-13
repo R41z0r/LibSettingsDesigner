@@ -24,8 +24,10 @@ boolean map where selected keys are `true`.
 | `setSelection` | function | Writes a boolean map. |
 | `isSelectedFunc` | function | Per-option selected reader. |
 | `setSelectedFunc` | function | Per-option selected writer. |
-| `hideSummary` | boolean | Hide selected summary text. |
 | `menuHeight` | number | Menu height. |
+
+`hideSummary` is currently metadata/pass-through only and is not consumed by the
+UI renderer.
 
 ## [Selection Map][Top]
 
@@ -70,4 +72,3 @@ end
 
 [//]: # (Links)
 [Top]: #Top
-

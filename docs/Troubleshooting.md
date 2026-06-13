@@ -29,7 +29,7 @@ When something is wrong, check these in order:
 4. Is the app registered once through `Config:RegisterAddOn(addonName, opts)`?
 5. Are category/page/control ids stable and unique?
 6. Does the control have a valid `type`?
-7. Does the control have either a simple `key`/`var` or explicit getter/setter?
+7. Does the direct control have either a simple `key` or explicit getter/setter?
 8. Does the control have a `default` when it should support reset/customized
    state?
 9. If a wrapper exists, did the feature module use the wrapper instead of raw

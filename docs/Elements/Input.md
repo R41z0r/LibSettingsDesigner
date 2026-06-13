@@ -25,7 +25,9 @@ Input controls store text or numbers.
 | `readOnly` | boolean | Prevent editing. |
 | `inputWidth` | number | Input width. |
 | `multiline` | boolean | Use multiline edit box. |
-| `multilineHeight` | number | Multiline height. |
+
+`multilineHeight` is currently metadata/pass-through only and is not consumed by
+the UI renderer. The current multiline editor height is fixed by the runtime.
 
 ## [Text][Top]
 
@@ -66,7 +68,6 @@ app:RegisterControl("macros.body", {
   type = "input",
   label = "Macro body",
   multiline = true,
-  multilineHeight = 120,
   inputWidth = 420,
   default = "",
 })
@@ -74,4 +75,3 @@ app:RegisterControl("macros.body", {
 
 [//]: # (Links)
 [Top]: #Top
-

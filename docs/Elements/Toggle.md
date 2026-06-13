@@ -18,14 +18,18 @@ A toggle stores a boolean value. Use `type = "toggle"` or `type = "checkbox"`.
 | Field | Type | Description |
 | :---- | :--- | :---------- |
 | `id` | string | Stable control id. |
-| `key` / `var` | string | DB key for default persistence. |
-| `label` / `text` | string | Row label. |
-| `description` / `desc` | string | Short explanation. |
+| `key` | string | DB key for direct persistence. |
+| `label` | string | Row label. |
+| `description` | string | Short explanation. |
 | `default` | boolean/function | Default value. |
-| `getValue` / `get` | function | Explicit value reader. |
-| `setValue` / `set` | function | Explicit value writer. |
+| `getValue` | function | Explicit value reader. |
+| `setValue` | function | Explicit value writer. |
 | `isEnabled` | function | Disabled-state gate. |
 | `parentCheck` | function | Parent enabled-state gate. |
+
+Legacy aliases such as `var`, `text`, `desc`, `get`, and `set` are only safe
+through wrapper/legacy mapping. New direct registrations should use canonical
+fields.
 
 ## [Simple DB Toggle][Top]
 
@@ -66,4 +70,3 @@ app:RegisterControl("general.core", {
 
 [//]: # (Links)
 [Top]: #Top
-

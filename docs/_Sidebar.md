@@ -30,6 +30,7 @@
 &nbsp; • [ReorderList](Elements/ReorderList.md "ReorderList") \
 &nbsp; • [Notes](Elements/Notes.md "Notes") \
 &nbsp; • [Dashboard](Elements/Dashboard.md "Dashboard") \
+&nbsp; • [Expandable](Elements/Expandable.md "Expandable") \
 &nbsp; • [InfoPage](Elements/InfoPage.md "InfoPage")
 
 **Examples** \
