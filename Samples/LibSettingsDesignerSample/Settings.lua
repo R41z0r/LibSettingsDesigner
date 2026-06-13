@@ -46,6 +46,10 @@ local function splitVersionBadge(version)
 	return version, nil
 end
 
+local function showSampleLink(label, url)
+	addon.Print(("%s: %s"):format(label or "Link", url or ""))
+end
+
 local app
 app = Config:RegisterAddOn(addonName, {
 	title = "LibSettingsDesigner Sample",
@@ -123,6 +127,12 @@ app = Config:RegisterAddOn(addonName, {
 					description = "Open a changelog-style info page from a dashboard card or version tile.",
 					iconKey = "help",
 					pageID = "help.changelog",
+				},
+				{
+					title = "Support Links",
+					description = "Show Discord, GitHub, sponsor, and website link buttons on an info page.",
+					iconKey = "help",
+					pageID = "help.support-links",
 				},
 				{
 					title = "Density Modes",
@@ -594,6 +604,37 @@ app:RegisterPage({
 })
 
 app:RegisterPage({
+	id = "help.support-links",
+	category = "help",
+	title = "Support Links",
+	description = "Discord, GitHub, sponsor, and website link examples.",
+	layout = "info",
+	iconKey = "help",
+	order = 98,
+	content = {
+		{
+			title = "Community and Support",
+			entries = {
+				{ type = "text", text = "External links belong to the host addon. The sample prints URLs to chat; real addons can show a copy popup or custom link frame." },
+				{ type = "button", text = "Discord", width = 180, onClick = function() showSampleLink("Discord", "https://discord.gg/example") end },
+				{ type = "button", text = "GitHub Issues", width = 180, onClick = function() showSampleLink("GitHub Issues", "https://github.com/R41z0r/LibSettingsDesigner/issues") end },
+				{ type = "button", text = "Ko-fi", width = 180, onClick = function() showSampleLink("Ko-fi", "https://ko-fi.com/example") end },
+				{ type = "button", text = "Website", width = 180, onClick = function() showSampleLink("Website", "https://github.com/R41z0r/LibSettingsDesigner") end },
+			},
+		},
+		{
+			title = "Visible URLs",
+			entries = {
+				{ type = "text", text = "Discord: https://discord.gg/example" },
+				{ type = "text", text = "GitHub Issues: https://github.com/R41z0r/LibSettingsDesigner/issues" },
+				{ type = "text", text = "Ko-fi: https://ko-fi.com/example" },
+				{ type = "text", text = "Website: https://github.com/R41z0r/LibSettingsDesigner" },
+			},
+		},
+	},
+})
+
+app:RegisterPage({
 	id = "help.quick-reference",
 	category = "help",
 	title = "Quick Reference",
@@ -610,6 +651,7 @@ app:RegisterPage({
 				{ type = "command", commands = { "/lsdsample visuals" }, desc = "Open the visuals page." },
 				{ type = "command", commands = { "/lsdsample dashboard" }, desc = "Open the dashboard." },
 				{ type = "command", commands = { "/lsdsample changelog" }, desc = "Open version notes." },
+				{ type = "command", commands = { "/lsdsample support" }, desc = "Open support link examples." },
 				{ type = "command", commands = { "/lsdsample reset" }, desc = "Reset the sample profile and reopen settings." },
 			},
 		},
@@ -636,6 +678,8 @@ SlashCmdList.LIBSETTINGSDESIGNERSAMPLE = function(input)
 		ConfigUI:Open(app, "dashboard")
 	elseif input == "changelog" then
 		ConfigUI:Open(app, "help.changelog")
+	elseif input == "support" then
+		ConfigUI:Open(app, "help.support-links")
 	elseif input == "help" then
 		ConfigUI:Open(app, "help.quick-reference")
 	elseif input == "reset" then

@@ -19,6 +19,7 @@
 | [Nested Database Values](Nested-Database-Values.md) | Explicit getters/setters for nested saved-variable tables. |
 | [Search and New Badges](Search-And-New-Badges.md) | Search aliases, renamed settings, and new-feature badges. |
 | [Runtime Refresh](Runtime-Refresh.md) | Updating rendered rows after external state changes. |
+| [Support Links](Support-Links.md) | Discord, GitHub, Ko-fi, website, and support buttons on an info page. |
 
 ## [Suggested Reading Order][Top]
 

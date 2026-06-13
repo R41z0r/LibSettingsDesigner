@@ -14,7 +14,8 @@
 &nbsp; • [Dynamic Dropdowns](Dynamic-Dropdowns.md "Dynamic Dropdowns") \
 &nbsp; • [Nested Database Values](Nested-Database-Values.md "Nested Database Values") \
 &nbsp; • [Search and New Badges](Search-And-New-Badges.md "Search and New Badges") \
-&nbsp; • [Runtime Refresh](Runtime-Refresh.md "Runtime Refresh")
+&nbsp; • [Runtime Refresh](Runtime-Refresh.md "Runtime Refresh") \
+&nbsp; • [Support Links](Support-Links.md "Support Links")
 
 **Reference** \
 &nbsp; • [Field Glossary](../Field-Glossary.md "Field Glossary") \
