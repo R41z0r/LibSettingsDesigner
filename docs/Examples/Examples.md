@@ -20,6 +20,7 @@
 | [Search and New Badges](Search-And-New-Badges.md) | Search aliases, renamed settings, and new-feature badges. |
 | [Runtime Refresh](Runtime-Refresh.md) | Updating rendered rows after external state changes. |
 | [Support Links](Support-Links.md) | Discord, GitHub, Ko-fi, website, and support buttons on an info page. |
+| [Theme Colors](Theme-Colors.md) | Global UI chrome color overrides with per-key fallback to defaults. |
 
 ## [Suggested Reading Order][Top]
 

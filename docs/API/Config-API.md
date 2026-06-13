@@ -102,6 +102,7 @@ and `setDensity` when that choice should persist in SavedVariables. Set
 | `assetRoot` | string | Explicit path to vendored LibSettingsDesigner assets. |
 | `db` | function | Returns the table used for simple `control.key` reads/writes. |
 | `locale` | table | Host addon locale table. |
+| `colors` / `colorTable` / `themeColors` | table/function | Optional global UI theme color overrides. Missing keys keep defaults. |
 | `density` | string/function | Initial density, `"compact"` or `"comfortable"`. |
 | `getDensity(app)` / `setDensity(density, app)` | function | Read/write the user's selected density. |
 | `showDensityButton` / `showDensityButton(app)` | boolean/function | Whether users can switch density; only `false` hides the button. |

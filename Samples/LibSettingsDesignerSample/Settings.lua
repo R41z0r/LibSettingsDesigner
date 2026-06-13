@@ -59,6 +59,14 @@ app = Config:RegisterAddOn(addonName, {
 	assetRoot = "Interface\\AddOns\\LibSettingsDesignerSample\\libs\\LibSettingsDesigner\\Assets\\",
 	density = "compact",
 	showDensityButton = true,
+	colors = {
+		background = { 0.028, 0.030, 0.034, 0.97 },
+		overlay = { 0.70, 0.78, 0.90, 1 },
+		button = { 0.082, 0.072, 0.052, 0.94 },
+		buttonHover = { 0.160, 0.120, 0.060, 0.98 },
+		searchBorder = { 0.55, 0.44, 0.24, 0.90 },
+		accent = { 1.00, 0.82, 0.36, 1 },
+	},
 	db = DB,
 	locale = addon.L,
 	version = function()

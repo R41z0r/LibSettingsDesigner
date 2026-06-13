@@ -66,6 +66,7 @@ wrapper bridges, documenting elements, or validating changes.
 - [Search and New Badges](Examples/Search-And-New-Badges.md)
 - [Runtime Refresh](Examples/Runtime-Refresh.md)
 - [Support Links](Examples/Support-Links.md)
+- [Theme Colors](Examples/Theme-Colors.md)
 
 ## [Principles][Top]
 

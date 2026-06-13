@@ -43,6 +43,7 @@ Config:RegisterAddOn(addonID, opts)
 | `assetRoot` | string | Explicit path to vendored LibSettingsDesigner assets. Should usually end with `\\Assets\\`. |
 | `db` | function | Returns the table used for simple DB-backed controls. |
 | `locale` | table | Host addon locale table. |
+| `colors` / `colorTable` / `themeColors` | table/function | Optional global UI theme color overrides. Missing keys keep defaults. |
 | `density` | string/function | Initial density, usually `"compact"` or `"comfortable"`. |
 | `getDensity(app)` / `setDensity(density, app)` | function | Read/write the user's selected density. |
 | `showDensityButton` / `showDensityButton(app)` | boolean/function | Controls whether users can switch density; only `false` hides the button. |

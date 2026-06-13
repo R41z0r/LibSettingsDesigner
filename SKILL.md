@@ -335,6 +335,7 @@ ConfigUI:Open("MyAddon", "general.core")
 | `assetRoot` | Path to vendored `Assets/`. |
 | `db` | Function returning simple DB table. |
 | `locale` | Host addon locale table. |
+| `colors` / `colorTable` / `themeColors` | Optional global UI theme color overrides; missing keys keep defaults. |
 | `density` | Initial density, `"compact"` or `"comfortable"`, string or function. |
 | `getDensity(app)` / `setDensity(density, app)` | Persist the user's selected density. |
 | `showDensityButton` / `showDensityButton(app)` | Whether users can switch density; only `false` hides the button. |
@@ -358,6 +359,48 @@ and `setDensity` when that choice should persist. Use
 `profile` and `version` are host-owned metadata in the current runtime. Do not
 promise automatic profile/status/version rendering from these fields unless host
 addon code or a custom dashboard function explicitly reads them.
+
+## Theme Colors
+
+Use `opts.colors`, `opts.colorTable`, or `opts.themeColors` to override global
+LibSettingsDesigner chrome colors. Every key is optional and falls back to the
+built-in default when omitted.
+
+Use this for UI shell colors such as background, overlay, buttons, rows, cards,
+search, text, and accent. Do not use it for host-addon feature colors; those
+belong to the host addon's own settings and saved variables.
+
+```lua
+local app = Config:RegisterAddOn(addonName, {
+  title = "My Addon",
+  colors = {
+    background = { 0.02, 0.02, 0.025, 0.96 },
+    overlay = { 0.75, 0.82, 0.95, 1 },
+    accent = { 1.00, 0.82, 0.36, 1 },
+    button = { 0.08, 0.07, 0.05, 0.94 },
+    buttonHover = { 0.16, 0.12, 0.06, 0.98 },
+    searchBorder = { 0.55, 0.44, 0.24, 0.90 },
+  },
+})
+```
+
+Color values may be array-shaped `{ r, g, b, a }` or named
+`{ r = r, g = g, b = b, a = a }` tables. Dynamic themes may provide
+`colors = function(app) return colorTable end`.
+
+Common semantic keys:
+
+```text
+background, overlay, panel, content, sidebar, card, cardHover, cardBorder,
+cardHoverBorder, row, rowBorder, rowHover, rowHoverBorder, button,
+buttonBorder, buttonHover, buttonHoverBorder, search, searchBorder, selected,
+text, mutedText, subtleText, disabledText, accent, topbarText
+```
+
+For precise one-off overrides, use direct detail keys such as `topbarBg`,
+`topbarBorder`, `buttonTopbarBg`, `dashboardCardBg`, `detailSectionBg`,
+`disabledControlBg`, or any other key documented in
+`docs/Examples/Theme-Colors.md`.
 
 ## Blizzard Settings Bridge
 
