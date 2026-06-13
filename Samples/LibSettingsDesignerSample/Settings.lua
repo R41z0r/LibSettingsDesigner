@@ -88,9 +88,83 @@ local SAMPLE_THEME_COLORS = {
 	},
 }
 
+local SAMPLE_THEME_BORDERS = {
+	gold = {
+		default = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 12,
+			insets = { left = 3, right = 3, top = 3, bottom = 3 },
+		},
+		button = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 10,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+	},
+	midnight = {
+		default = {
+			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+			edgeSize = 16,
+			insets = { left = 4, right = 4, top = 4, bottom = 4 },
+		},
+		row = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 8,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+		button = {
+			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+			edgeSize = 12,
+			insets = { left = 3, right = 3, top = 3, bottom = 3 },
+		},
+		search = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 14,
+			insets = { left = 3, right = 3, top = 3, bottom = 3 },
+		},
+	},
+	ember = {
+		default = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 18,
+			insets = { left = 5, right = 5, top = 5, bottom = 5 },
+		},
+		topbar = {
+			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+			edgeSize = 18,
+			insets = { left = 5, right = 5, top = 5, bottom = 5 },
+		},
+		topbarButton = {
+			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+			edgeSize = 13,
+			insets = { left = 3, right = 3, top = 3, bottom = 3 },
+		},
+		button = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 9,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+		toggle = {
+			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+			edgeSize = 10,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+		swatch = {
+			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+			edgeSize = 11,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+	},
+}
+
 local function getSampleThemeColors()
 	local preset = DB().themePreset or "gold"
 	return SAMPLE_THEME_COLORS[preset]
+end
+
+local function getSampleThemeBorders()
+	local preset = DB().themePreset or "gold"
+	return SAMPLE_THEME_BORDERS[preset]
 end
 
 local function applySampleThemePreset(preset)
@@ -114,6 +188,7 @@ app = Config:RegisterAddOn(addonName, {
 	density = "compact",
 	showDensityButton = true,
 	colors = getSampleThemeColors,
+	borders = getSampleThemeBorders,
 	db = DB,
 	locale = addon.L,
 	version = function()
