@@ -1,0 +1,64 @@
+name: Update sample TOC
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 7 * * 4"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-sample-toc:
+    name: Update sample addon Interface metadata
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update sample TOC
+        run: python3 scripts/update_sample_toc.py
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet -- Samples/LibSettingsDesignerSample/LibSettingsDesignerSample.toc; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create and merge pull request
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          branch="dev/update-sample-toc"
+          body="Updates the sample addon's Interface metadata from Gethe/wow-ui-source live version.txt."
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$branch"
+          git add Samples/LibSettingsDesignerSample/LibSettingsDesignerSample.toc
+          git commit -m "Update sample addon TOC"
+          git push --force-with-lease origin "$branch"
+
+          pr_number="$(gh pr list --head "$branch" --base main --state open --json number --jq '.[0].number // empty')"
+          if [ -z "$pr_number" ]; then
+            pr_url="$(gh pr create \
+              --base main \
+              --head "$branch" \
+              --title "Update sample addon TOC" \
+              --body "$body")"
+            pr_number="$(gh pr view "$pr_url" --json number --jq '.number')"
+          fi
+
+          gh pr merge "$pr_number" \
+            --squash \
+            --delete-branch \
+            --subject "Update sample addon TOC" \
+            --body "$body"

@@ -33,6 +33,15 @@ Never violate these rules:
 - Do not rebuild the settings frame from dropdown or MultiDropdown option-click
   callbacks.
 - Do not change runtime code when the task is documentation-only.
+- Do not remove LibSettingsDesigner license notices from runtime Lua/XML files
+  or vendored runtime copies.
+- Add the LibSettingsDesigner license notice to any new runtime Lua/XML file:
+
+```text
+LibSettingsDesigner
+License: https://raw.githubusercontent.com/R41z0r/LibSettingsDesigner/main/LICENSE.md
+Do not remove this notice from redistributed copies.
+```
 
 ## First Steps
 
