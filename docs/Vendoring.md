@@ -4,6 +4,7 @@
 
 - [Overview](#overview)
 - [Required Layout](#required-layout)
+- [BigWigsPackager External](#bigwigspackager-external)
 - [Loading](#loading)
 - [Asset Root](#asset-root)
 - [Do Not Use Shared LibStub](#do-not-use-shared-libstub)
@@ -48,6 +49,41 @@ MyAddon/
 
 The names matter. Keep the library folder and runtime file names stable, and do
 not make the folder a standalone shared dependency.
+
+## [BigWigsPackager External][Top]
+
+Host addons that use BigWigsPackager can vendor LibSettingsDesigner through
+`.pkgmeta` instead of committing a local copy of the library.
+
+Use `branch: main` when the host addon should package the latest stable
+LibSettingsDesigner runtime:
+
+```yaml
+externals:
+  libs/LibSettingsDesigner:
+    url: https://github.com/R41z0r/LibSettingsDesigner.git
+    branch: main
+    path: runtime/LibSettingsDesigner
+```
+
+The `path` value is required because this repository also contains docs,
+samples, and agent guidance. Only `runtime/LibSettingsDesigner` belongs in a
+host addon's packaged runtime.
+
+Project policy: `main` must always be releasable. Development work belongs on a
+feature branch and reaches `main` only through a reviewed pull request. That
+makes `branch: main` suitable as a latest-stable external for addons that want
+automatic library updates.
+
+For fully reproducible addon releases, pin a version tag instead:
+
+```yaml
+externals:
+  libs/LibSettingsDesigner:
+    url: https://github.com/R41z0r/LibSettingsDesigner.git
+    tag: v1
+    path: runtime/LibSettingsDesigner
+```
 
 ## [Loading][Top]
 

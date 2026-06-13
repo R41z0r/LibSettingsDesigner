@@ -32,6 +32,17 @@ It must remain:
 - Keep `frame._LibSettingsDesignerState` as the documented internal frame-state
   field.
 
+## Branch and Release Policy
+
+- `main` is the latest-stable branch and must always be releasable.
+- Never commit directly to `main`.
+- All changes must be made on a feature branch and merged through a pull
+  request.
+- Pull requests must pass validation before merge.
+- Host addons may use BigWigsPackager with `branch: main` only because `main` is
+  protected by this policy.
+- Use version tags such as `v1` for fully reproducible host-addon releases.
+
 Current namespace:
 
 ```lua
