@@ -1,3 +1,7 @@
+-- LibSettingsDesigner
+-- License: https://raw.githubusercontent.com/R41z0r/LibSettingsDesigner/main/LICENSE.md
+-- Do not remove this notice from redistributed copies.
+
 local addonName, addon = ...
 addon = addon or _G[addonName] or {}
 addon.LibSettingsDesigner = addon.LibSettingsDesigner or {}

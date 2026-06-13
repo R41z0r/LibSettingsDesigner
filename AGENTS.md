@@ -31,6 +31,33 @@ It must remain:
 - Do not change runtime code during documentation-only tasks.
 - Keep `frame._LibSettingsDesignerState` as the documented internal frame-state
   field.
+- Do not remove LibSettingsDesigner license notices from runtime Lua/XML files
+  or vendored runtime copies.
+- New runtime Lua/XML files must include the LibSettingsDesigner license notice:
+
+```text
+LibSettingsDesigner
+License: https://raw.githubusercontent.com/R41z0r/LibSettingsDesigner/main/LICENSE.md
+Do not remove this notice from redistributed copies.
+```
+
+## Branch and Release Policy
+
+- `main` is the latest-stable branch and must always be releasable.
+- Never commit directly to `main`.
+- All changes must be made on a feature branch and merged through a pull
+  request.
+- Pull requests must pass validation before merge.
+- Pull requests that change runtime Lua/XML/assets or sample addon Lua/XML/assets
+  must not be merged to `main` until the changed behavior was tested in game and
+  the user confirmed that it works.
+- Sample addon TOC-only metadata updates, such as adding a new `## Interface`
+  version, may be opened and merged automatically by the scheduled workflow.
+- Documentation-only pull requests do not require an in-game test, but must
+  still keep documentation validation clean.
+- Host addons may use BigWigsPackager with `branch: main` only because `main` is
+  protected by this policy.
+- Use version tags such as `v1` for fully reproducible host-addon releases.
 
 Current namespace:
 

@@ -78,6 +78,10 @@ MyAddon/
       Assets/
 ```
 
+## License
+
+LibSettingsDesigner is available under the [LibSettingsDesigner Vendoring License](LICENSE.md).
+
 Repository layout:
 
 ```text
