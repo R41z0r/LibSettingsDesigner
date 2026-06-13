@@ -1149,7 +1149,9 @@ content = {
   {
     title = "Commands",
     buttonLayout = "wrap",
+    buttonAlign = "center",
     buttonWidth = 180,
+    buttonGap = 12,
     entries = {
       { type = "command", commands = { "/myaddon", "/myaddon config" }, desc = "Open settings." },
       { type = "button", text = "Open Website", onClick = function(entry, app) end },
@@ -1164,7 +1166,8 @@ content = {
 For horizontal button groups, set `buttonLayout = "wrap"` on the info block.
 Consecutive button entries then render left-to-right and automatically wrap when
 they exceed the available width. Optional block fields are `buttonWidth`,
-`buttonHeight`, `buttonGap`, and `buttonRowGap`. A single button can opt in with
+`buttonHeight`, `buttonGap`, `buttonRowGap`, and
+`buttonAlign = "left" | "center" | "right"`. A single button can opt in with
 `inline = true`.
 
 Use `type = "expandable"` inside info-page `entries` for changelogs, FAQs, or
@@ -1207,7 +1210,9 @@ app:RegisterPage({
     {
       title = "Community and Support",
       buttonLayout = "wrap",
+      buttonAlign = "center",
       buttonWidth = 180,
+      buttonGap = 12,
       entries = {
         { type = "button", text = "Discord", onClick = function() ShowSupportURL("Discord", "https://discord.gg/example") end },
         { type = "button", text = "GitHub Issues", onClick = function() ShowSupportURL("GitHub Issues", "https://github.com/example/MyAddon/issues") end },

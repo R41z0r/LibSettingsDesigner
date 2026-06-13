@@ -818,9 +818,10 @@ app:RegisterPage({
 		{
 			title = "Community and Support",
 			buttonLayout = "wrap",
+			buttonAlign = "center",
 			buttonWidth = 180,
-			buttonGap = 10,
-			buttonRowGap = 10,
+			buttonGap = 12,
+			buttonRowGap = 12,
 			entries = {
 				{ type = "text", text = "External links belong to the host addon. The sample prints URLs to chat; real addons can show a copy popup or custom link frame." },
 				{ type = "button", text = "Discord", width = 180, onClick = function() showSampleLink("Discord", "https://discord.gg/example") end },

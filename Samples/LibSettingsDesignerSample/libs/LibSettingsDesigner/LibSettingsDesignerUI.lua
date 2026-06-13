@@ -5228,6 +5228,17 @@ function lib.GetInfoPageButtonMetrics(block, entry)
 	return buttonWidth, buttonHeight, gap, rowGap
 end
 
+function lib.GetInfoPageButtonAlign(block)
+	local align = tostring((type(block) == "table" and (block.buttonAlign or block.buttonsAlign or block.alignButtons)) or "left"):lower()
+	if align == "center" or align == "middle" then
+		return "center"
+	end
+	if align == "right" or align == "end" then
+		return "right"
+	end
+	return "left"
+end
+
 function lib.GetInfoPageWrappedButtonRunHeight(entries, startIndex, width, block)
 	local contentWidth = math.max(120, (tonumber(width) or 0) - 28)
 	local index = startIndex
@@ -5490,30 +5501,56 @@ end
 function lib.RenderInfoPageWrappedButtonRun(state, section, entries, startIndex, y, width, block)
 	local contentWidth = math.max(120, (tonumber(width) or 0) - 28)
 	local x = 14
-	local currentX = 0
-	local rowHeight = 0
 	local index = startIndex
+	local rows = {}
+	local currentRow
 	while index <= #entries and lib.IsInfoPageWrappedButton(block, entries[index]) do
 		local entry = entries[index]
 		local buttonWidth, buttonHeight, gap, entryRowGap = lib.GetInfoPageButtonMetrics(block, entry)
-		if currentX > 0 and currentX + gap + buttonWidth > contentWidth then
-			y = y - rowHeight - entryRowGap
-			currentX = 0
-			rowHeight = 0
+		local projectedWidth = currentRow and (currentRow.width + gap + buttonWidth) or buttonWidth
+		if currentRow and projectedWidth > contentWidth then
+			rows[#rows + 1] = currentRow
+			currentRow = nil
 		end
-		local button = makeFlatButton(section, entry.text or entry.label or (_G.OKAY or "OK"), buttonWidth, buttonHeight, entry.icon, entry.iconAtlas == true)
-		button:SetPoint("TOPLEFT", section, "TOPLEFT", x + currentX, y)
-		button:SetScript("OnClick", function()
-			if type(entry.onClick) == "function" then
-				entry.onClick(entry, state.app)
-			end
-		end)
-		currentX = currentX > 0 and (currentX + gap + buttonWidth) or buttonWidth
-		rowHeight = math.max(rowHeight, buttonHeight)
+		if not currentRow then
+			currentRow = { entries = {}, width = 0, height = 0, rowGap = entryRowGap }
+		end
+		currentRow.entries[#currentRow.entries + 1] = {
+			entry = entry,
+			width = buttonWidth,
+			height = buttonHeight,
+			gap = #currentRow.entries > 0 and gap or 0,
+		}
+		currentRow.width = currentRow.width > 0 and (currentRow.width + gap + buttonWidth) or buttonWidth
+		currentRow.height = math.max(currentRow.height, buttonHeight)
+		currentRow.rowGap = math.max(currentRow.rowGap or 0, entryRowGap)
 		index = index + 1
 	end
-	if currentX > 0 then
-		y = y - rowHeight - 12
+	if currentRow then
+		rows[#rows + 1] = currentRow
+	end
+	local align = lib.GetInfoPageButtonAlign(block)
+	for rowIndex, row in ipairs(rows) do
+		local rowOffset = 0
+		if align == "center" then
+			rowOffset = math.max(0, (contentWidth - row.width) / 2)
+		elseif align == "right" then
+			rowOffset = math.max(0, contentWidth - row.width)
+		end
+		local currentX = rowOffset
+		for _, item in ipairs(row.entries) do
+			currentX = currentX + item.gap
+			local entry = item.entry
+			local button = makeFlatButton(section, entry.text or entry.label or (_G.OKAY or "OK"), item.width, item.height, entry.icon, entry.iconAtlas == true)
+			button:SetPoint("TOPLEFT", section, "TOPLEFT", x + currentX, y)
+			button:SetScript("OnClick", function()
+				if type(entry.onClick) == "function" then
+					entry.onClick(entry, state.app)
+				end
+			end)
+			currentX = currentX + item.width
+		end
+		y = y - row.height - (rowIndex < #rows and row.rowGap or 12)
 	end
 	return y, index
 end

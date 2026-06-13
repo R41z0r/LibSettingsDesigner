@@ -43,8 +43,9 @@ Info pages render static/help content instead of settings controls. Use
 
 Set `buttonLayout = "wrap"` on a content block to render consecutive buttons
 horizontally and wrap them onto the next row when they no longer fit. Optional
-block fields are `buttonWidth`, `buttonHeight`, `buttonGap`, and
-`buttonRowGap`. A single button can opt in with `inline = true`.
+block fields are `buttonWidth`, `buttonHeight`, `buttonGap`, `buttonRowGap`,
+and `buttonAlign = "left" | "center" | "right"`. A single button can opt in
+with `inline = true`.
 
 ## [Expandable Entries][Top]
 
@@ -78,7 +79,9 @@ app:RegisterPage({
     {
       title = "Slash Commands",
       buttonLayout = "wrap",
+      buttonAlign = "center",
       buttonWidth = 180,
+      buttonGap = 12,
       entries = {
         { type = "text", text = "Use these commands in chat." },
         { type = "command", commands = { "/myaddon" }, desc = "Open settings." },
