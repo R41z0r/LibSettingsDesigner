@@ -317,6 +317,18 @@ Maintain documentation as a wiki-style reference set:
 - `docs/Validation.md` documents checks and reporting.
 - `docs/_Sidebar.md` and folder `_Sidebar.md` files must be updated when navigation changes.
 - `SKILL.md` must stay usable by an AI agent.
+- The public GitHub wiki is a separate repository:
+  `https://github.com/R41z0r/LibSettingsDesigner.wiki.git`.
+- `docs/` in this repository is the source copy for review and PRs; after
+  documentation changes are merged to `main`, sync the public wiki repository
+  as a separate commit.
+- Do not add the wiki repository as a submodule or subtree unless the project
+  owner explicitly requests a repository-structure change. The wiki has a flat
+  page layout, while `docs/` is grouped by `API/`, `Elements/`, and `Examples/`.
+- When syncing to the GitHub wiki, flatten page paths and rewrite links:
+  `docs/Elements/Toggle.md` becomes `Toggle.md`, links such as
+  `Elements/Toggle.md` become `Toggle`, and screenshot links use
+  `assets/images/<file>.png`.
 
 Every new element type needs:
 
