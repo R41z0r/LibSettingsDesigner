@@ -1,0 +1,42 @@
+name: Sync GitHub Wiki
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - docs/**
+      - scripts/sync_wiki_docs.py
+      - .github/workflows/sync-wiki.yml
+
+permissions:
+  contents: write
+
+jobs:
+  sync-wiki:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check out wiki
+        run: |
+          git clone "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.wiki.git" /tmp/libsettingsdesigner-wiki
+
+      - name: Sync docs to wiki
+        run: |
+          python3 scripts/sync_wiki_docs.py docs /tmp/libsettingsdesigner-wiki
+
+      - name: Commit and push wiki changes
+        run: |
+          cd /tmp/libsettingsdesigner-wiki
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "Wiki already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Sync wiki from docs"
+          git push origin HEAD:master

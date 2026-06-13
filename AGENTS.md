@@ -324,8 +324,11 @@ Maintain documentation as a wiki-style reference set:
 - The public GitHub wiki is a separate repository:
   `https://github.com/R41z0r/LibSettingsDesigner.wiki.git`.
 - `docs/` in this repository is the source copy for review and PRs; after
-  documentation changes are merged to `main`, sync the public wiki repository
-  as a separate commit.
+  documentation changes are merged to `main`, `.github/workflows/sync-wiki.yml`
+  syncs the public wiki repository automatically.
+- If the wiki sync workflow is unavailable, run
+  `python3 scripts/sync_wiki_docs.py docs <wiki-checkout>` and push the wiki
+  repository manually.
 - Do not add the wiki repository as a submodule or subtree unless the project
   owner explicitly requests a repository-structure change. The wiki has a flat
   page layout, while `docs/` is grouped by `API/`, `Elements/`, and `Examples/`.
