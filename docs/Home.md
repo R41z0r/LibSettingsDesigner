@@ -52,6 +52,7 @@ wrapper bridges, documenting elements, or validating changes.
 - [ReorderList](Elements/ReorderList.md)
 - [Notes](Elements/Notes.md)
 - [Dashboard](Elements/Dashboard.md)
+- [Expandable](Elements/Expandable.md)
 - [InfoPage](Elements/InfoPage.md)
 
 ## [Examples][Top]
@@ -64,6 +65,7 @@ wrapper bridges, documenting elements, or validating changes.
 - [Nested Database Values](Examples/Nested-Database-Values.md)
 - [Search and New Badges](Examples/Search-And-New-Badges.md)
 - [Runtime Refresh](Examples/Runtime-Refresh.md)
+- [Support Links](Examples/Support-Links.md)
 
 ## [Principles][Top]
 
