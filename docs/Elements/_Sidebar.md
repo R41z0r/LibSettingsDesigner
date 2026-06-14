@@ -11,23 +11,23 @@
 &nbsp; • [Category](Category.md "Category") \
 &nbsp; • [Page](Page.md "Page") \
 &nbsp; • [Group](Group.md "Group") \
+&nbsp; • [Dashboard](Dashboard.md "Dashboard") \
+&nbsp; • [InfoPage](InfoPage.md "InfoPage") \
+&nbsp; • [Custom](Custom.md "Custom Hosting") \
 &nbsp; • [Toggle](Toggle.md "Toggle") \
-&nbsp; • [Slider](Slider.md "Slider") \
+&nbsp; • [CheckboxDropdown](CheckboxDropdown.md "CheckboxDropdown") \
 &nbsp; • [Dropdown](Dropdown.md "Dropdown") \
 &nbsp; • [MultiDropdown](MultiDropdown.md "MultiDropdown") \
+&nbsp; • [SoundDropdown](SoundDropdown.md "SoundDropdown") \
 &nbsp; • [Input](Input.md "Input") \
+&nbsp; • [Slider](Slider.md "Slider") \
 &nbsp; • [Button](Button.md "Button") \
 &nbsp; • [ColorPicker](ColorPicker.md "ColorPicker") \
 &nbsp; • [ColorPalette](ColorPalette.md "ColorPalette") \
 &nbsp; • [ColorOverrides](ColorOverrides.md "ColorOverrides Legacy Alias") \
-&nbsp; • [SoundDropdown](SoundDropdown.md "SoundDropdown") \
-&nbsp; • [CheckboxDropdown](CheckboxDropdown.md "CheckboxDropdown") \
 &nbsp; • [ReorderList](ReorderList.md "ReorderList") \
-&nbsp; • [Custom](Custom.md "Custom Hosting") \
-&nbsp; • [Notes](Notes.md "Notes") \
-&nbsp; • [Dashboard](Dashboard.md "Dashboard") \
 &nbsp; • [Expandable](Expandable.md "Expandable") \
-&nbsp; • [InfoPage](InfoPage.md "InfoPage")
+&nbsp; • [Notes](Notes.md "Notes")
 
 **Other** \
 &nbsp; • [Config API](../API/Config-API.md "Config API") \
