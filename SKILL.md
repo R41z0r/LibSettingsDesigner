@@ -784,6 +784,7 @@ Read the specific element page before changing examples or behavior:
 | Sound selection/preview | `docs/Elements/SoundDropdown.md` |
 | Checkbox plus dropdown rows | `docs/Elements/CheckboxDropdown.md` |
 | Ordered editable lists | `docs/Elements/ReorderList.md` |
+| Host-rendered editors | `docs/Elements/Custom.md`, `docs/Examples/Custom-Hosted-Editors.md` |
 | Hover help/rich notes | `docs/Elements/Notes.md` |
 | Dashboard content | `docs/Elements/Dashboard.md` |
 | Static help pages | `docs/Elements/InfoPage.md` |
@@ -890,6 +891,95 @@ Expandable changelog entry:
   },
 }
 ```
+
+ReorderList order plus visibility:
+
+```lua
+app:RegisterControl("broker.columns", {
+  id = "columns",
+  type = "reorderlist",
+  label = "Columns",
+  showAddButton = false,
+  showRemoveButton = false,
+  showEntryID = false,
+  getEntries = function() return MyAddonDB.profile.columns end,
+  moveEntry = function(fromIndex, toIndex)
+    MyAddon.MoveColumn(fromIndex, toIndex)
+  end,
+  entryToggle = {
+    getValue = function(entryID, entry)
+      return entry.visible == true
+    end,
+    setValue = function(entryID, entry, visible)
+      entry.visible = visible == true
+    end,
+  },
+  rowActions = {
+    {
+      id = "rename",
+      label = "Rename",
+      visibleWhen = function(entry) return entry.custom == true end,
+      onClick = function(entryID)
+        MyAddon.OpenRenamePopup(entryID)
+      end,
+    },
+  },
+})
+```
+
+Dynamic ColorPalette with reset/inherit:
+
+```lua
+app:RegisterControl("groups.colors", {
+  id = "groupColors",
+  type = "colorpalette",
+  label = "Group colors",
+  entries = function()
+    return MyAddon.BuildGroupColorEntries()
+  end,
+  getColor = function(key)
+    local color = MyAddonDB.profile.groupColorOverrides[key]
+    if color then return color.r, color.g, color.b, color.a end
+  end,
+  setColor = function(key, r, g, b, a)
+    MyAddonDB.profile.groupColorOverrides[key] = { r = r, g = g, b = b, a = a or 1 }
+  end,
+  hasOverride = function(key)
+    return MyAddonDB.profile.groupColorOverrides[key] ~= nil
+  end,
+  clearColor = function(key)
+    MyAddonDB.profile.groupColorOverrides[key] = nil
+  end,
+  getInheritedColor = function(key)
+    return MyAddon.GetBaseGroupColor(key)
+  end,
+})
+```
+
+Custom hosted editor page:
+
+```lua
+app:RegisterPage({
+  id = "tools.rule-builder",
+  category = "tools",
+  title = "Rule Builder",
+  layout = "custom",
+  searchEntries = {
+    { id = "rule.create", label = "Create Rule", keywords = { "filter", "new" }, focusID = "create" },
+  },
+  getHeight = function() return 560 end,
+  render = function(parent, app, page, state, focusID)
+    return MyAddon.RuleBuilder:Render(parent, state, focusID)
+  end,
+  release = function(handle)
+    if handle and handle.Release then handle:Release() end
+  end,
+})
+```
+
+Use custom pages for table-like database editors first. Do not add a new
+generic `datatable` control unless multiple host addons have converged on the
+same column, sorting, search, selection, and row-action model.
 
 ## Dropdown and MultiDropdown Rules
 
