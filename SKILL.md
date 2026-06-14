@@ -481,7 +481,7 @@ Canonical direct fields:
 | Object | Canonical fields |
 | :----- | :--------------- |
 | Category | `id`, `title`, `description`, `order`, `icon`, `iconAtlas`, `iconKey` |
-| Page | `id`, `category`, `title`, `description`, `descriptionKey`, `order`, `icon`, `iconAtlas`, `iconKey`, `mainToggleID`, `pageKey`, `newTagID`, `onOpen`, `layout`, `type`, `content`, `blocks`, `infoBlocks` |
+| Page | `id`, `category`, `title`, `description`, `descriptionKey`, `order`, `icon`, `iconAtlas`, `iconKey`, `mainToggleID`, `pageKey`, `newTagID`, `onOpen`, `layout`, `type`, `content`, `blocks`, `infoBlocks`, `searchEntries`, `getHeight`, `render`, `refresh`, `release` |
 | Group | `id`, `title`, `order` |
 | Control | `id`, `key`, `type`, `label`, `description`, `default`, `dbDefault`, `getValue`, `setValue`, `getSelection`, `setSelection`, `setting`, `parentCheck`, `isEnabled`, visibility fields, search fields |
 
@@ -608,10 +608,11 @@ runtime actively consumes as UI behavior:
 | Input | `numeric`, `min`, `max`, `step`, `clampToRange`, `maxChars`, `readOnly`, `inputWidth`, `multiline` |
 | Button | `buttonText`, `onClick`, `setValue`, `trackCustomized = false` |
 | ColorPicker | `getColor`, `setColor`, `hasOpacity` |
-| ColorPalette | `entries`, `getColor`, `setColor`, `hasOpacity`, `colorizeLabel` |
+| ColorPalette | `entries`, `getColor`, `setColor`, `hasOpacity`, `colorizeLabel`, `hasOverride`, `clearColor`, `getInheritedColor`, `getDefaultColor` |
 | SoundDropdown | `soundResolver`, `previewSoundFunc`, `previewTooltip`, `playbackChannel`, `getPlaybackChannel`, `menuHeight` |
 | CheckboxDropdown | `dropdownKey`, `dropdownDefault`, `dropdownValues`, `dropdownOptions`, `dropdownList`, `dropdownOrder`, `dropdownGet`, `dropdownSet` |
-| ReorderList | `getEntries`, `addEntry`, `removeEntry`, `moveEntry`, `setEntryFormat`, `formatOptions`, `formatOrder`, `emptyText`, `addButtonText`, `addPopupText`, `addPopupTitle`, `numeric`, `maxChars`, `rowHeight` |
+| ReorderList | `getEntries`, `addEntry`, `removeEntry`, `moveEntry`, `setEntryFormat`, `formatOptions`, `formatOrder`, `formatEntryLabel`, `showEntryID`, `showAddButton`, `showRemoveButton`, `entryToggle`, `rowActions`, `emptyText`, `addButtonText`, `addPopupText`, `addPopupTitle`, `numeric`, `maxChars`, `rowHeight` |
+| Custom | `type = "custom"`, `rowHeight`, `getHeight`, `render`, `refresh`, `release` |
 | Keybind | Legacy/fallback bridge control; prefer host wrapper or `openLegacySettings` patterns. |
 
 Use `type = "colorpalette"` for multiple keyed colors in new code.
@@ -624,7 +625,6 @@ Do not document these as active UI behavior unless runtime support is added:
 - Input `multilineHeight`
 - ColorPicker `callback`
 - ColorPicker `colorizeLabel`
-- ColorPalette `getDefaultColor`
 
 ## Value Resolution Contract
 

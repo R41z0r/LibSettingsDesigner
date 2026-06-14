@@ -251,6 +251,7 @@ local LEGACY_CONTROL_METADATA_FIELDS = {
 	"bindingIndex",
 	"callback",
 	"clampToRange",
+	"clearColor",
 	"colorizeLabel",
 	"customDefaultText",
 	"customText",
@@ -280,14 +281,18 @@ local LEGACY_CONTROL_METADATA_FIELDS = {
 	"formatter",
 	"formatOptions",
 	"formatOrder",
+	"formatEntryLabel",
 	"frameHeight",
 	"frameWidth",
 	"generator",
 	"getColor",
 	"getDefaultColor",
+	"getHeight",
 	"getPlaybackChannel",
 	"getEntries",
 	"getSelection",
+	"getInheritedColor",
+	"hasOverride",
 	"groupID",
 	"groupTitle",
 	"hasOpacity",
@@ -324,10 +329,13 @@ local LEGACY_CONTROL_METADATA_FIELDS = {
 	"previewTooltip",
 	"readOnly",
 	"refreshOnChange",
+	"release",
 	"removeEntry",
+	"render",
 	"moveEntry",
 	"orderList",
 	"rowHeight",
+	"rowActions",
 	"richNote",
 	"richNotes",
 	"setColor",
@@ -335,6 +343,9 @@ local LEGACY_CONTROL_METADATA_FIELDS = {
 	"setSelected",
 	"setSelectedFunc",
 	"setSelection",
+	"showAddButton",
+	"showEntryID",
+	"showRemoveButton",
 	"selectionSource",
 	"soundResolver",
 	"step",
@@ -347,6 +358,7 @@ local LEGACY_CONTROL_METADATA_FIELDS = {
 	"values",
 	"visible",
 	"visibleWhen",
+	"entryToggle",
 }
 
 local function sortByOrderAndTitle(a, b)
@@ -384,6 +396,40 @@ local function rebuildSearchBlob(app, control)
 		end
 	end
 	control.searchBlob = table.concat(parts, " ")
+end
+
+local function buildSearchEntryBlob(app, page, entry)
+	local parts = {}
+	local category = page and app.categoriesByID[page.category or ""]
+	addSearchBlob(parts, entry.label or entry.title or entry.text or entry.id)
+	addSearchBlob(parts, entry.description or entry.desc)
+	addSearchBlob(parts, entry.keywords or entry.searchtags)
+	addSearchBlob(parts, entry.focusID or entry.focusId)
+	addSearchBlob(parts, page and page.title)
+	addSearchBlob(parts, category and category.title)
+	return table.concat(parts, " ")
+end
+
+local function rebuildPageSearchEntries(app, page)
+	page._searchEntries = {}
+	if type(page.searchEntries) ~= "table" then
+		return
+	end
+	for index, entry in ipairs(page.searchEntries) do
+		if type(entry) == "table" then
+			local id = entry.id or entry.key or (page.id .. ".search." .. tostring(index))
+			local result = copyTable(entry, {
+				id = id,
+				pageID = page.id,
+				_pageResult = true,
+				_searchEntry = true,
+			})
+			result.focusID = result.focusID or result.focusId or result.controlID or result.controlId
+			result.label = result.label or result.title or result.text or id
+			result.searchBlob = buildSearchEntryBlob(app, page, result)
+			page._searchEntries[#page._searchEntries + 1] = result
+		end
+	end
 end
 
 local function noteHasContent(note)
@@ -438,6 +484,7 @@ function AppMixin:RegisterPage(data)
 		self:RegisterCategory({ id = page.category, title = page.category, order = 1000 })
 	end
 	table.sort(self.pages, sortByOrderAndTitle)
+	rebuildPageSearchEntries(self, page)
 	return page
 end
 
@@ -889,6 +936,31 @@ function AppMixin:GetSearchResults(query, limit)
 				results[#results + 1] = control
 				if limit and #results >= limit then
 					break
+				end
+			end
+		end
+	end
+	for _, page in ipairs(self.pages) do
+		if self:IsPageVisible(page) then
+			for _, entry in ipairs(page._searchEntries or {}) do
+				local entryIsNew = self:IsPageNew(page)
+					or self:IsNewTagActive(entry.newTagID)
+					or self:IsNewTagActive(entry.id)
+				if not newOnly or entryIsNew then
+					local blob = entry.searchBlob or ""
+					local matched = true
+					for _, term in ipairs(terms) do
+						if not blob:find(term, 1, true) then
+							matched = false
+							break
+						end
+					end
+					if matched then
+						results[#results + 1] = entry
+						if limit and #results >= limit then
+							return results
+						end
+					end
 				end
 			end
 		end

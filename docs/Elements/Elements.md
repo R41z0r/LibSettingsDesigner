@@ -43,6 +43,7 @@ For all shared fields and aliases, see [Field Glossary](../Field-Glossary.md).
 | [SoundDropdown](SoundDropdown.md) | Single sound choice with preview support. |
 | [CheckboxDropdown](CheckboxDropdown.md) | Boolean setting plus related dropdown. |
 | [ReorderList](ReorderList.md) | Ordered editable list. |
+| [Custom](Custom.md) | Host-rendered controls or pages with library-owned navigation and lifecycle. |
 
 ## [Content Elements][Top]
 
@@ -68,6 +69,7 @@ For all shared fields and aliases, see [Field Glossary](../Field-Glossary.md).
 | Pick and preview a sound | [SoundDropdown](SoundDropdown.md) |
 | Toggle plus related mode/threshold | [CheckboxDropdown](CheckboxDropdown.md) |
 | Let users reorder entries | [ReorderList](ReorderList.md) |
+| Host a specialized editor | [Custom](Custom.md) |
 | Add long explanatory hover help | [Notes](Notes.md) |
 | Create a non-settings help page | [InfoPage](InfoPage.md) |
 | Add collapsible changelog text | [Expandable](Expandable.md) |

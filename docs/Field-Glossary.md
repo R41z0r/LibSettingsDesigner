@@ -120,9 +120,12 @@ app:RegisterPage(data)
 | `newTagID` | string | New badge tag for the page. |
 | `onOpen` | function | Called as `onOpen(page, app, state)` when the page opens. |
 | `order` | number | Sort order. |
-| `layout` | string | Use `"info"` for static/help pages. |
+| `layout` | string | Use `"info"` for static/help pages or `"custom"` for host-rendered pages. |
 | `content` | table | Info page content blocks. |
 | `blocks` / `infoBlocks` | table | Alternate info content tables. `blocks` alone does not select info-page rendering. |
+| `searchEntries` | table | Search-only child entries for custom/action pages. |
+| `render`, `refresh`, `release` | function | Custom page hosting callbacks. |
+| `getHeight` | function | Dynamic height for custom pages. |
 | `visible`, `isVisible`, `visibleWhen` | boolean/function | Show gates. |
 | `hidden`, `hiddenWhen` | boolean/function | Hide gates. |
 
@@ -254,11 +257,12 @@ app:RegisterControl("interface.names", {
 | Input | `numeric`, `min`, `max`, `maxChars`, `multiline`, `readOnly` | [Input](Elements/Input.md) |
 | Button | `buttonText`, `onClick`, `setValue` | [Button](Elements/Button.md) |
 | ColorPicker | `getColor`, `setColor`, `hasOpacity` | [ColorPicker](Elements/ColorPicker.md) |
-| ColorPalette | `entries`, `getColor`, `setColor`, `hasOpacity`, `colorizeLabel` | [ColorPalette](Elements/ColorPalette.md) |
+| ColorPalette | `entries`, `getColor`, `setColor`, `hasOverride`, `clearColor`, `getInheritedColor` | [ColorPalette](Elements/ColorPalette.md) |
 | ColorOverrides | Legacy alias for ColorPalette. | [ColorOverrides](Elements/ColorOverrides.md) |
 | SoundDropdown | `soundResolver`, `previewSoundFunc`, `playbackChannel` | [SoundDropdown](Elements/SoundDropdown.md) |
 | CheckboxDropdown | `dropdownKey`, `dropdownList`, `dropdownOrder`, `dropdownDefault` | [CheckboxDropdown](Elements/CheckboxDropdown.md) |
-| ReorderList | `getEntries`, `moveEntry`, `removeEntry`, `setEntryFormat` | [ReorderList](Elements/ReorderList.md) |
+| ReorderList | `getEntries`, `moveEntry`, `showAddButton`, `showRemoveButton`, `entryToggle`, `rowActions` | [ReorderList](Elements/ReorderList.md) |
+| Custom | `type = "custom"`, `render`, `refresh`, `release`, `getHeight`, `rowHeight` | [Custom](Elements/Custom.md) |
 | Notes | `note`, `notes`, `richNote`, `richNotes`, `blocks` | [Notes](Elements/Notes.md) |
 | Dashboard | `hero`, `cards`, `status`, `features`, `newEntries` | [Dashboard](Elements/Dashboard.md) |
 | InfoPage | `layout = "info"`, `content`, `entries` | [InfoPage](Elements/InfoPage.md) |
