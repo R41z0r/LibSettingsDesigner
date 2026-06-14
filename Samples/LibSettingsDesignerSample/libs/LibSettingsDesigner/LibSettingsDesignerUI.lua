@@ -2530,6 +2530,17 @@ function lib.GetReorderListRowHeight(control)
 	return math.max(220, 104 + (#entries * 32))
 end
 
+function lib.NormalizeTextValue(text, fallback)
+	if text == nil then
+		return fallback or ""
+	end
+	local textType = type(text)
+	if textType == "string" or textType == "number" or textType == "boolean" then
+		return tostring(text)
+	end
+	return fallback or ""
+end
+
 local function makeFlatButton(parent, text, width, height, iconSource, iconIsAtlas)
 	local button = CreateFrame("Button", nil, parent, "BackdropTemplate")
 	button:SetSize(width or 120, height or 26)
@@ -2548,7 +2559,7 @@ local function makeFlatButton(parent, text, width, height, iconSource, iconIsAtl
 	button.Text:SetPoint("RIGHT", button, "RIGHT", -10, 0)
 	button.Text:SetJustifyH("CENTER")
 	button.Text:SetJustifyV("MIDDLE")
-	button.Text:SetText(text or "")
+	button.Text:SetText(lib.NormalizeTextValue(text))
 	setTextColor(button.Text, TEXT.main)
 	button._eqolApplyVisual = lib.ApplyFlatButtonVisual
 	button._eqolOnEnter = function(self)
@@ -5514,7 +5525,7 @@ local function addPageFixedHeader(state, category, pagePath)
 	end
 
 	local L = getLocale(state.app)
-	local backLabel = L["configCenterBack"] or "Back"
+	local backLabel = lib.NormalizeTextValue(L["configCenterBack"], "Back")
 	local backButton = makeFlatButton(header, backLabel, 104, 28)
 	backButton:SetPoint("LEFT", header, "LEFT", 0, 0)
 	setFrameBackdrop(backButton, { 0.120, 0.105, 0.075, 0.95 }, { 0.55, 0.42, 0.18, 0.82 })
