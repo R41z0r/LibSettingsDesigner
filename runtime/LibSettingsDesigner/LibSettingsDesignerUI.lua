@@ -96,14 +96,28 @@ lib.LOCALES = {
 		configCenterLockWindowDesc = "Prevents the settings window from being moved by mouse drags.",
 		configCenterMultiDropdownFallbackDesc = "Choose one or more options.",
 		configCenterNoResults = "No settings found.",
+		configCenterAdd = "Add",
+		configCenterBack = "Back",
+		configCenterCancel = "Cancel",
+		configCenterDefaults = "Defaults",
+		configCenterDisabled = "Disabled",
+		configCenterEnabled = "Enabled",
+		configCenterKeyBindings = "Key Bindings",
+		configCenterNew = "New",
+		configCenterNotes = "Notes",
 		configCenterNone = "None",
+		configCenterOkay = "OK",
 		configCenterOpenButton = "Open",
 		configCenterOpen = "Open Settings",
 		configCenterOpenDesc = "Opens the modern settings center.",
+		configCenterPreview = "Preview",
+		configCenterRemove = "Remove",
 		configCenterSearchPlaceholder = "Search settings",
 		configCenterSetting = "setting",
 		configCenterSettings = "settings",
 		configCenterSliderFallbackDesc = "Adjust this value.",
+		configCenterSound = "Sound",
+		configCenterStatus = "Status",
 		configCenterTitle = "Settings",
 		configCenterUnlockWindow = "Unlock Window",
 	},
@@ -130,14 +144,28 @@ lib.LOCALES = {
 		configCenterLockWindowDesc = "Verhindert, dass das Einstellungsfenster per Maus verschoben wird.",
 		configCenterMultiDropdownFallbackDesc = "Wähle eine oder mehrere Optionen.",
 		configCenterNoResults = "Keine Einstellungen gefunden.",
+		configCenterAdd = "Hinzufügen",
+		configCenterBack = "Zurück",
+		configCenterCancel = "Abbrechen",
+		configCenterDefaults = "Standardwerte",
+		configCenterDisabled = "Deaktiviert",
+		configCenterEnabled = "Aktiviert",
+		configCenterKeyBindings = "Tastenbelegungen",
+		configCenterNew = "Neu",
+		configCenterNotes = "Notizen",
 		configCenterNone = "Keine",
+		configCenterOkay = "OK",
 		configCenterOpenButton = "Öffnen",
 		configCenterOpen = "Einstellungen öffnen",
 		configCenterOpenDesc = "Öffnet das moderne Einstellungscenter.",
+		configCenterPreview = "Vorschau",
+		configCenterRemove = "Entfernen",
 		configCenterSearchPlaceholder = "Einstellungen suchen",
 		configCenterSetting = "Einstellung",
 		configCenterSettings = "Einstellungen",
 		configCenterSliderFallbackDesc = "Passe diesen Wert an.",
+		configCenterSound = "Sound",
+		configCenterStatus = "Status",
 		configCenterTitle = "Einstellungen",
 		configCenterUnlockWindow = "Fenster entsperren",
 	},
@@ -164,14 +192,28 @@ lib.LOCALES = {
 		configCenterLockWindowDesc = "Impide mover la ventana de ajustes arrastrándola con el ratón.",
 		configCenterMultiDropdownFallbackDesc = "Elige una o más opciones.",
 		configCenterNoResults = "No se encontraron ajustes.",
+		configCenterAdd = "Añadir",
+		configCenterBack = "Atrás",
+		configCenterCancel = "Cancelar",
+		configCenterDefaults = "Predeterminados",
+		configCenterDisabled = "Desactivado",
+		configCenterEnabled = "Activado",
+		configCenterKeyBindings = "Asignaciones de teclas",
+		configCenterNew = "Nuevo",
+		configCenterNotes = "Notas",
 		configCenterNone = "Ninguno",
+		configCenterOkay = "Aceptar",
 		configCenterOpenButton = "Abrir",
 		configCenterOpen = "Abrir ajustes",
 		configCenterOpenDesc = "Abre el centro de ajustes moderno.",
+		configCenterPreview = "Vista previa",
+		configCenterRemove = "Eliminar",
 		configCenterSearchPlaceholder = "Buscar ajustes",
 		configCenterSetting = "ajuste",
 		configCenterSettings = "ajustes",
 		configCenterSliderFallbackDesc = "Ajusta este valor.",
+		configCenterSound = "Sonido",
+		configCenterStatus = "Estado",
 		configCenterTitle = "Ajustes",
 		configCenterUnlockWindow = "Desbloquear ventana",
 	},
@@ -198,14 +240,28 @@ lib.LOCALES = {
 		configCenterLockWindowDesc = "Impide mover la ventana de ajustes arrastrándola con el ratón.",
 		configCenterMultiDropdownFallbackDesc = "Elige una o más opciones.",
 		configCenterNoResults = "No se encontraron ajustes.",
+		configCenterAdd = "Añadir",
+		configCenterBack = "Atrás",
+		configCenterCancel = "Cancelar",
+		configCenterDefaults = "Predeterminados",
+		configCenterDisabled = "Desactivado",
+		configCenterEnabled = "Activado",
+		configCenterKeyBindings = "Asignaciones de teclas",
+		configCenterNew = "Nuevo",
+		configCenterNotes = "Notas",
 		configCenterNone = "Ninguno",
+		configCenterOkay = "Aceptar",
 		configCenterOpenButton = "Abrir",
 		configCenterOpen = "Abrir ajustes",
 		configCenterOpenDesc = "Abre el centro de ajustes moderno.",
+		configCenterPreview = "Vista previa",
+		configCenterRemove = "Eliminar",
 		configCenterSearchPlaceholder = "Buscar ajustes",
 		configCenterSetting = "ajuste",
 		configCenterSettings = "ajustes",
 		configCenterSliderFallbackDesc = "Ajusta este valor.",
+		configCenterSound = "Sonido",
+		configCenterStatus = "Estado",
 		configCenterTitle = "Ajustes",
 		configCenterUnlockWindow = "Desbloquear ventana",
 	},
@@ -232,14 +288,28 @@ lib.LOCALES = {
 		configCenterLockWindowDesc = "Empêche le déplacement de la fenêtre de réglages avec la souris.",
 		configCenterMultiDropdownFallbackDesc = "Choisissez une ou plusieurs options.",
 		configCenterNoResults = "Aucun réglage trouvé.",
+		configCenterAdd = "Ajouter",
+		configCenterBack = "Retour",
+		configCenterCancel = "Annuler",
+		configCenterDefaults = "Par défaut",
+		configCenterDisabled = "Désactivé",
+		configCenterEnabled = "Activé",
+		configCenterKeyBindings = "Raccourcis clavier",
+		configCenterNew = "Nouveau",
+		configCenterNotes = "Notes",
 		configCenterNone = "Aucun",
+		configCenterOkay = "OK",
 		configCenterOpenButton = "Ouvrir",
 		configCenterOpen = "Ouvrir les réglages",
 		configCenterOpenDesc = "Ouvre le centre de réglages moderne.",
+		configCenterPreview = "Aperçu",
+		configCenterRemove = "Supprimer",
 		configCenterSearchPlaceholder = "Rechercher des réglages",
 		configCenterSetting = "réglage",
 		configCenterSettings = "réglages",
 		configCenterSliderFallbackDesc = "Ajustez cette valeur.",
+		configCenterSound = "Son",
+		configCenterStatus = "État",
 		configCenterTitle = "Réglages",
 		configCenterUnlockWindow = "Déverrouiller la fenêtre",
 	},
@@ -266,14 +336,28 @@ lib.LOCALES = {
 		configCenterLockWindowDesc = "Impedisce di spostare la finestra delle impostazioni trascinandola con il mouse.",
 		configCenterMultiDropdownFallbackDesc = "Scegli una o più opzioni.",
 		configCenterNoResults = "Nessuna impostazione trovata.",
+		configCenterAdd = "Aggiungi",
+		configCenterBack = "Indietro",
+		configCenterCancel = "Annulla",
+		configCenterDefaults = "Predefiniti",
+		configCenterDisabled = "Disabilitato",
+		configCenterEnabled = "Abilitato",
+		configCenterKeyBindings = "Tasti rapidi",
+		configCenterNew = "Nuovo",
+		configCenterNotes = "Note",
 		configCenterNone = "Nessuno",
+		configCenterOkay = "OK",
 		configCenterOpenButton = "Apri",
 		configCenterOpen = "Apri impostazioni",
 		configCenterOpenDesc = "Apre il centro impostazioni moderno.",
+		configCenterPreview = "Anteprima",
+		configCenterRemove = "Rimuovi",
 		configCenterSearchPlaceholder = "Cerca impostazioni",
 		configCenterSetting = "impostazione",
 		configCenterSettings = "impostazioni",
 		configCenterSliderFallbackDesc = "Regola questo valore.",
+		configCenterSound = "Suono",
+		configCenterStatus = "Stato",
 		configCenterTitle = "Impostazioni",
 		configCenterUnlockWindow = "Sblocca finestra",
 	},
@@ -300,14 +384,28 @@ lib.LOCALES = {
 		configCenterLockWindowDesc = "마우스 드래그로 설정 창을 이동하지 못하게 합니다.",
 		configCenterMultiDropdownFallbackDesc = "하나 이상의 옵션을 선택합니다.",
 		configCenterNoResults = "설정을 찾을 수 없습니다.",
+		configCenterAdd = "추가",
+		configCenterBack = "뒤로",
+		configCenterCancel = "취소",
+		configCenterDefaults = "기본값",
+		configCenterDisabled = "비활성화됨",
+		configCenterEnabled = "활성화됨",
+		configCenterKeyBindings = "단축키",
+		configCenterNew = "신규",
+		configCenterNotes = "메모",
 		configCenterNone = "없음",
+		configCenterOkay = "확인",
 		configCenterOpenButton = "열기",
 		configCenterOpen = "설정 열기",
 		configCenterOpenDesc = "최신 설정 센터를 엽니다.",
+		configCenterPreview = "미리보기",
+		configCenterRemove = "제거",
 		configCenterSearchPlaceholder = "설정 검색",
 		configCenterSetting = "설정",
 		configCenterSettings = "설정",
 		configCenterSliderFallbackDesc = "이 값을 조정합니다.",
+		configCenterSound = "소리",
+		configCenterStatus = "상태",
 		configCenterTitle = "설정",
 		configCenterUnlockWindow = "창 잠금 해제",
 	},
@@ -334,14 +432,28 @@ lib.LOCALES = {
 		configCenterLockWindowDesc = "Impede que a janela de configurações seja movida ao arrastar com o mouse.",
 		configCenterMultiDropdownFallbackDesc = "Escolha uma ou mais opções.",
 		configCenterNoResults = "Nenhuma configuração encontrada.",
+		configCenterAdd = "Adicionar",
+		configCenterBack = "Voltar",
+		configCenterCancel = "Cancelar",
+		configCenterDefaults = "Padrões",
+		configCenterDisabled = "Desativado",
+		configCenterEnabled = "Ativado",
+		configCenterKeyBindings = "Atalhos de teclado",
+		configCenterNew = "Novo",
+		configCenterNotes = "Notas",
 		configCenterNone = "Nenhum",
+		configCenterOkay = "OK",
 		configCenterOpenButton = "Abrir",
 		configCenterOpen = "Abrir configurações",
 		configCenterOpenDesc = "Abre a central moderna de configurações.",
+		configCenterPreview = "Prévia",
+		configCenterRemove = "Remover",
 		configCenterSearchPlaceholder = "Buscar configurações",
 		configCenterSetting = "configuração",
 		configCenterSettings = "configurações",
 		configCenterSliderFallbackDesc = "Ajuste este valor.",
+		configCenterSound = "Som",
+		configCenterStatus = "Status",
 		configCenterTitle = "Configurações",
 		configCenterUnlockWindow = "Desbloquear janela",
 	},
@@ -368,14 +480,28 @@ lib.LOCALES = {
 		configCenterLockWindowDesc = "Запрещает перемещать окно настроек перетаскиванием мышью.",
 		configCenterMultiDropdownFallbackDesc = "Выберите один или несколько вариантов.",
 		configCenterNoResults = "Настройки не найдены.",
+		configCenterAdd = "Добавить",
+		configCenterBack = "Назад",
+		configCenterCancel = "Отмена",
+		configCenterDefaults = "По умолчанию",
+		configCenterDisabled = "Отключено",
+		configCenterEnabled = "Включено",
+		configCenterKeyBindings = "Назначения клавиш",
+		configCenterNew = "Новое",
+		configCenterNotes = "Заметки",
 		configCenterNone = "Нет",
+		configCenterOkay = "OK",
 		configCenterOpenButton = "Открыть",
 		configCenterOpen = "Открыть настройки",
 		configCenterOpenDesc = "Открывает современный центр настроек.",
+		configCenterPreview = "Предпросмотр",
+		configCenterRemove = "Удалить",
 		configCenterSearchPlaceholder = "Поиск настроек",
 		configCenterSetting = "настройка",
 		configCenterSettings = "настройки",
 		configCenterSliderFallbackDesc = "Измените это значение.",
+		configCenterSound = "Звук",
+		configCenterStatus = "Статус",
 		configCenterTitle = "Настройки",
 		configCenterUnlockWindow = "Открепить окно",
 	},
@@ -402,14 +528,28 @@ lib.LOCALES = {
 		configCenterLockWindowDesc = "防止通过鼠标拖动移动设置窗口。",
 		configCenterMultiDropdownFallbackDesc = "选择一个或多个选项。",
 		configCenterNoResults = "未找到设置。",
+		configCenterAdd = "添加",
+		configCenterBack = "返回",
+		configCenterCancel = "取消",
+		configCenterDefaults = "默认值",
+		configCenterDisabled = "已禁用",
+		configCenterEnabled = "已启用",
+		configCenterKeyBindings = "按键绑定",
+		configCenterNew = "新",
+		configCenterNotes = "备注",
 		configCenterNone = "无",
+		configCenterOkay = "确定",
 		configCenterOpenButton = "打开",
 		configCenterOpen = "打开设置",
 		configCenterOpenDesc = "打开现代设置中心。",
+		configCenterPreview = "预览",
+		configCenterRemove = "移除",
 		configCenterSearchPlaceholder = "搜索设置",
 		configCenterSetting = "设置",
 		configCenterSettings = "设置",
 		configCenterSliderFallbackDesc = "调整此值。",
+		configCenterSound = "声音",
+		configCenterStatus = "状态",
 		configCenterTitle = "设置",
 		configCenterUnlockWindow = "解锁窗口",
 	},
@@ -436,14 +576,28 @@ lib.LOCALES = {
 		configCenterLockWindowDesc = "防止透過滑鼠拖曳移動設定視窗。",
 		configCenterMultiDropdownFallbackDesc = "選擇一個或多個選項。",
 		configCenterNoResults = "找不到設定。",
+		configCenterAdd = "新增",
+		configCenterBack = "返回",
+		configCenterCancel = "取消",
+		configCenterDefaults = "預設值",
+		configCenterDisabled = "已停用",
+		configCenterEnabled = "已啟用",
+		configCenterKeyBindings = "按鍵綁定",
+		configCenterNew = "新增",
+		configCenterNotes = "備註",
 		configCenterNone = "無",
+		configCenterOkay = "確定",
 		configCenterOpenButton = "開啟",
 		configCenterOpen = "開啟設定",
 		configCenterOpenDesc = "開啟現代設定中心。",
+		configCenterPreview = "預覽",
+		configCenterRemove = "移除",
 		configCenterSearchPlaceholder = "搜尋設定",
 		configCenterSetting = "設定",
 		configCenterSettings = "設定",
 		configCenterSliderFallbackDesc = "調整此值。",
+		configCenterSound = "音效",
+		configCenterStatus = "狀態",
 		configCenterTitle = "設定",
 		configCenterUnlockWindow = "解除鎖定視窗",
 	},
@@ -1888,7 +2042,8 @@ function lib.ShowControlNotePanel(state, row, control)
 	local width = getControlNotePanelWidth(control, notes)
 	local textWidth = width - (panel.NoteInset * 2)
 	local y = -panel.NoteInset
-	local label = _G.NOTES_LABEL or _G.NOTES
+	local L = getLocale(state and state.app)
+	local label = L["configCenterNotes"] or "Notes"
 	if label then
 		y = lib.AddNoteText(panel, label, TEXT.gold, y, textWidth, FONT_HEADER)
 	end
@@ -2007,7 +2162,8 @@ function lib.FormatControlValue(control, value)
 		if type(value) == "number" then
 			text = string.format("%.2f", value):gsub("(%..-)0+$", "%1"):gsub("%.$", "")
 		elseif type(value) == "boolean" then
-			text = value and (_G.ENABLED or "Enabled") or (_G.DISABLED or "Disabled")
+			local L = getLibLocale()
+			text = value and (L["configCenterEnabled"] or "Enabled") or (L["configCenterDisabled"] or "Disabled")
 		elseif value ~= nil then
 			text = tostring(value)
 		else
@@ -2298,7 +2454,8 @@ function lib.GetMultiSummary(app, control)
 		end
 	end
 	if selectedCount == 0 then
-		return control.customDefaultText or _G.NONE or "None"
+		local L = getLibLocale()
+		return control.customDefaultText or L["configCenterNone"] or "None"
 	end
 	if selectedCount > #labels then
 		return table.concat(labels, ", ") .. " +" .. tostring(selectedCount - #labels)
@@ -2883,7 +3040,7 @@ local function addStatusChip(parent, text, color, width)
 	return chip
 end
 
-function lib.CreateNewBadge(parent)
+function lib.CreateNewBadge(parent, app)
 	local ok, badge = pcall(CreateFrame, "Frame", nil, parent, "NewFeatureLabelNoAnimateTemplate")
 	if not ok or not badge then
 		ok, badge = pcall(CreateFrame, "Frame", nil, parent, "NewFeatureLabelTemplate")
@@ -2893,7 +3050,8 @@ function lib.CreateNewBadge(parent)
 		badge:SetShown(true)
 		return badge
 	end
-	local chip = addStatusChip(parent, _G.NEW or "New", TEXT.gold, 54)
+	local L = getLocale(app)
+	local chip = addStatusChip(parent, L["configCenterNew"] or "New", TEXT.gold, 54)
 	return chip
 end
 
@@ -3059,7 +3217,8 @@ local function addDashboardStatusPanel(state, stats, statusConfig)
 
 	local panel = createContentFrame(state, 130)
 	applyBackdrop(panel, DETAIL_SECTION_BG, DASHBOARD_CARD_BORDER, "dashboardCard")
-	local title = createText(panel, FONT_TITLE, statusConfig.title or (_G.STATUS or "Status"), TEXT.gold)
+	local L = getLocale(app)
+	local title = createText(panel, FONT_TITLE, statusConfig.title or (L["configCenterStatus"] or "Status"), TEXT.gold)
 	title:SetPoint("TOPLEFT", panel, "TOPLEFT", 14, -13)
 	title:SetPoint("RIGHT", panel, "RIGHT", -14, 0)
 	title:SetHeight(24)
@@ -3195,13 +3354,15 @@ local function ensureSoundPreviewButton(button)
 	preview:SetScript("OnEnter", function(self)
 		if self.Icon then self.Icon:SetVertexColor(1, 0.82, 0.35, 1) end
 		if _G.GameTooltip then
+			local L = getLibLocale()
+			local soundText = L["configCenterSound"] or "Sound"
 			_G.GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-			_G.GameTooltip:SetText(self.LibSettingsDesignerSoundLabel or self.LibSettingsDesignerSoundValue or _G.PREVIEW or _G.SOUND or "Preview")
+			_G.GameTooltip:SetText(self.LibSettingsDesignerSoundLabel or self.LibSettingsDesignerSoundValue or L["configCenterPreview"] or soundText or "Preview")
 			local tooltip = self.LibSettingsDesignerControl and self.LibSettingsDesignerControl.previewTooltip
 			if tooltip and tooltip ~= "" then
 				_G.GameTooltip:AddLine(tooltip, 1, 1, 1, true)
-			elseif _G.SOUND then
-				_G.GameTooltip:AddLine(_G.SOUND, 1, 1, 1, true)
+			elseif soundText then
+				_G.GameTooltip:AddLine(soundText, 1, 1, 1, true)
 			end
 			_G.GameTooltip:Show()
 		end
@@ -4034,10 +4195,11 @@ end
 
 function lib.ReorderList.EnsurePopup()
 	if StaticPopupDialogs.LIB_SETTINGS_DESIGNER_REORDER_LIST_ADD then return end
+	local L = getLibLocale()
 	StaticPopupDialogs.LIB_SETTINGS_DESIGNER_REORDER_LIST_ADD = {
 		text = "%s",
-		button1 = _G.ADD or "Add",
-		button2 = _G.CANCEL or "Cancel",
+		button1 = L["configCenterAdd"] or "Add",
+		button2 = L["configCenterCancel"] or "Cancel",
 		hasEditBox = true,
 		editBoxWidth = 180,
 		timeout = 0,
@@ -4126,7 +4288,7 @@ function lib.AddReorderListWidget(row, app, control, opts)
 	opts = opts or {}
 	local L = getLocale(app)
 	local top = opts.startY or -56
-	local addButton = makeFlatButton(row, control.addButtonText or (_G.ADD or "Add"), 92, 24)
+	local addButton = makeFlatButton(row, control.addButtonText or (L["configCenterAdd"] or "Add"), 92, 24)
 	addButton:SetPoint("TOPLEFT", row, "TOPLEFT", FIELD_CONTROL_LEFT, top)
 	row.actionButton = addButton
 	addButton:SetScript("OnClick", function()
@@ -4152,7 +4314,7 @@ function lib.AddReorderListWidget(row, app, control, opts)
 	local function refreshRows()
 		local enabled = app:IsControlEnabled(control)
 		local entries = lib.ReorderList.GetEntries(control)
-		status.Text:SetText(#entries == 0 and (control.emptyText or L["configCenterNone"] or _G.NONE or "None") or "")
+		status.Text:SetText(#entries == 0 and (control.emptyText or L["configCenterNone"] or "None") or "")
 		for index, entry in ipairs(entries) do
 			local item = row.reorderRows[index]
 			if not item then
@@ -4177,7 +4339,7 @@ function lib.AddReorderListWidget(row, app, control, opts)
 				item.MoveDown:SetPoint("RIGHT", item, "RIGHT", -98, 0)
 				item.MoveDown.Arrow = createAssetArrow(item.MoveDown, app, 12, "dropdown", "down")
 				item.MoveDown.Arrow:SetPoint("CENTER")
-				item.Remove = makeFlatButton(item, _G.REMOVE or "Remove", 84, 22)
+				item.Remove = makeFlatButton(item, L["configCenterRemove"] or "Remove", 84, 22)
 				item.Remove:SetPoint("RIGHT", item, "RIGHT", -8, 0)
 				row.reorderRows[index] = item
 			end
@@ -4269,6 +4431,7 @@ end
 
 local function addSettingRow(state, control, pathText, parent, yOffset, width)
 	local app = state.app
+	local L = getLocale(app)
 	local _ = pathText
 	local controlType = getControlType(control)
 	local layoutType = getControlLayoutType(control)
@@ -4309,7 +4472,6 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 	elseif control.description and control.description ~= "" then
 		descText = lib.CompactDescription(control.description)
 	elseif layoutType == "complex" then
-		local L = getLocale(app)
 		descText = L["configCenterAdvancedSettingDesc"] or "Open the related editor or action for this setting."
 	elseif layoutType == "stacked" or controlType == "button" or controlType == "colorpalette" then
 		descText = lib.GetFallbackControlDescription(app, control)
@@ -4497,7 +4659,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 			desc:SetPoint("RIGHT", row, "RIGHT", -18, 0)
 			desc:SetHeight(control.description and control.description ~= "" and 36 or 1)
 		end
-		local button = makeFlatButton(row, control.buttonText or (_G.OKAY or "OK"), 112, 26)
+		local button = makeFlatButton(row, control.buttonText or (L["configCenterOkay"] or "OK"), 112, 26)
 		button:SetPoint(compact and "RIGHT" or "BOTTOMRIGHT", row, compact and "RIGHT" or "BOTTOMRIGHT", -14, compact and 0 or 14)
 		row.actionButton = button
 		button:SetScript("OnClick", function()
@@ -4525,7 +4687,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 				point = compact and { "RIGHT", row, "RIGHT", -14, 0 } or { "BOTTOMRIGHT", row, "BOTTOMRIGHT", -14, 14 },
 				width = 150,
 			})
-			local badge = addStatusChip(row, _G.KEY_BINDINGS or "Key Bindings", TEXT.muted, 92)
+			local badge = addStatusChip(row, L["configCenterKeyBindings"] or "Key Bindings", TEXT.muted, 92)
 			badge:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", textLeft, 15)
 		end
 	end
@@ -4579,8 +4741,8 @@ local function confirmResetCurrentPage(state)
 		return
 	end
 	StaticPopupDialogs.LIB_SETTINGS_DESIGNER_CENTER_RESET_DEFAULTS = StaticPopupDialogs.LIB_SETTINGS_DESIGNER_CENTER_RESET_DEFAULTS or {
-		button1 = _G.OKAY or "OK",
-		button2 = _G.CANCEL or "Cancel",
+		button1 = L["configCenterOkay"] or "OK",
+		button2 = L["configCenterCancel"] or "Cancel",
 		timeout = 0,
 		whileDead = true,
 		hideOnEscape = true,
@@ -4876,7 +5038,7 @@ local function renderDashboard(state)
 		customizedPages = #enabledPages == 0 and collectCustomizedPages(app, 5) or {}
 	end
 	local featurePages = #enabledPages > 0 and enabledPages or customizedPages
-	local featureBadgeText = #enabledPages > 0 and (featureConfig.enabledBadge or _G.ENABLED or "")
+	local featureBadgeText = #enabledPages > 0 and (featureConfig.enabledBadge or L["configCenterEnabled"] or "")
 		or (featureConfig.customizedBadge or "")
 	local featureTitleText = #enabledPages > 0 and (featureConfig.enabledTitle or L["configCenterSettings"] or "Settings")
 		or (featureConfig.customizedTitle or L["configCenterSettings"] or "Settings")
@@ -4968,6 +5130,7 @@ local function renderCategoryOverview(state, categoryID)
 end
 
 local function collectPageGroups(app, page, mainToggle)
+	local L = getLocale(app)
 	local groups = {}
 	local groupsByID = {}
 	for _, group in ipairs(page.groups or {}) do
@@ -4988,7 +5151,7 @@ local function collectPageGroups(app, page, mainToggle)
 			if not entry then
 				entry = {
 					id = groupID,
-					title = control.groupTitle or (_G.SETTINGS or "Settings"),
+					title = control.groupTitle or (L["configCenterTitle"] or "Settings"),
 					order = 100000,
 					controls = {},
 				}
@@ -5072,7 +5235,8 @@ local function addPageFixedHeader(state, category, pagePath)
 		header:SetFrameLevel((state.frame.Scroll:GetFrameLevel() or 1) + 2)
 	end
 
-	local backLabel = _G.BACK or "Back"
+	local L = getLocale(state.app)
+	local backLabel = L["configCenterBack"] or "Back"
 	local backButton = makeFlatButton(header, backLabel, 104, 28)
 	backButton:SetPoint("LEFT", header, "LEFT", 0, 0)
 	setFrameBackdrop(backButton, { 0.120, 0.105, 0.075, 0.95 }, { 0.55, 0.42, 0.18, 0.82 })
@@ -5408,7 +5572,8 @@ function lib.RenderInfoPageEntry(state, section, entry, y, width, path, depth)
 		return y - (tonumber(entry.height) or 10)
 	end
 	if entryType == "button" then
-		local button = makeFlatButton(section, entry.text or entry.label or (_G.OKAY or "OK"), tonumber(entry.width) or 190, tonumber(entry.height) or 28, entry.icon, entry.iconAtlas == true)
+		local L = getLocale(state.app)
+		local button = makeFlatButton(section, entry.text or entry.label or (L["configCenterOkay"] or "OK"), tonumber(entry.width) or 190, tonumber(entry.height) or 28, entry.icon, entry.iconAtlas == true)
 		button:SetPoint("TOPLEFT", section, "TOPLEFT", x, y)
 		button:SetScript("OnClick", function()
 			if type(entry.onClick) == "function" then
@@ -5541,7 +5706,8 @@ function lib.RenderInfoPageWrappedButtonRun(state, section, entries, startIndex,
 		for _, item in ipairs(row.entries) do
 			currentX = currentX + item.gap
 			local entry = item.entry
-			local button = makeFlatButton(section, entry.text or entry.label or (_G.OKAY or "OK"), item.width, item.height, entry.icon, entry.iconAtlas == true)
+			local L = getLocale(state.app)
+			local button = makeFlatButton(section, entry.text or entry.label or (L["configCenterOkay"] or "OK"), item.width, item.height, entry.icon, entry.iconAtlas == true)
 			button:SetPoint("TOPLEFT", section, "TOPLEFT", x + currentX, y)
 			button:SetScript("OnClick", function()
 				if type(entry.onClick) == "function" then
@@ -6263,7 +6429,7 @@ local function createFrame(app)
 		frame:Hide()
 	end)
 
-	frame.ResetButton = makeFlatButton(frame.TopBar, _G.DEFAULTS or _G.RESET or "Defaults", 104, 28)
+	frame.ResetButton = makeFlatButton(frame.TopBar, L["configCenterDefaults"] or "Defaults", 104, 28)
 	frame.ResetButton:SetPoint("RIGHT", frame.TopBar, "RIGHT", -12, 0)
 	setFrameBackdrop(frame.ResetButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
 	setTextColor(frame.ResetButton.Text, TEXT.topbarGold)

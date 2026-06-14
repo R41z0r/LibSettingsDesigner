@@ -345,7 +345,7 @@ app = Config:RegisterAddOn(addonName, {
 			features = {
 				enabledTitle = "Enabled Sample Pages",
 				customizedTitle = "Customized Sample Pages",
-				enabledBadge = ENABLED or "Enabled",
+				enabledBadge = "Enabled",
 				customizedBadge = "Changed",
 				limit = 5,
 			},
@@ -357,10 +357,10 @@ app = Config:RegisterAddOn(addonName, {
 	end,
 })
 
-app:RegisterCategory({ id = "general", title = GENERAL or "General", iconAtlas = "communities-icon-chat", order = 100 })
+app:RegisterCategory({ id = "general", title = "General", iconAtlas = "communities-icon-chat", order = 100 })
 app:RegisterCategory({ id = "visuals", title = "Visuals", iconAtlas = "transmog-icon-revert", order = 200 })
 app:RegisterCategory({ id = "advanced", title = "Advanced", iconAtlas = "Professions-Icon-Quality-Tier5", order = 300 })
-app:RegisterCategory({ id = "help", title = HELP_LABEL or "Help", iconAtlas = "QuestNormal", order = 900 })
+app:RegisterCategory({ id = "help", title = "Help", iconAtlas = "QuestNormal", order = 900 })
 
 app:RegisterPage({
 	id = "general.behavior",
@@ -381,7 +381,7 @@ app:RegisterControl("general.behavior", {
 	groupID = "core",
 	groupTitle = "Core",
 	type = "toggle",
-	label = ENABLE or "Enable",
+	label = "Enable",
 	description = "Master switch for the sample addon.",
 	keywords = { "master", "on", "off" },
 	default = true,
@@ -439,7 +439,7 @@ app:RegisterControl("general.behavior", {
 	default = true,
 	dropdownKey = "announceChannel",
 	dropdownDefault = "SAY",
-	dropdownList = { SAY = SAY or "Say", PARTY = PARTY or "Party", RAID = RAID or "Raid" },
+	dropdownList = { SAY = "Say", PARTY = "Party", RAID = "Raid" },
 	dropdownOrder = { "SAY", "PARTY", "RAID" },
 	parentCheck = function() return DB().enabled == true end,
 	order = 200,
@@ -656,7 +656,7 @@ app:RegisterControl("advanced.shortcuts", {
 	description = "Add, remove, move, drag, and format controls.",
 	newTagID = "shortcuts",
 	rowHeight = 250,
-	addButtonText = ADD or "Add",
+	addButtonText = "Add",
 	addPopupTitle = "Add Shortcut",
 	addPopupText = "Enter a shortcut label.",
 	emptyText = "No shortcuts configured.",

@@ -999,7 +999,11 @@ local function registerBlizzardSettingsBridge(app)
 			app.opts.openSettings(app)
 		end
 	end
-	local button = _G.CreateSettingsButtonInitializer(title, _G.SETTINGS or "Settings", openSettings, nil, false)
+	local locale = type(app.opts.locale) == "table" and app.opts.locale or nil
+	local buttonText = app.opts.blizzardSettingsButtonText or app.opts.settingsButtonText
+		or (locale and (locale.configCenterTitle or locale.configCenterSettings))
+		or "Settings"
+	local button = _G.CreateSettingsButtonInitializer(title, buttonText, openSettings, nil, false)
 	layout:AddInitializer(button)
 	app.blizzardSettingsCategory = category
 end
