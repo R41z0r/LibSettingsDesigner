@@ -112,6 +112,7 @@ lib.LOCALES = {
 		configCenterOpenDesc = "Opens the modern settings center.",
 		configCenterPreview = "Preview",
 		configCenterRemove = "Remove",
+		configCenterResetColor = "Reset color",
 		configCenterSearchPlaceholder = "Search settings",
 		configCenterSetting = "setting",
 		configCenterSettings = "settings",
@@ -160,6 +161,7 @@ lib.LOCALES = {
 		configCenterOpenDesc = "Öffnet das moderne Einstellungscenter.",
 		configCenterPreview = "Vorschau",
 		configCenterRemove = "Entfernen",
+		configCenterResetColor = "Farbe zurücksetzen",
 		configCenterSearchPlaceholder = "Einstellungen suchen",
 		configCenterSetting = "Einstellung",
 		configCenterSettings = "Einstellungen",
@@ -208,6 +210,7 @@ lib.LOCALES = {
 		configCenterOpenDesc = "Abre el centro de ajustes moderno.",
 		configCenterPreview = "Vista previa",
 		configCenterRemove = "Eliminar",
+		configCenterResetColor = "Restablecer color",
 		configCenterSearchPlaceholder = "Buscar ajustes",
 		configCenterSetting = "ajuste",
 		configCenterSettings = "ajustes",
@@ -256,6 +259,7 @@ lib.LOCALES = {
 		configCenterOpenDesc = "Abre el centro de ajustes moderno.",
 		configCenterPreview = "Vista previa",
 		configCenterRemove = "Eliminar",
+		configCenterResetColor = "Restablecer color",
 		configCenterSearchPlaceholder = "Buscar ajustes",
 		configCenterSetting = "ajuste",
 		configCenterSettings = "ajustes",
@@ -304,6 +308,7 @@ lib.LOCALES = {
 		configCenterOpenDesc = "Ouvre le centre de réglages moderne.",
 		configCenterPreview = "Aperçu",
 		configCenterRemove = "Supprimer",
+		configCenterResetColor = "Réinitialiser la couleur",
 		configCenterSearchPlaceholder = "Rechercher des réglages",
 		configCenterSetting = "réglage",
 		configCenterSettings = "réglages",
@@ -352,6 +357,7 @@ lib.LOCALES = {
 		configCenterOpenDesc = "Apre il centro impostazioni moderno.",
 		configCenterPreview = "Anteprima",
 		configCenterRemove = "Rimuovi",
+		configCenterResetColor = "Reimposta colore",
 		configCenterSearchPlaceholder = "Cerca impostazioni",
 		configCenterSetting = "impostazione",
 		configCenterSettings = "impostazioni",
@@ -400,6 +406,7 @@ lib.LOCALES = {
 		configCenterOpenDesc = "최신 설정 센터를 엽니다.",
 		configCenterPreview = "미리보기",
 		configCenterRemove = "제거",
+		configCenterResetColor = "색상 초기화",
 		configCenterSearchPlaceholder = "설정 검색",
 		configCenterSetting = "설정",
 		configCenterSettings = "설정",
@@ -448,6 +455,7 @@ lib.LOCALES = {
 		configCenterOpenDesc = "Abre a central moderna de configurações.",
 		configCenterPreview = "Prévia",
 		configCenterRemove = "Remover",
+		configCenterResetColor = "Redefinir cor",
 		configCenterSearchPlaceholder = "Buscar configurações",
 		configCenterSetting = "configuração",
 		configCenterSettings = "configurações",
@@ -496,6 +504,7 @@ lib.LOCALES = {
 		configCenterOpenDesc = "Открывает современный центр настроек.",
 		configCenterPreview = "Предпросмотр",
 		configCenterRemove = "Удалить",
+		configCenterResetColor = "Сбросить цвет",
 		configCenterSearchPlaceholder = "Поиск настроек",
 		configCenterSetting = "настройка",
 		configCenterSettings = "настройки",
@@ -544,6 +553,7 @@ lib.LOCALES = {
 		configCenterOpenDesc = "打开现代设置中心。",
 		configCenterPreview = "预览",
 		configCenterRemove = "移除",
+		configCenterResetColor = "重置颜色",
 		configCenterSearchPlaceholder = "搜索设置",
 		configCenterSetting = "设置",
 		configCenterSettings = "设置",
@@ -592,6 +602,7 @@ lib.LOCALES = {
 		configCenterOpenDesc = "開啟現代設定中心。",
 		configCenterPreview = "預覽",
 		configCenterRemove = "移除",
+		configCenterResetColor = "重設顏色",
 		configCenterSearchPlaceholder = "搜尋設定",
 		configCenterSetting = "設定",
 		configCenterSettings = "設定",
@@ -1440,6 +1451,14 @@ end
 local function getSettingRowHeight(control, state)
 	local layoutType = getControlLayoutType(control)
 	local controlType = getControlType(control)
+	if controlType == "custom" and type(control.getHeight) == "function" then
+		local ok, height = pcall(control.getHeight, state and state.app, control, state)
+		if ok and tonumber(height) then
+			return math.max(44, tonumber(height))
+		end
+	elseif controlType == "custom" then
+		return tonumber(control.height or control.rowHeight) or 220
+	end
 	if lib.IsCompactDensity(state) then
 		if layoutType == "boolean" then
 			return 44
@@ -1448,7 +1467,7 @@ local function getSettingRowHeight(control, state)
 			return 66
 		end
 		if controlType == "colorpalette" then
-			return lib.GetColorOverridesRowHeight(control)
+			return lib.GetColorOverridesRowHeight(control, state and state.app)
 		end
 		if controlType == "reorderlist" then
 			return lib.GetReorderListRowHeight(control)
@@ -1465,7 +1484,7 @@ local function getSettingRowHeight(control, state)
 		return hasUsefulDescription(control) and SLIDER_ROW_HEIGHT or SLIDER_ROW_HEIGHT_COMPACT
 	end
 	if controlType == "colorpalette" then
-		return lib.GetColorOverridesRowHeight(control)
+		return lib.GetColorOverridesRowHeight(control, state and state.app)
 	end
 	if controlType == "reorderlist" then
 		return lib.GetReorderListRowHeight(control)
@@ -1578,6 +1597,31 @@ local function clearFrameList(list)
 	end
 	for i = #list, 1, -1 do
 		list[i] = nil
+	end
+end
+
+function lib.ReleaseCustomHandle(state, key)
+	if not (state and state.customHandles and key) then
+		return
+	end
+	local entry = state.customHandles[key]
+	state.customHandles[key] = nil
+	local handle = type(entry) == "table" and entry.handle or entry
+	local owner = type(entry) == "table" and entry.owner or nil
+	if owner and type(owner.release) == "function" then
+		pcall(owner.release, handle, state.app, owner, state)
+	elseif type(handle) == "table" and type(handle.Release) == "function" then
+		pcall(handle.Release, handle, state.app, owner, state)
+	end
+end
+
+function lib.ReleaseAllCustomHandles(state)
+	if not (state and state.customHandles) then
+		return
+	end
+	for key, handle in pairs(state.customHandles) do
+		local _ = handle
+		lib.ReleaseCustomHandle(state, key)
 	end
 end
 
@@ -2463,8 +2507,14 @@ function lib.GetMultiSummary(app, control)
 	return table.concat(labels, ", ")
 end
 
-function lib.GetColorOverridesRowHeight(control)
-	local count = type(control.entries) == "table" and #control.entries or 0
+function lib.GetColorOverridesRowHeight(control, app)
+	local count = 0
+	if type(control.entries) == "table" then
+		count = #control.entries
+	elseif type(control.entries) == "function" then
+		local ok, entries = pcall(control.entries, app, control)
+		count = ok and type(entries) == "table" and #entries or 2
+	end
 	if count <= 0 then
 		return COMPLEX_ROW_HEIGHT
 	end
@@ -2947,6 +2997,7 @@ function lib.FocusPendingControl(state)
 end
 
 local function clearContent(state)
+	lib.ReleaseAllCustomHandles(state)
 	clearFrameList(state.contentFrames)
 	state.controlRows = {}
 	state.y = -2
@@ -4084,7 +4135,14 @@ end
 
 local function addColorOverridesWidget(row, app, control, opts)
 	opts = opts or {}
-	local entries = type(control.entries) == "table" and control.entries or {}
+	local L = getLocale(app)
+	local entries = {}
+	if type(control.entries) == "function" then
+		local ok, result = pcall(control.entries, app, control)
+		entries = ok and type(result) == "table" and result or {}
+	elseif type(control.entries) == "table" then
+		entries = control.entries
+	end
 	local hasColorCallbacks = type(control.getColor) == "function" and type(control.setColor) == "function"
 	if #entries == 0 or not hasColorCallbacks or not ColorPickerFrame then
 		addConfigureFallback(row, app, control, nil, opts.configure)
@@ -4115,7 +4173,7 @@ local function addColorOverridesWidget(row, app, control, opts)
 
 		item.Text = item:CreateFontString(nil, "OVERLAY", FONT_MUTED)
 		item.Text:SetPoint("LEFT", item, "LEFT", 8, 0)
-		item.Text:SetPoint("RIGHT", item, "RIGHT", -42, 0)
+		item.Text:SetPoint("RIGHT", item, "RIGHT", type(control.clearColor) == "function" and -108 or -42, 0)
 		item.Text:SetJustifyH("LEFT")
 		item.Text:SetText(entry.label or entry.key or "?")
 		setTextColor(item.Text, TEXT.subtle)
@@ -4127,12 +4185,37 @@ local function addColorOverridesWidget(row, app, control, opts)
 		item.Swatch.Texture = item.Swatch:CreateTexture(nil, "OVERLAY")
 		item.Swatch.Texture:SetPoint("TOPLEFT", item.Swatch, "TOPLEFT", 4, -4)
 		item.Swatch.Texture:SetPoint("BOTTOMRIGHT", item.Swatch, "BOTTOMRIGHT", -4, 4)
+		item.Reset = makeFlatButton(item, "", 24, 20)
+		item.Reset:SetPoint("RIGHT", item.Swatch, "LEFT", -6, 0)
+		item.Reset:SetShown(type(control.clearColor) == "function")
+		item.Reset.Icon = item.Reset:CreateTexture(nil, "OVERLAY")
+		item.Reset.Icon:SetSize(14, 14)
+		item.Reset.Icon:SetPoint("CENTER")
+		item.Reset.Icon:SetTexture("Interface\\Buttons\\UI-RefreshButton")
+		item.Reset:SetScript("OnEnter", function(self)
+			if _G.GameTooltip then
+				_G.GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+				_G.GameTooltip:SetText(L["configCenterResetColor"] or "Reset color")
+				_G.GameTooltip:Show()
+			end
+		end)
+		item.Reset:SetScript("OnLeave", function()
+			if _G.GameTooltip then
+				_G.GameTooltip:Hide()
+			end
+		end)
 
 		local function openPicker()
 			if not app:IsControlEnabled(control) then
 				return
 			end
 			local ok, r, g, b, a = pcall(control.getColor, entry.key)
+			if (not ok or r == nil) and type(control.getInheritedColor) == "function" then
+				ok, r, g, b, a = pcall(control.getInheritedColor, entry.key, entry, app, control)
+			end
+			if (not ok or r == nil) and type(control.getDefaultColor) == "function" then
+				ok, r, g, b, a = pcall(control.getDefaultColor, entry.key, entry, app, control)
+			end
 			if not ok then
 				r, g, b, a = 1, 1, 1, 1
 			end
@@ -4168,21 +4251,54 @@ local function addColorOverridesWidget(row, app, control, opts)
 
 		item:SetScript("OnClick", openPicker)
 		item.Swatch:SetScript("OnClick", openPicker)
+		item.Reset:SetScript("OnClick", function()
+			if not app:IsControlEnabled(control) or type(control.clearColor) ~= "function" then
+				return
+			end
+			control.clearColor(entry.key, entry, app, control)
+			lib.RefreshVisibleRows(row._state)
+		end)
 		row.colorOverrideSwatches[#row.colorOverrideSwatches + 1] = item
 	end
 
 	row.refreshControls = function()
 		local enabled = app:IsControlEnabled(control)
+		if type(control.entries) == "function" then
+			local ok, result = pcall(control.entries, app, control)
+			if ok and type(result) == "table" and #result ~= #entries then
+				if row._state then
+					row._state:RenderContent()
+				end
+				return
+			elseif ok and type(result) == "table" then
+				entries = result
+			end
+		end
 		for index, item in ipairs(row.colorOverrideSwatches or {}) do
 			local entry = entries[index]
+			local hasOverride = true
+			if type(control.hasOverride) == "function" then
+				local okOverride, override = pcall(control.hasOverride, entry.key, entry, app, control)
+				hasOverride = okOverride and override == true
+			end
 			local ok, r, g, b, a = pcall(control.getColor, entry.key)
+			if (not ok or r == nil) and type(control.getInheritedColor) == "function" then
+				ok, r, g, b, a = pcall(control.getInheritedColor, entry.key, entry, app, control)
+			end
+			if (not ok or r == nil) and type(control.getDefaultColor) == "function" then
+				ok, r, g, b, a = pcall(control.getDefaultColor, entry.key, entry, app, control)
+			end
 			if not ok then
 				r, g, b, a = 1, 1, 1, 1
 			end
 			item:SetAlpha(enabled and 1 or 0.55)
 			if item.EnableMouse then item:EnableMouse(enabled) end
 			if item.Swatch and item.Swatch.EnableMouse then item.Swatch:EnableMouse(enabled) end
+			if item.Reset and item.Reset.SetShown then
+				item.Reset:SetShown(type(control.clearColor) == "function" and hasOverride)
+			end
 			item.Swatch.Texture:SetColorTexture(r or 1, g or 1, b or 1, a or 1)
+			item.Swatch:SetAlpha(hasOverride and 1 or 0.62)
 			if control.colorizeLabel and enabled then
 				item.Text:SetTextColor(r or TEXT.subtle[1], g or TEXT.subtle[2], b or TEXT.subtle[3], 1)
 			else
@@ -4242,11 +4358,26 @@ function lib.ReorderList.GetEntryID(entry, index)
 	return entry and (entry.id or entry.key or entry.value or entry.currencyID) or index
 end
 
-function lib.ReorderList.GetEntryLabel(entry, index)
+function lib.ReorderList.GetEntryLabel(control, entry, index)
+	if type(control and control.formatEntryLabel) == "function" then
+		local ok, label = pcall(control.formatEntryLabel, entry, index, control)
+		if ok and label ~= nil then
+			return tostring(label)
+		end
+	end
 	if type(entry) ~= "table" then return tostring(entry or index) end
 	local label = entry.label or entry.text or entry.name or entry.title
 	local id = lib.ReorderList.GetEntryID(entry, index)
-	if id ~= nil and label and label ~= "" then return ("%s (%s)"):format(label, tostring(id)) end
+	local showID = entry.showID
+	if showID == nil then
+		showID = control and control.showEntryID
+	end
+	if showID == nil then
+		showID = true
+	end
+	if showID and id ~= nil and label and label ~= "" and tostring(id) ~= tostring(label) then
+		return ("%s (%s)"):format(label, tostring(id))
+	end
 	return label or tostring(id or index)
 end
 
@@ -4284,12 +4415,61 @@ function lib.ReorderList.RefreshRows(row, control)
 	end
 end
 
+function lib.StoreCustomHandle(state, key, owner, handle)
+	if not (state and key) then
+		return
+	end
+	state.customHandles = state.customHandles or {}
+	state.customHandles[key] = {
+		owner = owner,
+		handle = handle,
+	}
+end
+
+function lib.RenderCustomOwner(state, parent, owner, key)
+	if not (state and parent and owner and key) then
+		return nil
+	end
+	local handle
+	if type(owner.render) == "function" then
+		local ok, result = pcall(owner.render, parent, state.app, owner, state, state.pendingCustomFocusID)
+		if ok then
+			handle = result
+		end
+	elseif type(owner.onRender) == "function" then
+		local ok, result = pcall(owner.onRender, parent, state.app, owner, state, state.pendingCustomFocusID)
+		if ok then
+			handle = result
+		end
+	end
+	if handle ~= nil then
+		lib.StoreCustomHandle(state, key, owner, handle)
+	end
+	if type(owner.refresh) == "function" then
+		pcall(owner.refresh, handle, state.app, owner, state)
+	elseif type(handle) == "table" and type(handle.Refresh) == "function" then
+		pcall(handle.Refresh, handle, state.app, owner, state)
+	end
+	return handle
+end
+
 function lib.AddReorderListWidget(row, app, control, opts)
 	opts = opts or {}
 	local L = getLocale(app)
 	local top = opts.startY or -56
+	local canAdd = control.showAddButton
+	if canAdd == nil then
+		canAdd = type(control.addEntry) == "function"
+	end
+	local canRemove = control.showRemoveButton
+	if canRemove == nil then
+		canRemove = type(control.removeEntry) == "function"
+	end
+	local hasRowActions = type(control.rowActions) == "table" and #control.rowActions > 0
+	local hasEntryToggle = type(control.entryToggle) == "table"
 	local addButton = makeFlatButton(row, control.addButtonText or (L["configCenterAdd"] or "Add"), 92, 24)
 	addButton:SetPoint("TOPLEFT", row, "TOPLEFT", FIELD_CONTROL_LEFT, top)
+	addButton:SetShown(canAdd)
 	row.actionButton = addButton
 	addButton:SetScript("OnClick", function()
 		if not app:IsControlEnabled(control) then return end
@@ -4306,7 +4486,11 @@ function lib.AddReorderListWidget(row, app, control, opts)
 	end)
 
 	local status = createText(row, FONT_MUTED, "", TEXT.muted)
-	status:SetPoint("LEFT", addButton, "RIGHT", 10, 0)
+	if canAdd then
+		status:SetPoint("LEFT", addButton, "RIGHT", 10, 0)
+	else
+		status:SetPoint("LEFT", row, "LEFT", FIELD_CONTROL_LEFT, 0)
+	end
 	status:SetPoint("RIGHT", row, "RIGHT", -14, 0)
 	status:SetHeight(24)
 
@@ -4329,6 +4513,12 @@ function lib.AddReorderListWidget(row, app, control, opts)
 				item.Text:SetPoint("LEFT", item.Icon, "RIGHT", 8, 0)
 				item.Text:SetPoint("RIGHT", item, "RIGHT", -296, 0)
 				item.Text:SetJustifyH("LEFT")
+				item.Toggle = CreateFrame("Button", nil, item, "BackdropTemplate")
+				item.Toggle:SetSize(42, 22)
+				applyBackdrop(item.Toggle, { 0.050, 0.046, 0.038, 0.95 }, CARD_BORDER, "toggle")
+				item.Toggle.Knob = CreateFrame("Frame", nil, item.Toggle, "BackdropTemplate")
+				item.Toggle.Knob:SetSize(14, 14)
+				applyBackdrop(item.Toggle.Knob, { 0.62, 0.58, 0.49, 1.00 }, { 0.92, 0.82, 0.58, 0.80 }, "toggleKnob")
 				item.Format = makeFlatButton(item, "", 128, 22)
 				item.Format:SetPoint("RIGHT", item, "RIGHT", -160, 0)
 				item.MoveUp = makeFlatButton(item, "", 24, 22)
@@ -4341,6 +4531,8 @@ function lib.AddReorderListWidget(row, app, control, opts)
 				item.MoveDown.Arrow:SetPoint("CENTER")
 				item.Remove = makeFlatButton(item, L["configCenterRemove"] or "Remove", 84, 22)
 				item.Remove:SetPoint("RIGHT", item, "RIGHT", -8, 0)
+				item.Actions = makeFlatButton(item, "...", 44, 22)
+				item.Actions:SetPoint("RIGHT", item, "RIGHT", -8, 0)
 				row.reorderRows[index] = item
 			end
 			item:ClearAllPoints()
@@ -4350,19 +4542,72 @@ function lib.AddReorderListWidget(row, app, control, opts)
 			item._eqolIndex = index
 			item._eqolEntryID = lib.ReorderList.GetEntryID(entry, index)
 			item.Icon:SetTexture(lib.ReorderList.GetEntryIcon(entry) or 134400)
-			item.Text:SetText(lib.ReorderList.GetEntryLabel(entry, index))
+			item.Text:SetText(lib.ReorderList.GetEntryLabel(control, entry, index))
 			setTextColor(item.Text, enabled and TEXT.main or TEXT.disabled)
 			item:SetAlpha(enabled and 1 or 0.52)
 			item:EnableMouse(enabled)
 			item.Format:SetShown(type(control.formatOptions) == "table")
+			item.Toggle:SetShown(hasEntryToggle)
+			item.Remove:SetShown(canRemove)
+			item.Actions:SetShown(hasRowActions)
 			item.Text:ClearAllPoints()
 			item.Text:SetPoint("LEFT", item.Icon, "RIGHT", 8, 0)
+			if hasEntryToggle then
+				item.Toggle:ClearAllPoints()
+				item.Toggle:SetPoint("LEFT", item.Icon, "RIGHT", 8, 0)
+				item.Text:SetPoint("LEFT", item.Toggle, "RIGHT", 8, 0)
+			end
+			local rightInset = -8
+			if hasRowActions then
+				rightInset = rightInset - 54
+			end
+			if canRemove then
+				rightInset = rightInset - 92
+			end
+			if type(control.moveEntry) == "function" then
+				rightInset = rightInset - 60
+			end
 			if type(control.formatOptions) == "table" then
-				item.Text:SetPoint("RIGHT", item, "RIGHT", -296, 0)
+				rightInset = rightInset - 136
+			end
+			if type(control.formatOptions) == "table" then
+				item.Text:SetPoint("RIGHT", item, "RIGHT", rightInset, 0)
 			elseif type(control.moveEntry) == "function" then
-				item.Text:SetPoint("RIGHT", item, "RIGHT", -156, 0)
+				item.Text:SetPoint("RIGHT", item, "RIGHT", rightInset, 0)
 			else
-				item.Text:SetPoint("RIGHT", item, "RIGHT", -100, 0)
+				item.Text:SetPoint("RIGHT", item, "RIGHT", rightInset, 0)
+			end
+			item.Actions:ClearAllPoints()
+			item.Actions:SetPoint("RIGHT", item, "RIGHT", -8, 0)
+			item.Remove:ClearAllPoints()
+			item.Remove:SetPoint("RIGHT", item, "RIGHT", hasRowActions and -60 or -8, 0)
+			item.MoveDown:ClearAllPoints()
+			item.MoveDown:SetPoint("RIGHT", item, "RIGHT", (canRemove and -150 or -60) - (hasRowActions and 54 or 0), 0)
+			item.MoveUp:ClearAllPoints()
+			item.MoveUp:SetPoint("RIGHT", item, "RIGHT", (canRemove and -180 or -90) - (hasRowActions and 54 or 0), 0)
+			item.Format:ClearAllPoints()
+			item.Format:SetPoint("RIGHT", item, "RIGHT", (canRemove and -212 or -122) - (hasRowActions and 54 or 0) - (type(control.moveEntry) == "function" and 60 or 0), 0)
+			if hasEntryToggle then
+				local toggle = control.entryToggle
+				local checked = false
+				if type(toggle.getValue) == "function" then
+					local ok, value = pcall(toggle.getValue, item._eqolEntryID, entry, app, control)
+					checked = ok and value == true
+				elseif entry.visible ~= nil then
+					checked = entry.visible == true
+				elseif entry.enabled ~= nil then
+					checked = entry.enabled == true
+				end
+				setFrameBackdrop(item.Toggle, checked and { 0.105, 0.205, 0.095, 0.96 } or { 0.050, 0.046, 0.038, 0.95 }, checked and { GREEN[1], GREEN[2], GREEN[3], 0.70 } or CARD_BORDER, "toggle")
+				item.Toggle.Knob:ClearAllPoints()
+				item.Toggle.Knob:SetPoint(checked and "RIGHT" or "LEFT", item.Toggle, checked and "RIGHT" or "LEFT", checked and -4 or 4, 0)
+				item.Toggle:SetScript("OnClick", function()
+					if not app:IsControlEnabled(control) then return end
+					if type(toggle.setValue) == "function" then
+						toggle.setValue(item._eqolEntryID, entry, not checked, app, control)
+						lib.ReorderList.RefreshRows(row, control)
+					end
+				end)
 			end
 			item.Format.Text:SetText(lib.ReorderList.GetFormatLabel(control, lib.ReorderList.GetEntryFormatKey(entry)))
 			item.MoveUp:SetShown(type(control.moveEntry) == "function")
@@ -4401,6 +4646,27 @@ function lib.AddReorderListWidget(row, app, control, opts)
 				if not app:IsControlEnabled(control) then return end
 				lib.ReorderList.CallControl(control, "removeEntry", item._eqolEntryID)
 				lib.ReorderList.RefreshRows(row, control)
+			end)
+			item.Actions:SetScript("OnClick", function(owner)
+				if not app:IsControlEnabled(control) then return end
+				if not MenuUtil or not MenuUtil.CreateContextMenu then return end
+				local entryID = item._eqolEntryID
+				MenuUtil.CreateContextMenu(owner, function(_, rootDescription)
+					rootDescription:SetTag("LIB_SETTINGS_DESIGNER_REORDER_ACTIONS")
+					for _, action in ipairs(control.rowActions or {}) do
+						local visible = true
+						if type(action.visibleWhen) == "function" then
+							local ok, result = pcall(action.visibleWhen, entry, entryID, app, control)
+							visible = ok and result ~= false
+						end
+						if visible and type(action.onClick) == "function" then
+							rootDescription:CreateButton(action.label or action.title or action.id or "Action", function()
+								action.onClick(entryID, entry, item, app, control)
+								lib.ReorderList.RefreshRows(row, control)
+							end)
+						end
+					end
+				end)
 			end)
 			item:SetScript("OnDragStart", function(self)
 				if not app:IsControlEnabled(control) then return end
@@ -4651,6 +4917,18 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 		lib.AddReorderListWidget(row, app, control, {
 			startY = control.description and control.description ~= "" and -68 or -48,
 		})
+	elseif controlType == "custom" then
+		title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and -154 or -18, 0)
+		desc.Text:SetText(control.description or "")
+		desc:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
+		desc:SetPoint("RIGHT", row, "RIGHT", -18, 0)
+		desc:SetHeight(control.description and control.description ~= "" and 24 or 1)
+		local top = control.description and control.description ~= "" and -68 or -48
+		local container = CreateFrame("Frame", nil, row, "BackdropTemplate")
+		container:SetPoint("TOPLEFT", row, "TOPLEFT", FIELD_CONTROL_LEFT, top)
+		container:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", -14, 14)
+		container._LibSettingsDesignerControl = control
+		lib.RenderCustomOwner(state, container, control, "control:" .. tostring(control.id or control.key))
 	elseif controlType == "button" then
 		title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and -154 or -18, 0)
 		if not compact then
@@ -5794,6 +6072,38 @@ function lib.RenderInfoPage(state, page, pagePath)
 	end
 end
 
+function lib.RenderCustomPage(state, page, pagePath)
+	local app = state.app
+	local category = app.categoriesByID[page.category or ""]
+	if state.sidePanelMode == "right" then
+		addPageLeftColumnShell(state)
+		addPageFixedHeader(state, category, pagePath)
+		addContentScrollbarRail(state)
+		addPageSidePanel(state, page, category)
+	end
+
+	local header = createPageLeftFrame(state, 74)
+	local iconSource, iconIsAtlas = resolvePageIcon(app, page)
+	local icon = createIconPlate(header, iconSource, 54, iconIsAtlas)
+	icon:SetPoint("TOPLEFT", header, "TOPLEFT", 0, -10)
+	local title = createText(header, FONT_TITLE, page.title or page.id, TEXT.main)
+	title:SetPoint("LEFT", icon, "RIGHT", 16, 0)
+	title:SetPoint("RIGHT", header, "RIGHT", -6, 0)
+	title:SetHeight(30)
+	state.y = state.y - 8
+
+	local height
+	if type(page.getHeight) == "function" then
+		local ok, result = pcall(page.getHeight, app, page, state)
+		height = ok and tonumber(result) or nil
+	end
+	height = height or tonumber(page.height or page.pageHeight) or math.max(260, (state.frame.Scroll and state.frame.Scroll:GetHeight() or 520) - 96)
+	local section = createPageLeftFrame(state, height)
+	applyBackdrop(section, DETAIL_SECTION_BG, DETAIL_COLORS.sectionBorder, "detailSection")
+	createPixelBorder(section, DETAIL_COLORS.sectionBorder)
+	lib.RenderCustomOwner(state, section, page, "page:" .. tostring(page.id))
+end
+
 local function renderPage(state, pageID)
 	local app = state.app
 	local page = app:GetPage(pageID)
@@ -5803,6 +6113,10 @@ local function renderPage(state, pageID)
 	end
 	local category = app.categoriesByID[page.category or ""]
 	local pagePath = getPagePath(app, page)
+	if page.layout == "custom" or page.type == "custom" or type(page.render) == "function" then
+		lib.RenderCustomPage(state, page, pagePath)
+		return
+	end
 	if page.layout == "info" or page.type == "info" or page.content or page.infoBlocks then
 		lib.RenderInfoPage(state, page, pagePath)
 		return
@@ -5860,7 +6174,7 @@ local function renderSearch(state, query)
 			local card = createContentFrame(state, 102)
 			styleRaisedTile(card, true)
 			card:SetScript("OnMouseUp", function()
-				state:SetPage(control.pageID)
+				state:SetPage(control.pageID, control.focusID)
 			end)
 
 			local iconSource, iconIsAtlas = resolvePageIcon(app, page)
@@ -5892,7 +6206,7 @@ local function renderSearch(state, query)
 			local openButton = makeFlatButton(card, (L["configCenterOpenButton"] or "Open"), 74, 24)
 			openButton:SetPoint("BOTTOMRIGHT", card, "BOTTOMRIGHT", -14, 8)
 			openButton:SetScript("OnClick", function()
-				state:SetPage(control.pageID)
+				state:SetPage(control.pageID, control.focusID)
 			end)
 			state.y = state.y - 8
 		else
@@ -5962,8 +6276,14 @@ function StateMixin:RenderContent()
 		self.resetSearchScroll = nil
 	end
 	lib.FocusPendingControl(self)
+	self.pendingCustomFocusID = nil
 	self:RefreshSidebarNewBadges()
 	self:RefreshSidebarSelection()
+end
+
+function StateMixin:RequestLayout()
+	self.resetContentScroll = true
+	self:RenderContent()
 end
 
 function StateMixin:RefreshSidebarNewBadges()
@@ -6194,7 +6514,11 @@ function StateMixin:SetPage(pageID, focusControlID)
 		if groupID and self.collapsedGroups then
 			self.collapsedGroups[groupID] = nil
 		end
-		self.pendingFocusControlID = resolvedControlID or focusControlID
+		if resolvedControlID then
+			self.pendingFocusControlID = resolvedControlID
+		else
+			self.pendingCustomFocusID = focusControlID
+		end
 	end
 	if self.frame.SearchBox:GetText() ~= "" then
 		self.suppressSearchRender = true
@@ -6672,6 +6996,9 @@ local function createFrame(app)
 	local state = initializeState(frame, app)
 	frame._LibSettingsDesignerState = state
 	updateContentMetrics(state)
+	frame:SetScript("OnHide", function()
+		lib.ReleaseAllCustomHandles(state)
+	end)
 
 	frame.SearchBox:SetScript("OnTextChanged", function()
 		if frame.SearchPlaceholder then

@@ -23,6 +23,7 @@
 &nbsp; • [SoundDropdown](SoundDropdown.md "SoundDropdown") \
 &nbsp; • [CheckboxDropdown](CheckboxDropdown.md "CheckboxDropdown") \
 &nbsp; • [ReorderList](ReorderList.md "ReorderList") \
+&nbsp; • [Custom](Custom.md "Custom Hosting") \
 &nbsp; • [Notes](Notes.md "Notes") \
 &nbsp; • [Dashboard](Dashboard.md "Dashboard") \
 &nbsp; • [Expandable](Expandable.md "Expandable") \

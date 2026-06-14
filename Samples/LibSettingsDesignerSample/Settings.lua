@@ -80,6 +80,51 @@ local function showSampleLink(label, url)
 	addon.Print(("%s: %s"):format(label or "Link", url or ""))
 end
 
+local function getGroupByID(groupID)
+	for _, group in ipairs(DB().customGroups or {}) do
+		if group.id == groupID then
+			return group
+		end
+	end
+	return nil
+end
+
+local function getSampleGroupColor(groupID)
+	local override = DB().groupColorOverrides and DB().groupColorOverrides[groupID]
+	local group = getGroupByID(groupID)
+	local color = override or group and group.color or { r = 1, g = 1, b = 1, a = 1 }
+	return color.r, color.g, color.b, color.a
+end
+
+local function renderSampleCustomPage(parent, _, page, state, focusID)
+	local title = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+	title:SetPoint("TOPLEFT", parent, "TOPLEFT", 18, -18)
+	title:SetText(focusID == "builder" and "Custom Builder Focus" or "Custom Hosted Editor")
+
+	local body = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+	body:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -16)
+	body:SetPoint("RIGHT", parent, "RIGHT", -18, 0)
+	body:SetJustifyH("LEFT")
+	body:SetText("This page is rendered by the host addon inside a LibSettingsDesigner parent frame. Navigation, search, sizing, density, and release lifecycle stay owned by the library.")
+
+	local button = _G.CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+	button:SetSize(160, 24)
+	button:SetPoint("TOPLEFT", body, "BOTTOMLEFT", 0, -18)
+	button:SetText("Request Layout")
+	button:SetScript("OnClick", function()
+		addon.Print("Custom page requested a layout refresh.")
+		if state and state.RequestLayout then
+			state:RequestLayout()
+		end
+	end)
+
+	return {
+		Release = function()
+			addon.Print((page and page.title or "Custom page") .. " released.")
+		end,
+	}
+end
+
 local app
 
 local SAMPLE_THEME_COLORS = {
@@ -299,6 +344,12 @@ app = Config:RegisterAddOn(addonName, {
 					description = "Compare compact and comfortable layouts and learn how to hide the switcher.",
 					iconKey = "settingspage",
 					pageID = "help.density-modes",
+				},
+				{
+					title = "Editor Extensions",
+					description = "Order-only lists, visibility toggles, dynamic color palettes, and custom-hosted pages.",
+					iconKey = "movementinput",
+					pageID = "advanced.editor-showcase",
 				},
 			},
 			status = {
@@ -637,6 +688,22 @@ app:RegisterPage({
 	order = 100,
 })
 
+app:RegisterPage({
+	id = "advanced.editor-showcase",
+	category = "advanced",
+	title = "Editor Extensions",
+	description = "Order-only lists, row actions, entry toggles, dynamic colors, and custom-hosted content.",
+	iconKey = "movementinput",
+	searchEntries = {
+		{ id = "custom.builder", label = "Custom Builder", keywords = { "custom", "builder", "hosted", "editor" }, focusID = "builder" },
+		{ id = "ordered.visibility", label = "Ordered Visibility List", keywords = { "ordered", "visible", "columns" } },
+	},
+	onOpen = markSamplePageSeen,
+	order = 120,
+})
+app:RegisterGroup("advanced.editor-showcase", { id = "columns", title = "Ordered Columns", order = 100 })
+app:RegisterGroup("advanced.editor-showcase", { id = "groups", title = "Dynamic Groups", order = 200 })
+
 app:RegisterControl("advanced.shortcuts", {
 	id = "shortcutsEnabled",
 	key = "shortcutsEnabled",
@@ -647,6 +714,126 @@ app:RegisterControl("advanced.shortcuts", {
 	parentCheck = function() return DB().enabled == true end,
 	order = 90,
 	refreshOnChange = true,
+})
+
+app:RegisterControl("advanced.editor-showcase", {
+	id = "brokerColumns",
+	type = "reorderlist",
+	groupID = "columns",
+	groupTitle = "Ordered Columns",
+	label = "Broker Columns",
+	description = "Order-only list with visibility toggles and row actions.",
+	rowHeight = 210,
+	showAddButton = false,
+	showRemoveButton = false,
+	showEntryID = false,
+	formatOptions = { text = "Text", badge = "Badge", icon = "Icon" },
+	formatOrder = { "text", "badge", "icon" },
+	getEntries = function() return DB().brokerColumns or {} end,
+	moveEntry = function(fromIndex, toIndex) moveEntry(DB().brokerColumns or {}, fromIndex, toIndex) end,
+	setEntryFormat = function(entryID, formatKey)
+		for _, entry in ipairs(DB().brokerColumns or {}) do
+			if entry.id == entryID then entry.formatKey = formatKey return end
+		end
+	end,
+	entryToggle = {
+		getValue = function(entryID)
+			for _, entry in ipairs(DB().brokerColumns or {}) do
+				if entry.id == entryID then return entry.visible == true end
+			end
+			return false
+		end,
+		setValue = function(entryID, _, visible)
+			for _, entry in ipairs(DB().brokerColumns or {}) do
+				if entry.id == entryID then entry.visible = visible == true return end
+			end
+		end,
+	},
+	rowActions = {
+		{
+			id = "print",
+			label = "Print",
+			onClick = function(_, entry)
+				addon.Print("Column action: " .. tostring(entry and entry.label or "unknown"))
+			end,
+		},
+	},
+	order = 100,
+})
+
+app:RegisterControl("advanced.editor-showcase", {
+	id = "groupColors",
+	type = "colorpalette",
+	groupID = "groups",
+	groupTitle = "Dynamic Groups",
+	label = "Group Colors",
+	description = "Dynamic entries with explicit reset/inherit state.",
+	rowHeight = 150,
+	entries = function()
+		local result = {}
+		for _, group in ipairs(DB().customGroups or {}) do
+			result[#result + 1] = { key = group.id, label = group.label }
+		end
+		return result
+	end,
+	getColor = function(key)
+		return getSampleGroupColor(key)
+	end,
+	setColor = function(key, r, g, b, a)
+		DB().groupColorOverrides = DB().groupColorOverrides or {}
+		DB().groupColorOverrides[key] = { r = r, g = g, b = b, a = a or 1 }
+	end,
+	hasOverride = function(key)
+		return DB().groupColorOverrides and DB().groupColorOverrides[key] ~= nil
+	end,
+	clearColor = function(key)
+		if DB().groupColorOverrides then
+			DB().groupColorOverrides[key] = nil
+		end
+	end,
+	getInheritedColor = function(key)
+		local group = getGroupByID(key)
+		local color = group and group.color or { r = 1, g = 1, b = 1, a = 1 }
+		return color.r, color.g, color.b, color.a
+	end,
+	colorizeLabel = true,
+	order = 200,
+})
+
+app:RegisterControl("advanced.editor-showcase", {
+	id = "customInline",
+	type = "custom",
+	groupID = "groups",
+	groupTitle = "Dynamic Groups",
+	label = "Inline Custom Control",
+	description = "Host-rendered content inside a normal settings row.",
+	rowHeight = 156,
+	render = function(parent)
+		local text = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+		text:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -4)
+		text:SetPoint("RIGHT", parent, "RIGHT", -4, 0)
+		text:SetJustifyH("LEFT")
+		text:SetText("Inline custom controls are useful for previews or small editors that do not need a full custom page.")
+		return {
+			Release = function() end,
+		}
+	end,
+	order = 300,
+})
+
+app:RegisterPage({
+	id = "advanced.custom-editor",
+	category = "advanced",
+	title = "Custom Hosted Page",
+	description = "A full custom page rendered by the host addon.",
+	layout = "custom",
+	iconKey = "movementinput",
+	searchEntries = {
+		{ id = "custom.hosted.builder", label = "Hosted Builder", keywords = { "custom", "builder", "rules" }, focusID = "builder" },
+	},
+	getHeight = function() return 300 end,
+	render = renderSampleCustomPage,
+	order = 130,
 })
 
 app:RegisterControl("advanced.shortcuts", {

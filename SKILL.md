@@ -481,7 +481,7 @@ Canonical direct fields:
 | Object | Canonical fields |
 | :----- | :--------------- |
 | Category | `id`, `title`, `description`, `order`, `icon`, `iconAtlas`, `iconKey` |
-| Page | `id`, `category`, `title`, `description`, `descriptionKey`, `order`, `icon`, `iconAtlas`, `iconKey`, `mainToggleID`, `pageKey`, `newTagID`, `onOpen`, `layout`, `type`, `content`, `blocks`, `infoBlocks` |
+| Page | `id`, `category`, `title`, `description`, `descriptionKey`, `order`, `icon`, `iconAtlas`, `iconKey`, `mainToggleID`, `pageKey`, `newTagID`, `onOpen`, `layout`, `type`, `content`, `blocks`, `infoBlocks`, `searchEntries`, `getHeight`, `render`, `refresh`, `release` |
 | Group | `id`, `title`, `order` |
 | Control | `id`, `key`, `type`, `label`, `description`, `default`, `dbDefault`, `getValue`, `setValue`, `getSelection`, `setSelection`, `setting`, `parentCheck`, `isEnabled`, visibility fields, search fields |
 
@@ -608,10 +608,11 @@ runtime actively consumes as UI behavior:
 | Input | `numeric`, `min`, `max`, `step`, `clampToRange`, `maxChars`, `readOnly`, `inputWidth`, `multiline` |
 | Button | `buttonText`, `onClick`, `setValue`, `trackCustomized = false` |
 | ColorPicker | `getColor`, `setColor`, `hasOpacity` |
-| ColorPalette | `entries`, `getColor`, `setColor`, `hasOpacity`, `colorizeLabel` |
+| ColorPalette | `entries`, `getColor`, `setColor`, `hasOpacity`, `colorizeLabel`, `hasOverride`, `clearColor`, `getInheritedColor`, `getDefaultColor` |
 | SoundDropdown | `soundResolver`, `previewSoundFunc`, `previewTooltip`, `playbackChannel`, `getPlaybackChannel`, `menuHeight` |
 | CheckboxDropdown | `dropdownKey`, `dropdownDefault`, `dropdownValues`, `dropdownOptions`, `dropdownList`, `dropdownOrder`, `dropdownGet`, `dropdownSet` |
-| ReorderList | `getEntries`, `addEntry`, `removeEntry`, `moveEntry`, `setEntryFormat`, `formatOptions`, `formatOrder`, `emptyText`, `addButtonText`, `addPopupText`, `addPopupTitle`, `numeric`, `maxChars`, `rowHeight` |
+| ReorderList | `getEntries`, `addEntry`, `removeEntry`, `moveEntry`, `setEntryFormat`, `formatOptions`, `formatOrder`, `formatEntryLabel`, `showEntryID`, `showAddButton`, `showRemoveButton`, `entryToggle`, `rowActions`, `emptyText`, `addButtonText`, `addPopupText`, `addPopupTitle`, `numeric`, `maxChars`, `rowHeight` |
+| Custom | `type = "custom"`, `rowHeight`, `getHeight`, `render`, `refresh`, `release` |
 | Keybind | Legacy/fallback bridge control; prefer host wrapper or `openLegacySettings` patterns. |
 
 Use `type = "colorpalette"` for multiple keyed colors in new code.
@@ -624,7 +625,6 @@ Do not document these as active UI behavior unless runtime support is added:
 - Input `multilineHeight`
 - ColorPicker `callback`
 - ColorPicker `colorizeLabel`
-- ColorPalette `getDefaultColor`
 
 ## Value Resolution Contract
 
@@ -784,6 +784,7 @@ Read the specific element page before changing examples or behavior:
 | Sound selection/preview | `docs/Elements/SoundDropdown.md` |
 | Checkbox plus dropdown rows | `docs/Elements/CheckboxDropdown.md` |
 | Ordered editable lists | `docs/Elements/ReorderList.md` |
+| Host-rendered editors | `docs/Elements/Custom.md`, `docs/Examples/Custom-Hosted-Editors.md` |
 | Hover help/rich notes | `docs/Elements/Notes.md` |
 | Dashboard content | `docs/Elements/Dashboard.md` |
 | Static help pages | `docs/Elements/InfoPage.md` |
@@ -890,6 +891,95 @@ Expandable changelog entry:
   },
 }
 ```
+
+ReorderList order plus visibility:
+
+```lua
+app:RegisterControl("broker.columns", {
+  id = "columns",
+  type = "reorderlist",
+  label = "Columns",
+  showAddButton = false,
+  showRemoveButton = false,
+  showEntryID = false,
+  getEntries = function() return MyAddonDB.profile.columns end,
+  moveEntry = function(fromIndex, toIndex)
+    MyAddon.MoveColumn(fromIndex, toIndex)
+  end,
+  entryToggle = {
+    getValue = function(entryID, entry)
+      return entry.visible == true
+    end,
+    setValue = function(entryID, entry, visible)
+      entry.visible = visible == true
+    end,
+  },
+  rowActions = {
+    {
+      id = "rename",
+      label = "Rename",
+      visibleWhen = function(entry) return entry.custom == true end,
+      onClick = function(entryID)
+        MyAddon.OpenRenamePopup(entryID)
+      end,
+    },
+  },
+})
+```
+
+Dynamic ColorPalette with reset/inherit:
+
+```lua
+app:RegisterControl("groups.colors", {
+  id = "groupColors",
+  type = "colorpalette",
+  label = "Group colors",
+  entries = function()
+    return MyAddon.BuildGroupColorEntries()
+  end,
+  getColor = function(key)
+    local color = MyAddonDB.profile.groupColorOverrides[key]
+    if color then return color.r, color.g, color.b, color.a end
+  end,
+  setColor = function(key, r, g, b, a)
+    MyAddonDB.profile.groupColorOverrides[key] = { r = r, g = g, b = b, a = a or 1 }
+  end,
+  hasOverride = function(key)
+    return MyAddonDB.profile.groupColorOverrides[key] ~= nil
+  end,
+  clearColor = function(key)
+    MyAddonDB.profile.groupColorOverrides[key] = nil
+  end,
+  getInheritedColor = function(key)
+    return MyAddon.GetBaseGroupColor(key)
+  end,
+})
+```
+
+Custom hosted editor page:
+
+```lua
+app:RegisterPage({
+  id = "tools.rule-builder",
+  category = "tools",
+  title = "Rule Builder",
+  layout = "custom",
+  searchEntries = {
+    { id = "rule.create", label = "Create Rule", keywords = { "filter", "new" }, focusID = "create" },
+  },
+  getHeight = function() return 560 end,
+  render = function(parent, app, page, state, focusID)
+    return MyAddon.RuleBuilder:Render(parent, state, focusID)
+  end,
+  release = function(handle)
+    if handle and handle.Release then handle:Release() end
+  end,
+})
+```
+
+Use custom pages for table-like database editors first. Do not add a new
+generic `datatable` control unless multiple host addons have converged on the
+same column, sorting, search, selection, and row-action model.
 
 ## Dropdown and MultiDropdown Rules
 

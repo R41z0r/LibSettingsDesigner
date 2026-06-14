@@ -167,6 +167,11 @@ avoid rebuilding the settings frame from it.
 Use `layout = "info"` or `type = "info"` and table-based `content`, `blocks`,
 or `infoBlocks` for help/static pages.
 
+Use `layout = "custom"` or `type = "custom"` when a host addon needs to render
+specialized content inside a LibSettingsDesigner page. Custom pages can provide
+`getHeight`, `render`, `refresh`, `release`, and `searchEntries`; see
+[Custom](../Elements/Custom.md).
+
 ### `app:RegisterGroup(pageID, data)`
 
 Registers a heading/section inside one page.

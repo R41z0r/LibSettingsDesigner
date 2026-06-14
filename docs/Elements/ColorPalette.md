@@ -25,14 +25,19 @@ Use `type = "colorpalette"` for new code.
 
 | Field | Type | Description |
 | :---- | :--- | :---------- |
-| `entries` | table | List of `{ key, label }` color entries. |
+| `entries` | table/function | List of `{ key, label }` color entries, or `function(app, control) return entries end`. |
 | `getColor` | function | Reads current color by key. |
 | `setColor` | function | Writes color by key. |
 | `hasOpacity` | boolean | Show alpha channel. |
 | `colorizeLabel` | boolean | Tint entry labels with current colors. |
+| `hasOverride` | function | Optional override-state callback: `function(key, entry, app, control)`. |
+| `clearColor` | function | Optional reset/inherit callback. Shows a reset button per overridden swatch. |
+| `getInheritedColor` | function | Optional inherited color fallback when no explicit color exists. |
+| `getDefaultColor` | function | Optional default color fallback when no explicit or inherited color exists. |
 
-`getDefaultColor` is currently metadata/pass-through only and is not consumed by
-the UI renderer.
+When `entries` is a function, the renderer resolves it on render and visible-row
+refresh. If the number of entries changes during refresh, the current page is
+re-rendered.
 
 ## [Example][Top]
 
@@ -54,6 +59,40 @@ app:RegisterControl("bars.colors", {
   end,
 })
 ```
+
+## [Dynamic Entries and Inheritance][Top]
+
+Use dynamic entries when the list depends on runtime data such as user-created
+groups:
+
+```lua
+app:RegisterControl("groups.colors", {
+  id = "groupColors",
+  type = "colorpalette",
+  label = "Group colors",
+  entries = function(app, control)
+    return MyAddon.BuildCurrentGroupColorEntries()
+  end,
+  getColor = function(key)
+    return MyAddonDB.profile.groupColorOverrides[key]
+  end,
+  setColor = function(key, r, g, b, a)
+    MyAddonDB.profile.groupColorOverrides[key] = { r = r, g = g, b = b, a = a or 1 }
+  end,
+  hasOverride = function(key)
+    return MyAddonDB.profile.groupColorOverrides[key] ~= nil
+  end,
+  clearColor = function(key)
+    MyAddonDB.profile.groupColorOverrides[key] = nil
+  end,
+  getInheritedColor = function(key)
+    return MyAddon.GetGroupBaseColor(key)
+  end,
+})
+```
+
+Do not use a real color value such as white to mean reset. Keep reset/inherit
+state explicit with `clearColor` and `hasOverride`.
 
 ## [Legacy Alias][Top]
 

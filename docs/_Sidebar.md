@@ -29,6 +29,7 @@
 &nbsp; • [SoundDropdown](Elements/SoundDropdown.md "SoundDropdown") \
 &nbsp; • [CheckboxDropdown](Elements/CheckboxDropdown.md "CheckboxDropdown") \
 &nbsp; • [ReorderList](Elements/ReorderList.md "ReorderList") \
+&nbsp; • [Custom](Elements/Custom.md "Custom Hosting") \
 &nbsp; • [Notes](Elements/Notes.md "Notes") \
 &nbsp; • [Dashboard](Elements/Dashboard.md "Dashboard") \
 &nbsp; • [Expandable](Elements/Expandable.md "Expandable") \
@@ -43,6 +44,7 @@
 &nbsp; • [Nested Database Values](Examples/Nested-Database-Values.md "Nested Database Values") \
 &nbsp; • [Search and New Badges](Examples/Search-And-New-Badges.md "Search and New Badges") \
 &nbsp; • [Runtime Refresh](Examples/Runtime-Refresh.md "Runtime Refresh") \
+&nbsp; • [Custom Hosted Editors](Examples/Custom-Hosted-Editors.md "Custom Hosted Editors") \
 &nbsp; • [Support Links](Examples/Support-Links.md "Support Links") \
 &nbsp; • [Theme Colors](Examples/Theme-Colors.md "Theme Colors") \
 &nbsp; • [Theme Borders](Examples/Theme-Borders.md "Theme Borders")

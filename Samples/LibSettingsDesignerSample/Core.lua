@@ -20,7 +20,20 @@ local DEFAULT_PROFILE = {
 		healer = { r = 0.25, g = 0.90, b = 0.45, a = 1 },
 		damage = { r = 1.00, g = 0.35, b = 0.25, a = 1 },
 	},
+	groupColorOverrides = {
+		friends = { r = 0.35, g = 0.75, b = 1.00, a = 1 },
+		guild = { r = 0.25, g = 0.90, b = 0.45, a = 1 },
+	},
 	themePreset = "gold",
+	brokerColumns = {
+		{ id = "name", label = "Name", icon = 134400, formatKey = "text", visible = true },
+		{ id = "zone", label = "Zone", icon = 135769, formatKey = "text", visible = true },
+		{ id = "level", label = "Level", icon = 132762, formatKey = "badge", visible = false },
+	},
+	customGroups = {
+		{ id = "friends", label = "Friends", icon = 136074, color = { r = 0.35, g = 0.75, b = 1.00, a = 1 } },
+		{ id = "guild", label = "Guild", icon = 136075, color = { r = 0.25, g = 0.90, b = 0.45, a = 1 } },
+	},
 	shortcuts = {
 		{ id = "open", label = "Open Settings", icon = 134400, formatKey = "slash" },
 		{ id = "reload", label = "Reload UI", icon = 136243, formatKey = "macro" },

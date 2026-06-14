@@ -15,6 +15,7 @@
 &nbsp; • [Nested Database Values](Nested-Database-Values.md "Nested Database Values") \
 &nbsp; • [Search and New Badges](Search-And-New-Badges.md "Search and New Badges") \
 &nbsp; • [Runtime Refresh](Runtime-Refresh.md "Runtime Refresh") \
+&nbsp; • [Custom Hosted Editors](Custom-Hosted-Editors.md "Custom Hosted Editors") \
 &nbsp; • [Support Links](Support-Links.md "Support Links") \
 &nbsp; • [Theme Colors](Theme-Colors.md "Theme Colors") \
 &nbsp; • [Theme Borders](Theme-Borders.md "Theme Borders")
