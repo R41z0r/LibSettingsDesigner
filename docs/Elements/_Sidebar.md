@@ -8,26 +8,29 @@
 
 **Elements** \
 &nbsp; • [Elements](Elements.md "Element Reference") \
-&nbsp; • [Category](Category.md "Category") \
-&nbsp; • [Page](Page.md "Page") \
-&nbsp; • [Group](Group.md "Group") \
-&nbsp; • [Dashboard](Dashboard.md "Dashboard") \
-&nbsp; • [InfoPage](InfoPage.md "InfoPage") \
-&nbsp; • [Custom](Custom.md "Custom Hosting") \
-&nbsp; • [Toggle](Toggle.md "Toggle") \
-&nbsp; • [CheckboxDropdown](CheckboxDropdown.md "CheckboxDropdown") \
-&nbsp; • [Dropdown](Dropdown.md "Dropdown") \
-&nbsp; • [MultiDropdown](MultiDropdown.md "MultiDropdown") \
-&nbsp; • [SoundDropdown](SoundDropdown.md "SoundDropdown") \
-&nbsp; • [Input](Input.md "Input") \
-&nbsp; • [Slider](Slider.md "Slider") \
-&nbsp; • [Button](Button.md "Button") \
-&nbsp; • [ColorPicker](ColorPicker.md "ColorPicker") \
-&nbsp; • [ColorPalette](ColorPalette.md "ColorPalette") \
-&nbsp; • [ColorOverrides](ColorOverrides.md "ColorOverrides Legacy Alias") \
-&nbsp; • [ReorderList](ReorderList.md "ReorderList") \
-&nbsp; • [Expandable](Expandable.md "Expandable") \
-&nbsp; • [Notes](Notes.md "Notes")
+&nbsp; **Structure** \
+&nbsp;&nbsp; • [Category](Category.md "Category") \
+&nbsp;&nbsp; • [Page](Page.md "Page") \
+&nbsp;&nbsp; • [Group](Group.md "Group") \
+&nbsp;&nbsp; • [Dashboard](Dashboard.md "Dashboard") \
+&nbsp;&nbsp; • [InfoPage](InfoPage.md "InfoPage") \
+&nbsp;&nbsp; • [Custom](Custom.md "Custom Hosting") \
+&nbsp; **Controls** \
+&nbsp;&nbsp; • [Toggle](Toggle.md "Toggle") \
+&nbsp;&nbsp; • [CheckboxDropdown](CheckboxDropdown.md "CheckboxDropdown") \
+&nbsp;&nbsp; • [Dropdown](Dropdown.md "Dropdown") \
+&nbsp;&nbsp; • [MultiDropdown](MultiDropdown.md "MultiDropdown") \
+&nbsp;&nbsp; • [SoundDropdown](SoundDropdown.md "SoundDropdown") \
+&nbsp;&nbsp; • [Input](Input.md "Input") \
+&nbsp;&nbsp; • [Slider](Slider.md "Slider") \
+&nbsp;&nbsp; • [Button](Button.md "Button") \
+&nbsp; **Advanced** \
+&nbsp;&nbsp; • [ColorPicker](ColorPicker.md "ColorPicker") \
+&nbsp;&nbsp; • [ColorPalette](ColorPalette.md "ColorPalette") \
+&nbsp;&nbsp; • [ColorOverrides](ColorOverrides.md "ColorOverrides Legacy Alias") \
+&nbsp;&nbsp; • [ReorderList](ReorderList.md "ReorderList") \
+&nbsp;&nbsp; • [Expandable](Expandable.md "Expandable") \
+&nbsp;&nbsp; • [Notes](Notes.md "Notes")
 
 **Other** \
 &nbsp; • [Config API](../API/Config-API.md "Config API") \
