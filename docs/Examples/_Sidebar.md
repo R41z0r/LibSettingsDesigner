@@ -7,18 +7,21 @@
 
 **Examples** \
 &nbsp; • [Examples](Examples.md "Examples") \
-&nbsp; • [Minimal Addon](Minimal-Addon.md "Minimal Addon") \
-&nbsp; • [Complete Settings Center](Complete-Settings-Center.md "Complete Settings Center") \
-&nbsp; • [Wrapper Bridge Pattern](Wrapper-Bridge-Pattern.md "Wrapper Bridge Pattern") \
-&nbsp; • [Dependent Controls](Dependent-Controls.md "Dependent Controls") \
-&nbsp; • [Nested Database Values](Nested-Database-Values.md "Nested Database Values") \
-&nbsp; • [Dynamic Dropdowns](Dynamic-Dropdowns.md "Dynamic Dropdowns") \
-&nbsp; • [Runtime Refresh](Runtime-Refresh.md "Runtime Refresh") \
-&nbsp; • [Search and New Badges](Search-And-New-Badges.md "Search and New Badges") \
-&nbsp; • [Custom Hosted Editors](Custom-Hosted-Editors.md "Custom Hosted Editors") \
-&nbsp; • [Support Links](Support-Links.md "Support Links") \
-&nbsp; • [Theme Colors](Theme-Colors.md "Theme Colors") \
-&nbsp; • [Theme Borders](Theme-Borders.md "Theme Borders")
+&nbsp; **Start** \
+&nbsp;&nbsp; • [Minimal Addon](Minimal-Addon.md "Minimal Addon") \
+&nbsp;&nbsp; • [Complete Settings Center](Complete-Settings-Center.md "Complete Settings Center") \
+&nbsp;&nbsp; • [Wrapper Bridge Pattern](Wrapper-Bridge-Pattern.md "Wrapper Bridge Pattern") \
+&nbsp; **Data and Behavior** \
+&nbsp;&nbsp; • [Dependent Controls](Dependent-Controls.md "Dependent Controls") \
+&nbsp;&nbsp; • [Nested Database Values](Nested-Database-Values.md "Nested Database Values") \
+&nbsp;&nbsp; • [Dynamic Dropdowns](Dynamic-Dropdowns.md "Dynamic Dropdowns") \
+&nbsp;&nbsp; • [Runtime Refresh](Runtime-Refresh.md "Runtime Refresh") \
+&nbsp;&nbsp; • [Search and New Badges](Search-And-New-Badges.md "Search and New Badges") \
+&nbsp;&nbsp; • [Custom Hosted Editors](Custom-Hosted-Editors.md "Custom Hosted Editors") \
+&nbsp; **Polish** \
+&nbsp;&nbsp; • [Support Links](Support-Links.md "Support Links") \
+&nbsp;&nbsp; • [Theme Colors](Theme-Colors.md "Theme Colors") \
+&nbsp;&nbsp; • [Theme Borders](Theme-Borders.md "Theme Borders")
 
 **Reference** \
 &nbsp; • [Field Glossary](../Field-Glossary.md "Field Glossary") \
