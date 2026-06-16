@@ -19,12 +19,12 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Update sample TOC
-        run: python3 scripts/update_sample_toc.py
+        run: python3 scripts/update_sample_toc.py --changelog Samples/LibSettingsDesignerSample/CHANGELOG.md
 
       - name: Check for changes
         id: changes
         run: |
-          if git diff --quiet -- Samples/LibSettingsDesignerSample/LibSettingsDesignerSample.toc; then
+          if git diff --quiet -- Samples/LibSettingsDesignerSample/LibSettingsDesignerSample.toc Samples/LibSettingsDesignerSample/CHANGELOG.md; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -38,12 +38,12 @@ jobs:
           set -euo pipefail
 
           branch="dev/update-sample-toc"
-          body="Updates the sample addon's Interface metadata from Gethe/wow-ui-source live version.txt."
+          body="Updates the sample addon's Interface metadata from Gethe/wow-ui-source release branch version.txt files."
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -B "$branch"
-          git add Samples/LibSettingsDesignerSample/LibSettingsDesignerSample.toc
+          git add Samples/LibSettingsDesignerSample/LibSettingsDesignerSample.toc Samples/LibSettingsDesignerSample/CHANGELOG.md
           git commit -m "Update sample addon TOC"
           git push --force-with-lease origin "$branch"
 
