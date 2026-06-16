@@ -1,6 +1,0 @@
-## Interface: 120005
-## Title: LibSettingsDesigner Sample
-## Notes: Packaging metadata stub for the standalone sample addon.
-## Author: LibSettingsDesigner
-## Version: 1.0.0
-## X-Curse-Project-ID: 1577626
