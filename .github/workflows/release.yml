@@ -22,7 +22,9 @@ jobs:
           fetch-depth: 0
 
       - name: Prepare sample package root
-        run: cp -R Samples/LibSettingsDesignerSample/. .
+        run: |
+          cp -R Samples/LibSettingsDesignerSample/. .
+          git add -f .pkgmeta CHANGELOG.md Core.lua Settings.lua LibSettingsDesignerSample.toc libs
 
       - name: Package and upload addon
         uses: BigWigsMods/packager@v2
