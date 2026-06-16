@@ -10,8 +10,34 @@ import sys
 import urllib.request
 
 
-DEFAULT_VERSION_URL = "https://raw.githubusercontent.com/Gethe/wow-ui-source/live/version.txt"
 DEFAULT_TOC_PATH = pathlib.Path("Samples/LibSettingsDesignerSample/LibSettingsDesignerSample.toc")
+DEFAULT_CHANGELOG_PATH = pathlib.Path("Samples/LibSettingsDesignerSample/CHANGELOG.md")
+DEFAULT_VERSION_SOURCES = {
+    "retail": "https://raw.githubusercontent.com/Gethe/wow-ui-source/live/version.txt",
+    "classic": "https://raw.githubusercontent.com/Gethe/wow-ui-source/classic_era/version.txt",
+    "bcc": "https://raw.githubusercontent.com/Gethe/wow-ui-source/classic_anniversary/version.txt",
+    "mists": "https://raw.githubusercontent.com/Gethe/wow-ui-source/classic/version.txt",
+    "titan": "https://raw.githubusercontent.com/Gethe/wow-ui-source/classic_titan/version.txt",
+}
+TOC_KEYS = {
+    "retail": "Interface",
+    "classic": "Interface-Classic",
+    "bcc": "Interface-BCC",
+    "wrath": "Interface-Wrath",
+    "cata": "Interface-Cata",
+    "mists": "Interface-Mists",
+    "titan": "Interface-Titan",
+}
+DISPLAY_NAMES = {
+    "retail": "Retail",
+    "classic": "Classic Era",
+    "bcc": "Burning Crusade Classic",
+    "wrath": "Wrath Classic",
+    "cata": "Cataclysm Classic",
+    "mists": "Mists Classic",
+    "titan": "Titan Classic",
+}
+CHANGELOG_ENTRY = "- Updated sample addon Interface metadata for Retail and Classic game flavors."
 
 
 def parse_interface(version_text: str) -> int:
@@ -33,12 +59,30 @@ def fetch_text(url: str) -> str:
         return response.read().decode("utf-8")
 
 
-def update_toc_interface(toc_path: pathlib.Path, interface_version: int) -> bool:
+def parse_version_source(value: str) -> tuple[str, str]:
+    if "=" not in value:
+        raise argparse.ArgumentTypeError("version sources must use the form game_type=url")
+
+    game_type, url = value.split("=", 1)
+    game_type = game_type.strip().lower()
+    url = url.strip()
+
+    if game_type not in TOC_KEYS:
+        known = ", ".join(sorted(TOC_KEYS))
+        raise argparse.ArgumentTypeError(f"unknown game type {game_type!r}; expected one of: {known}")
+    if not url:
+        raise argparse.ArgumentTypeError("version source URL must not be empty")
+
+    return game_type, url
+
+
+def update_toc_interface(toc_path: pathlib.Path, interface_version: int, toc_key: str = "Interface") -> bool:
     text = toc_path.read_text(encoding="utf-8")
     lines = text.splitlines(keepends=True)
+    pattern = re.compile(rf"^(## {re.escape(toc_key)}:\s*)(.*?)(\r?\n)?$")
 
     for index, line in enumerate(lines):
-        match = re.match(r"^(## Interface:\s*)(.*?)(\r?\n)?$", line)
+        match = pattern.match(line)
         if not match:
             continue
 
@@ -50,6 +94,25 @@ def update_toc_interface(toc_path: pathlib.Path, interface_version: int) -> bool
         values.append(interface_version)
         values = sorted(set(values))
         lines[index] = f"{prefix}{', '.join(str(value) for value in values)}{newline or ''}"
+        toc_path.write_text("".join(lines), encoding="utf-8")
+        return True
+
+    if toc_key != "Interface":
+        insert_at = 0
+        for index, line in enumerate(lines):
+            if re.match(r"^## Interface(?:-[A-Za-z]+)?:", line):
+                insert_at = index + 1
+                continue
+            if insert_at:
+                break
+
+        newline = "\n"
+        for line in lines:
+            if line.endswith("\r\n"):
+                newline = "\r\n"
+                break
+
+        lines.insert(insert_at, f"## {toc_key}: {interface_version}{newline}")
         toc_path.write_text("".join(lines), encoding="utf-8")
         return True
 
@@ -80,13 +143,46 @@ def update_toc_version(toc_path: pathlib.Path, addon_version: str) -> bool:
     raise ValueError(f"No '## Version:' line found in {toc_path}")
 
 
+def update_changelog(changelog_path: pathlib.Path) -> bool:
+    text = changelog_path.read_text(encoding="utf-8")
+    if CHANGELOG_ENTRY in text:
+        return False
+
+    marker = "## Unreleased"
+    marker_index = text.find(marker)
+    if marker_index == -1:
+        raise ValueError(f"No '## Unreleased' section found in {changelog_path}")
+
+    insert_at = text.find("\n", marker_index)
+    if insert_at == -1:
+        new_text = f"{text}\n\n{CHANGELOG_ENTRY}\n"
+    else:
+        insert_at += 1
+        if insert_at < len(text) and text[insert_at] != "\n":
+            new_text = f"{text[:insert_at]}\n{CHANGELOG_ENTRY}\n{text[insert_at:]}"
+        else:
+            new_text = f"{text[:insert_at]}{CHANGELOG_ENTRY}\n{text[insert_at:]}"
+
+    changelog_path.write_text(new_text, encoding="utf-8")
+    return True
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--toc", type=pathlib.Path, default=DEFAULT_TOC_PATH)
-    parser.add_argument("--version-url", default=DEFAULT_VERSION_URL)
+    parser.add_argument(
+        "--version-url",
+        help="Deprecated alias for the Retail version source.",
+    )
+    parser.add_argument(
+        "--version-source",
+        action="append",
+        type=parse_version_source,
+        help="Version source in the form game_type=url. May be passed multiple times.",
+    )
     parser.add_argument(
         "--version-text",
-        help="Use literal version text instead of fetching from --version-url. Useful for tests.",
+        help="Use literal Retail version text instead of fetching from --version-url. Useful for tests.",
     )
     parser.add_argument(
         "--addon-version",
@@ -97,20 +193,51 @@ def main() -> int:
         action="store_true",
         help="Skip updating ## Interface metadata.",
     )
+    parser.add_argument(
+        "--changelog",
+        type=pathlib.Path,
+        help="Add a short Unreleased changelog entry when Interface metadata changes.",
+    )
     args = parser.parse_args()
 
     changed = False
+    interface_changed = False
 
     if not args.skip_interface:
-        version_text = args.version_text if args.version_text is not None else fetch_text(args.version_url)
-        interface_version = parse_interface(version_text)
-        interface_changed = update_toc_interface(args.toc, interface_version)
-        changed = changed or interface_changed
-
-        if interface_changed:
-            print(f"Added Interface {interface_version} to {args.toc}")
+        if args.version_text is not None:
+            version_sources = {"retail": args.version_text}
+            source_is_literal = True
+        elif args.version_source:
+            version_sources = dict(args.version_source)
+            source_is_literal = False
+        elif args.version_url:
+            version_sources = {"retail": args.version_url}
+            source_is_literal = False
         else:
-            print(f"Interface {interface_version} already present in {args.toc}")
+            version_sources = DEFAULT_VERSION_SOURCES
+            source_is_literal = False
+
+        for game_type, source in version_sources.items():
+            version_text = source if source_is_literal else fetch_text(source)
+            interface_version = parse_interface(version_text)
+            toc_key = TOC_KEYS[game_type]
+            game_changed = update_toc_interface(args.toc, interface_version, toc_key)
+            changed = changed or game_changed
+            interface_changed = interface_changed or game_changed
+            display_name = DISPLAY_NAMES[game_type]
+
+            if game_changed:
+                print(f"Added {toc_key} {interface_version} for {display_name} to {args.toc}")
+            else:
+                print(f"{toc_key} {interface_version} for {display_name} already present in {args.toc}")
+
+        if args.changelog and interface_changed:
+            changelog_changed = update_changelog(args.changelog)
+            changed = changed or changelog_changed
+            if changelog_changed:
+                print(f"Added Interface metadata changelog entry to {args.changelog}")
+            else:
+                print(f"Interface metadata changelog entry already present in {args.changelog}")
 
     if args.addon_version is not None:
         version_changed = update_toc_version(args.toc, args.addon_version)

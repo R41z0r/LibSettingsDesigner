@@ -55,6 +55,14 @@ Do not remove this notice from redistributed copies.
   packaging-relevant Lua files must run Luacheck before merge. Fix real
   warnings instead of suppressing them. Project-specific WoW globals belong in
   `.luacheckrc`.
+- When runtime or sample code uses WoW APIs, globals, XML templates, atlas names,
+  or frame methods, check the relevant Retail and Classic UI source branches
+  before the pull request. Record which branches/builds were checked when the
+  change depends on API availability.
+- Do not add compatibility wrappers or feature gates for APIs that exist across
+  the supported Retail and Classic branches. Add a small wrapper/fallback only
+  when a checked branch is missing the API, or when the code intentionally
+  supports older clients outside the current branch set.
 - Pull requests that change runtime Lua/XML/assets or sample addon Lua/XML/assets
   must not be merged to `main` until the changed behavior was tested in game and
   the user confirmed that it works.
