@@ -10,6 +10,7 @@ local MINOR = 2
 local lib = addon.LibSettingsDesigner.UI or {}
 addon.LibSettingsDesigner.UI = lib
 lib.MINOR = MINOR
+lib._Internal = lib._Internal or {}
 
 local CreateFrame = _G.CreateFrame
 local UIParent = _G.UIParent
@@ -75,6 +76,7 @@ lib.DEFAULT_DASHBOARD_INTRO = "Review settings, quick actions, and configuration
 lib.LOCALES = {
 	enUS = {
 		configCenterAbout = "About",
+		configCenterSections = "Sections",
 		configCenterAdvancedSettingDesc = "Open the related editor or action for this setting.",
 		configCenterButtonFallbackDesc = "Run this action.",
 		configCenterChange = "Change",
@@ -112,6 +114,9 @@ lib.LOCALES = {
 		configCenterOpenDesc = "Opens the modern settings center.",
 		configCenterPreview = "Preview",
 		configCenterRemove = "Remove",
+		configCenterReloadRequired = "Reload Required",
+		configCenterReloadRequiredDesc = "One or more changed settings require a UI reload.",
+		configCenterReloadUI = "Reload UI",
 		configCenterResetColor = "Reset color",
 		configCenterSearchPlaceholder = "Search settings",
 		configCenterSetting = "setting",
@@ -124,6 +129,7 @@ lib.LOCALES = {
 	},
 	deDE = {
 		configCenterAbout = "Überblick",
+		configCenterSections = "Abschnitte",
 		configCenterAdvancedSettingDesc = "Öffnet den zugehörigen Editor oder die Aktion für diese Einstellung.",
 		configCenterButtonFallbackDesc = "Führe diese Aktion aus.",
 		configCenterChange = "Ändern",
@@ -161,6 +167,9 @@ lib.LOCALES = {
 		configCenterOpenDesc = "Öffnet das moderne Einstellungscenter.",
 		configCenterPreview = "Vorschau",
 		configCenterRemove = "Entfernen",
+		configCenterReloadRequired = "Reload erforderlich",
+		configCenterReloadRequiredDesc = "Eine oder mehrere geänderte Einstellungen erfordern ein Neuladen der Benutzeroberfläche.",
+		configCenterReloadUI = "UI neu laden",
 		configCenterResetColor = "Farbe zurücksetzen",
 		configCenterSearchPlaceholder = "Einstellungen suchen",
 		configCenterSetting = "Einstellung",
@@ -173,6 +182,7 @@ lib.LOCALES = {
 	},
 	esES = {
 		configCenterAbout = "Acerca de",
+		configCenterSections = "Secciones",
 		configCenterAdvancedSettingDesc = "Abre el editor o la acción relacionada con este ajuste.",
 		configCenterButtonFallbackDesc = "Ejecuta esta acción.",
 		configCenterChange = "Cambiar",
@@ -210,6 +220,9 @@ lib.LOCALES = {
 		configCenterOpenDesc = "Abre el centro de ajustes moderno.",
 		configCenterPreview = "Vista previa",
 		configCenterRemove = "Eliminar",
+		configCenterReloadRequired = "Se requiere recarga",
+		configCenterReloadRequiredDesc = "Uno o más ajustes cambiados requieren recargar la interfaz.",
+		configCenterReloadUI = "Recargar interfaz",
 		configCenterResetColor = "Restablecer color",
 		configCenterSearchPlaceholder = "Buscar ajustes",
 		configCenterSetting = "ajuste",
@@ -222,6 +235,7 @@ lib.LOCALES = {
 	},
 	esMX = {
 		configCenterAbout = "Acerca de",
+		configCenterSections = "Secciones",
 		configCenterAdvancedSettingDesc = "Abre el editor o la acción relacionada con este ajuste.",
 		configCenterButtonFallbackDesc = "Ejecuta esta acción.",
 		configCenterChange = "Cambiar",
@@ -259,6 +273,9 @@ lib.LOCALES = {
 		configCenterOpenDesc = "Abre el centro de ajustes moderno.",
 		configCenterPreview = "Vista previa",
 		configCenterRemove = "Eliminar",
+		configCenterReloadRequired = "Se requiere recarga",
+		configCenterReloadRequiredDesc = "Uno o más ajustes cambiados requieren recargar la interfaz.",
+		configCenterReloadUI = "Recargar interfaz",
 		configCenterResetColor = "Restablecer color",
 		configCenterSearchPlaceholder = "Buscar ajustes",
 		configCenterSetting = "ajuste",
@@ -271,6 +288,7 @@ lib.LOCALES = {
 	},
 	frFR = {
 		configCenterAbout = "À propos",
+		configCenterSections = "Sections",
 		configCenterAdvancedSettingDesc = "Ouvre l’éditeur ou l’action associé à ce réglage.",
 		configCenterButtonFallbackDesc = "Exécute cette action.",
 		configCenterChange = "Modifier",
@@ -308,6 +326,9 @@ lib.LOCALES = {
 		configCenterOpenDesc = "Ouvre le centre de réglages moderne.",
 		configCenterPreview = "Aperçu",
 		configCenterRemove = "Supprimer",
+		configCenterReloadRequired = "Rechargement requis",
+		configCenterReloadRequiredDesc = "Un ou plusieurs réglages modifiés nécessitent de recharger l'interface.",
+		configCenterReloadUI = "Recharger l'interface",
 		configCenterResetColor = "Réinitialiser la couleur",
 		configCenterSearchPlaceholder = "Rechercher des réglages",
 		configCenterSetting = "réglage",
@@ -320,6 +341,7 @@ lib.LOCALES = {
 	},
 	itIT = {
 		configCenterAbout = "Informazioni",
+		configCenterSections = "Sezioni",
 		configCenterAdvancedSettingDesc = "Apre l’editor o l’azione collegata a questa impostazione.",
 		configCenterButtonFallbackDesc = "Esegui questa azione.",
 		configCenterChange = "Cambia",
@@ -357,6 +379,9 @@ lib.LOCALES = {
 		configCenterOpenDesc = "Apre il centro impostazioni moderno.",
 		configCenterPreview = "Anteprima",
 		configCenterRemove = "Rimuovi",
+		configCenterReloadRequired = "Ricaricamento richiesto",
+		configCenterReloadRequiredDesc = "Una o più impostazioni modificate richiedono il ricaricamento dell'interfaccia.",
+		configCenterReloadUI = "Ricarica UI",
 		configCenterResetColor = "Reimposta colore",
 		configCenterSearchPlaceholder = "Cerca impostazioni",
 		configCenterSetting = "impostazione",
@@ -369,6 +394,7 @@ lib.LOCALES = {
 	},
 	koKR = {
 		configCenterAbout = "정보",
+		configCenterSections = "섹션",
 		configCenterAdvancedSettingDesc = "이 설정과 관련된 편집기 또는 동작을 엽니다.",
 		configCenterButtonFallbackDesc = "이 동작을 실행합니다.",
 		configCenterChange = "변경",
@@ -403,10 +429,13 @@ lib.LOCALES = {
 		configCenterOkay = "확인",
 		configCenterOpenButton = "열기",
 		configCenterOpen = "설정 열기",
-		configCenterOpenDesc = "최신 설정 센터를 엽니다.",
-		configCenterPreview = "미리보기",
-		configCenterRemove = "제거",
-		configCenterResetColor = "색상 초기화",
+			configCenterOpenDesc = "최신 설정 센터를 엽니다.",
+			configCenterPreview = "미리보기",
+			configCenterRemove = "제거",
+			configCenterReloadRequired = "다시 불러오기 필요",
+			configCenterReloadRequiredDesc = "변경된 하나 이상의 설정은 UI 다시 불러오기가 필요합니다.",
+			configCenterReloadUI = "UI 다시 불러오기",
+			configCenterResetColor = "색상 초기화",
 		configCenterSearchPlaceholder = "설정 검색",
 		configCenterSetting = "설정",
 		configCenterSettings = "설정",
@@ -418,6 +447,7 @@ lib.LOCALES = {
 	},
 	ptBR = {
 		configCenterAbout = "Sobre",
+		configCenterSections = "Seções",
 		configCenterAdvancedSettingDesc = "Abre o editor ou a ação relacionada a esta configuração.",
 		configCenterButtonFallbackDesc = "Executa esta ação.",
 		configCenterChange = "Alterar",
@@ -452,10 +482,13 @@ lib.LOCALES = {
 		configCenterOkay = "OK",
 		configCenterOpenButton = "Abrir",
 		configCenterOpen = "Abrir configurações",
-		configCenterOpenDesc = "Abre a central moderna de configurações.",
-		configCenterPreview = "Prévia",
-		configCenterRemove = "Remover",
-		configCenterResetColor = "Redefinir cor",
+			configCenterOpenDesc = "Abre a central moderna de configurações.",
+			configCenterPreview = "Prévia",
+			configCenterRemove = "Remover",
+			configCenterReloadRequired = "Recarga necessária",
+			configCenterReloadRequiredDesc = "Uma ou mais configurações alteradas exigem recarregar a interface.",
+			configCenterReloadUI = "Recarregar interface",
+			configCenterResetColor = "Redefinir cor",
 		configCenterSearchPlaceholder = "Buscar configurações",
 		configCenterSetting = "configuração",
 		configCenterSettings = "configurações",
@@ -467,6 +500,7 @@ lib.LOCALES = {
 	},
 	ruRU = {
 		configCenterAbout = "Описание",
+		configCenterSections = "Разделы",
 		configCenterAdvancedSettingDesc = "Открывает связанный редактор или действие для этой настройки.",
 		configCenterButtonFallbackDesc = "Выполнить это действие.",
 		configCenterChange = "Изменить",
@@ -501,10 +535,13 @@ lib.LOCALES = {
 		configCenterOkay = "OK",
 		configCenterOpenButton = "Открыть",
 		configCenterOpen = "Открыть настройки",
-		configCenterOpenDesc = "Открывает современный центр настроек.",
-		configCenterPreview = "Предпросмотр",
-		configCenterRemove = "Удалить",
-		configCenterResetColor = "Сбросить цвет",
+			configCenterOpenDesc = "Открывает современный центр настроек.",
+			configCenterPreview = "Предпросмотр",
+			configCenterRemove = "Удалить",
+			configCenterReloadRequired = "Требуется перезагрузка",
+			configCenterReloadRequiredDesc = "Для одного или нескольких измененных параметров требуется перезагрузка интерфейса.",
+			configCenterReloadUI = "Перезагрузить UI",
+			configCenterResetColor = "Сбросить цвет",
 		configCenterSearchPlaceholder = "Поиск настроек",
 		configCenterSetting = "настройка",
 		configCenterSettings = "настройки",
@@ -516,6 +553,7 @@ lib.LOCALES = {
 	},
 	zhCN = {
 		configCenterAbout = "关于",
+		configCenterSections = "分区",
 		configCenterAdvancedSettingDesc = "打开与此设置相关的编辑器或操作。",
 		configCenterButtonFallbackDesc = "执行此操作。",
 		configCenterChange = "更改",
@@ -550,10 +588,13 @@ lib.LOCALES = {
 		configCenterOkay = "确定",
 		configCenterOpenButton = "打开",
 		configCenterOpen = "打开设置",
-		configCenterOpenDesc = "打开现代设置中心。",
-		configCenterPreview = "预览",
-		configCenterRemove = "移除",
-		configCenterResetColor = "重置颜色",
+			configCenterOpenDesc = "打开现代设置中心。",
+			configCenterPreview = "预览",
+			configCenterRemove = "移除",
+			configCenterReloadRequired = "需要重载",
+			configCenterReloadRequiredDesc = "一个或多个已更改的设置需要重载界面。",
+			configCenterReloadUI = "重载界面",
+			configCenterResetColor = "重置颜色",
 		configCenterSearchPlaceholder = "搜索设置",
 		configCenterSetting = "设置",
 		configCenterSettings = "设置",
@@ -565,6 +606,7 @@ lib.LOCALES = {
 	},
 	zhTW = {
 		configCenterAbout = "關於",
+		configCenterSections = "區段",
 		configCenterAdvancedSettingDesc = "開啟與此設定相關的編輯器或動作。",
 		configCenterButtonFallbackDesc = "執行此動作。",
 		configCenterChange = "變更",
@@ -599,10 +641,13 @@ lib.LOCALES = {
 		configCenterOkay = "確定",
 		configCenterOpenButton = "開啟",
 		configCenterOpen = "開啟設定",
-		configCenterOpenDesc = "開啟現代設定中心。",
-		configCenterPreview = "預覽",
-		configCenterRemove = "移除",
-		configCenterResetColor = "重設顏色",
+			configCenterOpenDesc = "開啟現代設定中心。",
+			configCenterPreview = "預覽",
+			configCenterRemove = "移除",
+			configCenterReloadRequired = "需要重新載入",
+			configCenterReloadRequiredDesc = "一個或多個已變更的設定需要重新載入介面。",
+			configCenterReloadUI = "重新載入介面",
+			configCenterResetColor = "重設顏色",
 		configCenterSearchPlaceholder = "搜尋設定",
 		configCenterSetting = "設定",
 		configCenterSettings = "設定",
@@ -1904,6 +1949,337 @@ function lib.UpdateDensityButton(frame, state)
 	frame.DensityButton.Text:SetText(label)
 end
 
+local function getTopbarOptions(app)
+	local opts = app and app.opts
+	local topbar = opts and (opts.topbar or opts.header or opts.topBar)
+	return type(topbar) == "table" and topbar or {}
+end
+
+local function resolveTopbarOption(app, key, defaultValue)
+	local topbar = getTopbarOptions(app)
+	local value = topbar[key]
+	if type(value) == "function" then
+		local ok, result = pcall(value, app)
+		if ok then
+			value = result
+		else
+			value = nil
+		end
+	end
+	if value == nil then
+		return defaultValue
+	end
+	return value
+end
+
+local function isTopbarActionVisible(action, app, state)
+	if type(action) ~= "table" then
+		return false
+	end
+	if action.hidden == true or action.visible == false then
+		return false
+	end
+	local visible = action.isVisible or action.visibleWhen or action.visible
+	if type(visible) == "function" then
+		local ok, result = pcall(visible, app, action, state)
+		return ok and result ~= false
+	end
+	return true
+end
+
+local function isTopbarActionEnabled(action, app, state)
+	local enabled = action.isEnabled or action.enabledWhen or action.enabled
+	if type(enabled) == "function" then
+		local ok, result = pcall(enabled, app, action, state)
+		return not ok or result ~= false
+	end
+	return enabled ~= false and action.disabled ~= true
+end
+
+local function getTopbarActionText(action, app, state)
+	local text = action.label or action.text or action.title or action.id or ""
+	if type(text) == "function" then
+		local ok, result = pcall(text, app, action, state)
+		if ok then
+			text = result
+		else
+			text = ""
+		end
+	end
+	return lib.NormalizeTextValue(text)
+end
+
+local function getTopbarActionTooltip(action, app, state)
+	local tooltip = action.tooltip or action.description or action.desc
+	if type(tooltip) == "function" then
+		local ok, result = pcall(tooltip, app, action, state)
+		if ok then
+			tooltip = result
+		else
+			tooltip = nil
+		end
+	end
+	return tooltip
+end
+
+local function getTopbarActionIcon(app, action)
+	if action.icon then
+		return action.icon
+	end
+	if action.iconKey then
+		return getAppIconTexture(app, action.iconKey)
+	end
+	return nil
+end
+
+local function getTopbarActions(app, slot)
+	local topbar = getTopbarOptions(app)
+	local actions
+	if slot == "title" then
+		actions = topbar.titleActions or topbar.leftActions
+	else
+		actions = topbar.actions or topbar.rightActions
+	end
+	if type(actions) == "function" then
+		local ok, result = pcall(actions, app, slot)
+		actions = ok and result or nil
+	end
+	if type(actions) ~= "table" then
+		return {}
+	end
+	return actions
+end
+
+local function addTopbarMenuEntry(rootDescription, entry, app, action, state)
+	if type(entry) ~= "table" then
+		return
+	end
+	if entry.hidden == true or entry.visible == false then
+		return
+	end
+	local visible = entry.isVisible or entry.visibleWhen or entry.visible
+	if type(visible) == "function" then
+		local ok, result = pcall(visible, app, action, state, entry)
+		if not ok or result == false then
+			return
+		end
+	end
+	if entry.divider and rootDescription.CreateDivider then
+		rootDescription:CreateDivider()
+		return
+	end
+	local text = lib.NormalizeTextValue(entry.label or entry.text or entry.title or entry.id)
+	local children = entry.children or entry.entries or entry.menu
+	if type(children) == "table" and rootDescription.CreateButton then
+		local childRoot = rootDescription:CreateButton(text)
+		for _, child in ipairs(children) do
+			addTopbarMenuEntry(childRoot, child, app, action, state)
+		end
+		return
+	end
+	if entry.checked ~= nil or entry.isSelected or entry.setSelected then
+		local isSelected = function()
+			if type(entry.isSelected) == "function" then
+				local ok, result = pcall(entry.isSelected, app, action, state, entry)
+				return ok and result == true
+			end
+			if type(entry.checked) == "function" then
+				local ok, result = pcall(entry.checked, app, action, state, entry)
+				return ok and result == true
+			end
+			return entry.checked == true
+		end
+		local setSelected = function()
+			if type(entry.setSelected) == "function" then
+				pcall(entry.setSelected, app, action, state, entry)
+			elseif type(entry.onClick) == "function" then
+				pcall(entry.onClick, app, action, state, entry)
+			end
+		end
+		if rootDescription.CreateCheckbox then
+			rootDescription:CreateCheckbox(text, isSelected, setSelected)
+		end
+	elseif rootDescription.CreateButton then
+		rootDescription:CreateButton(text, function()
+			if type(entry.onClick) == "function" then
+				pcall(entry.onClick, app, action, state, entry)
+			end
+		end)
+	end
+end
+
+local function openTopbarActionMenu(button, action, app, state)
+	if not MenuUtil or type(MenuUtil.CreateContextMenu) ~= "function" then
+		return
+	end
+	MenuUtil.CreateContextMenu(button, function(owner, rootDescription)
+		if type(action.menu) == "function" then
+			pcall(action.menu, rootDescription, owner, app, action, state)
+		elseif type(action.buildMenu) == "function" then
+			pcall(action.buildMenu, rootDescription, owner, app, action, state)
+		elseif type(action.setupMenu) == "function" then
+			pcall(action.setupMenu, rootDescription, owner, app, action, state)
+		else
+			local entries = action.menu or action.menuItems or action.entries
+			if type(entries) == "table" then
+				for _, entry in ipairs(entries) do
+					addTopbarMenuEntry(rootDescription, entry, app, action, state)
+				end
+			end
+		end
+	end)
+end
+
+local function topbarActionHasMenu(action)
+	return type(action) == "table" and (
+		type(action.menu) == "function"
+			or type(action.buildMenu) == "function"
+			or type(action.setupMenu) == "function"
+			or type(action.menu) == "table"
+			or type(action.menuItems) == "table"
+			or type(action.entries) == "table"
+	)
+end
+
+function lib.RefreshTopbar(frame, state)
+	if not frame or not state then
+		return
+	end
+	local app = state.app
+	local topbar = getTopbarOptions(app)
+	local titleWidth = tonumber(topbar.titleWidth) or 320
+	if frame.Title then
+		frame.Title:SetWidth(titleWidth)
+	end
+	lib.UpdateDensityButton(frame, state)
+	local allActionButtons = {}
+	local function configureActionButton(button, action)
+		local label = getTopbarActionText(action, app, state)
+		local icon = getTopbarActionIcon(app, action)
+		local iconOnly = action.iconOnly == true or (icon and label == "")
+		local width = tonumber(action.width) or (iconOnly and 32) or math.min(150, math.max(74, (#label * 7) + (icon and 36 or 24)))
+		button._eqolTopbarAction = action
+		button._eqolTopbarState = state
+		button:SetSize(width, tonumber(action.height) or 28)
+		button.Text:SetText(iconOnly and "" or label)
+		if icon and not button.Icon then
+			button.Icon = createIcon(button, icon, 18, action.iconAtlas == true)
+			button.Icon:SetPoint("LEFT", button, "LEFT", iconOnly and 7 or 8, 0)
+		end
+		if button.Icon then
+			button.Icon:SetShown(icon ~= nil)
+			if icon then
+				if action.iconAtlas == true and button.Icon.SetAtlas then
+					pcall(button.Icon.SetAtlas, button.Icon, icon, false)
+				else
+					button.Icon:SetTexture(icon)
+				end
+			end
+		end
+		local enabled = isTopbarActionEnabled(action, app, state)
+		button._eqolDisabled = not enabled
+		button:SetEnabled(enabled)
+		setFrameBackdrop(button, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
+		setTextColor(button.Text, TEXT.topbarGold)
+		button:SetShown(true)
+		return width
+	end
+	local function refreshSlot(slot, anchorFrame, leftGap)
+		local buttons = slot == "title" and frame.TopbarTitleActionButtons or frame.TopbarActionButtons
+		local previous = anchorFrame
+		for index, action in ipairs(getTopbarActions(app, slot)) do
+			local button = buttons[index]
+			if button then
+				allActionButtons[#allActionButtons + 1] = button
+			end
+			if button and isTopbarActionVisible(action, app, state) then
+				configureActionButton(button, action)
+				button:ClearAllPoints()
+				button:SetPoint("LEFT", previous, previous == anchorFrame and "RIGHT" or "RIGHT", previous == anchorFrame and leftGap or 8, 0)
+				previous = button
+			elseif button then
+				button._eqolTopbarAction = nil
+				button._eqolTopbarState = nil
+				button:Hide()
+			end
+		end
+		for index = #getTopbarActions(app, slot) + 1, #buttons do
+			buttons[index]:Hide()
+		end
+		return previous
+	end
+	refreshSlot("title", frame.Title, 12)
+	local rightAnchor = frame.TopBar
+	local rightPoint = "RIGHT"
+	local rightOffset = -12
+	local function placeRight(button)
+		if not button or not button:IsShown() then
+			return
+		end
+		button:ClearAllPoints()
+		button:SetPoint("RIGHT", rightAnchor, rightPoint, rightOffset, 0)
+		rightAnchor = button
+		rightPoint = "LEFT"
+		rightOffset = -12
+	end
+	if frame.SearchShell then
+		frame.SearchShell:SetShown(resolveTopbarOption(app, "showSearch", true) ~= false)
+	end
+	if frame.ResetButton then
+		frame.ResetButton:SetShown(resolveTopbarOption(app, "showDefaults", true) ~= false)
+	end
+	if frame.DensityButton then
+		frame.DensityButton:SetShown(resolveTopbarOption(app, "showDensity", true) ~= false and lib.ShouldShowDensityButton(app))
+	end
+	if frame.LockButton then
+		frame.LockButton:SetShown(resolveTopbarOption(app, "showLock", true) ~= false)
+	end
+	placeRight(frame.ResetButton)
+	placeRight(frame.DensityButton)
+	placeRight(frame.LockButton)
+	placeRight(frame.SearchShell)
+	local rightButtons = frame.TopbarActionButtons
+	for index, action in ipairs(getTopbarActions(app, "right")) do
+		local button = rightButtons[index]
+		if button then
+			allActionButtons[#allActionButtons + 1] = button
+		end
+		if button and isTopbarActionVisible(action, app, state) then
+			configureActionButton(button, action)
+			button:ClearAllPoints()
+			button:SetPoint("RIGHT", rightAnchor, rightPoint, rightOffset, 0)
+			rightAnchor = button
+			rightPoint = "LEFT"
+			rightOffset = -8
+		elseif button then
+			button._eqolTopbarAction = nil
+			button._eqolTopbarState = nil
+			button:Hide()
+		end
+	end
+	for index = #getTopbarActions(app, "right") + 1, #rightButtons do
+		rightButtons[index]:Hide()
+	end
+	for _, button in ipairs(allActionButtons) do
+		local action = button._eqolTopbarAction
+		button:SetScript("OnUpdate", action and action.pulse and function(self, elapsed)
+			self._eqolTopbarPulse = (self._eqolTopbarPulse or 0) + (elapsed or 0)
+			self:SetAlpha(0.74 + (0.26 * ((math.sin(self._eqolTopbarPulse * 4) + 1) * 0.5)))
+		end or nil)
+		if not (action and action.pulse) then
+			button._eqolTopbarPulse = nil
+			button:SetAlpha(1)
+		end
+	end
+end
+
+function lib.RefreshTopbarForApp(app)
+	local frame = lib.GetFrame and lib:GetFrame(app)
+	if frame and frame._LibSettingsDesignerState then
+		lib.RefreshTopbar(frame, frame._LibSettingsDesignerState)
+	end
+end
+
 function lib.GetPageAboutText(app, page)
 	return getPageDescription(app, page)
 end
@@ -2751,6 +3127,7 @@ function lib.RefreshVisibleRows(state)
 			end
 		end
 	end
+	lib.RefreshTopbar(state.frame, state)
 end
 
 local updateScrollFrameVisibility
@@ -5123,7 +5500,7 @@ local function isPageMasterToggle(page, control)
 	return page.mainToggleID ~= nil and page.mainToggleID == control.id
 end
 
-local function collectEnabledFeaturePages(app, limit)
+function lib._Internal.collectEnabledFeaturePages(app, limit)
 	local result = {}
 	local seen = {}
 	for _, control in ipairs(app.controls or {}) do
@@ -5142,7 +5519,7 @@ local function collectEnabledFeaturePages(app, limit)
 	return result
 end
 
-local function collectCustomizedPages(app, limit)
+function lib._Internal.collectCustomizedPages(app, limit)
 	local result = {}
 	local pages = app and type(app.GetPages) == "function" and app:GetPages() or (app and app.pages) or {}
 	for _, page in ipairs(pages) do
@@ -5207,7 +5584,7 @@ function lib.IsCategoryNew(app, categoryID)
 	return false
 end
 
-local function collectNewEntries(app, limit)
+function lib._Internal.collectNewEntries(app, limit)
 	local result = {}
 	local seen = {}
 	for _, control in ipairs(app.controls or {}) do
@@ -5223,7 +5600,7 @@ local function collectNewEntries(app, limit)
 	return result
 end
 
-local function addDashboardNewPanel(state, parent, entries, width, titleText)
+function lib._Internal.addDashboardNewPanel(state, parent, entries, width, titleText)
 	local app = state.app
 	local L = getLocale(app)
 	local panel = CreateFrame("Frame", nil, parent, "BackdropTemplate")
@@ -5296,15 +5673,13 @@ function lib.AddDashboardCards(state, cards)
 	end
 end
 
-local addContentScrollbarRail
-
-local function renderDashboard(state)
+function lib._Internal.renderDashboard(state)
 	local app = state.app
 	local L = getLocale(app)
 	local stats = app:GetStats()
 	local dashboard = lib.GetDashboardOptions(app)
 	local hero = type(dashboard.hero) == "table" and dashboard.hero or {}
-	addContentScrollbarRail(state)
+	lib._Internal.addContentScrollbarRail(state)
 	addDashboardHero(
 		state,
 		hero.title or L["configCenterTitle"] or (getAppTitle(app) .. " Settings"),
@@ -5326,8 +5701,8 @@ local function renderDashboard(state)
 	local enabledPages = {}
 	local customizedPages = {}
 	if dashboard.features ~= nil and dashboard.features ~= false then
-		enabledPages = collectEnabledFeaturePages(app, featureConfig.limit or 5)
-		customizedPages = #enabledPages == 0 and collectCustomizedPages(app, 5) or {}
+		enabledPages = lib._Internal.collectEnabledFeaturePages(app, featureConfig.limit or 5)
+		customizedPages = #enabledPages == 0 and lib._Internal.collectCustomizedPages(app, 5) or {}
 	end
 	local featurePages = #enabledPages > 0 and enabledPages or customizedPages
 	local featureBadgeText = #enabledPages > 0 and (featureConfig.enabledBadge or L["configCenterEnabled"] or "")
@@ -5336,7 +5711,7 @@ local function renderDashboard(state)
 		or (featureConfig.customizedTitle or L["configCenterSettings"] or "Settings")
 	local newConfig = type(dashboard.newEntries) == "table" and dashboard.newEntries or {}
 	local newEntries = (dashboard.newEntries == nil or dashboard.newEntries == false) and {}
-		or collectNewEntries(app, newConfig.limit or 3)
+		or lib._Internal.collectNewEntries(app, newConfig.limit or 3)
 	local hasFeaturePanel = dashboard.features ~= nil and dashboard.features ~= false
 	local hasNewPanel = #newEntries > 0
 	if not hasFeaturePanel and not hasNewPanel then
@@ -5348,7 +5723,7 @@ local function renderDashboard(state)
 		or panelWidth
 	local enabledWidth = hasNewPanel and (panelWidth - newPanelWidth - GRID_GAP) or panelWidth
 	if hasNewPanel then
-		addDashboardNewPanel(state, panelRow, newEntries, newPanelWidth, newConfig.title)
+		lib._Internal.addDashboardNewPanel(state, panelRow, newEntries, newPanelWidth, newConfig.title)
 	end
 	if not hasFeaturePanel then
 		return
@@ -5398,14 +5773,14 @@ local function renderDashboard(state)
 	state.y = state.y - 14
 end
 
-local function renderCategoryOverview(state, categoryID)
+function lib._Internal.renderCategoryOverview(state, categoryID)
 	local app = state.app
 	local category = app.categoriesByID[categoryID]
 	if not category then
-		renderDashboard(state)
+		lib._Internal.renderDashboard(state)
 		return
 	end
-	addContentScrollbarRail(state)
+	lib._Internal.addContentScrollbarRail(state)
 	addSectionTitle(state, category.title or category.id, category.description)
 	local pages = app:GetPages(categoryID)
 	if #pages == 0 then
@@ -5421,7 +5796,7 @@ local function renderCategoryOverview(state, categoryID)
 	end
 end
 
-local function collectPageGroups(app, page, mainToggle)
+function lib._Internal.collectPageGroups(app, page, mainToggle)
 	local L = getLocale(app)
 	local groups = {}
 	local groupsByID = {}
@@ -5468,7 +5843,7 @@ local function collectPageGroups(app, page, mainToggle)
 	return groups
 end
 
-local function addPageLeftColumnShell(state)
+function lib._Internal.addPageLeftColumnShell(state)
 	if state.sidePanelMode ~= "right" or not state.frame.ContentShell then
 		return nil
 	end
@@ -5494,7 +5869,7 @@ local function addPageLeftColumnShell(state)
 	return shell
 end
 
-function addContentScrollbarRail(state)
+function lib._Internal.addContentScrollbarRail(state)
 	if not state.frame.ContentShell or not state.frame.Scroll then
 		return nil
 	end
@@ -5510,7 +5885,7 @@ function addContentScrollbarRail(state)
 	return rail
 end
 
-local function addPageFixedHeader(state, category, pagePath)
+function lib._Internal.addPageFixedHeader(state, category, pagePath)
 	if state.sidePanelMode ~= "right" or not state.frame.ContentShell then
 		return nil
 	end
@@ -5553,12 +5928,123 @@ local function addPageFixedHeader(state, category, pagePath)
 	return header
 end
 
-local function addPageSidePanel(state, page, category)
+function lib._Internal.resolvePagePanelOption(app, page, key, alternateKey, ...)
+	local value
+	if page then
+		value = page[key]
+		if value == nil and alternateKey then
+			value = page[alternateKey]
+		end
+	end
+	local opts = app and app.opts
+	if value == nil and opts then
+		value = opts[key]
+		if value == nil and alternateKey then
+			value = opts[alternateKey]
+		end
+	end
+	if type(value) == "function" then
+		local ok, result = pcall(value, app, page, ...)
+		value = ok and result or nil
+	end
+	return value
+end
+
+function lib._Internal.shouldShowPageSubnav(state, page, groups)
+	if not groups or #groups <= 1 then
+		return false
+	end
+	local app = state and state.app
+	local subnav = page and (page.subnav or page.subnavigation) or nil
+	if subnav == nil and app and app.opts then
+		subnav = app.opts.subnav or app.opts.subnavigation
+	end
+	if type(subnav) == "table" then
+		local enabled = subnav.enabled
+		if type(enabled) == "function" then
+			local ok, result = pcall(enabled, app, page, groups, state)
+			enabled = ok and result or nil
+		end
+		return enabled == true
+	end
+	if type(subnav) == "function" then
+		local ok, result = pcall(subnav, app, page, groups, state)
+		return ok and result == true
+	end
+	local visible = lib._Internal.resolvePagePanelOption(app, page, "showSubnav", "showSubnavigation", groups, state)
+	if visible ~= nil then
+		return visible == true
+	end
+	return false
+end
+
+function lib._Internal.addPageSubnav(state, panel, page, groups, y, availableHeight)
+	if not lib._Internal.shouldShowPageSubnav(state, page, groups) then
+		return y
+	end
+
+	local app = state.app
+	local L = getLocale(app)
+	local panelWidth = state.pageRightWidth or PAGE_RIGHT_WIDTH
+	local divider = panel:CreateTexture(nil, "ARTWORK")
+	divider:SetPoint("TOPLEFT", panel, "TOPLEFT", 14, y)
+	divider:SetPoint("RIGHT", panel, "RIGHT", -14, 0)
+	divider:SetHeight(1)
+	divider:SetColorTexture(DETAIL_COLORS.sectionBorder[1], DETAIL_COLORS.sectionBorder[2], DETAIL_COLORS.sectionBorder[3], 0.56)
+	y = y - 14
+
+	local title = createText(panel, FONT_MUTED, L["configCenterSections"] or "Sections", TEXT.gold)
+	title:SetPoint("TOPLEFT", panel, "TOPLEFT", 14, y)
+	title:SetPoint("RIGHT", panel, "RIGHT", -14, 0)
+	title:SetHeight(18)
+	title.Text:SetJustifyV("MIDDLE")
+	y = y - 26
+
+	local rowHeight = 24
+	local rowGap = 4
+	local maxRows = math.max(0, math.floor(((availableHeight or 0) - 28) / (rowHeight + rowGap)))
+	maxRows = math.min(#groups, maxRows > 0 and maxRows or #groups)
+	for index = 1, maxRows do
+		local group = groups[index]
+		local button = trackFrame(state.fixedFrames, CreateFrame("Button", nil, panel, "BackdropTemplate"))
+		button:SetPoint("TOPLEFT", panel, "TOPLEFT", 10, y)
+		button:SetSize(panelWidth - 20, rowHeight)
+		applyBackdrop(button, { 0.060, 0.054, 0.040, 0.78 }, { 0.28, 0.24, 0.16, 0.52 }, "card")
+		button.Text = createText(button, FONT_MUTED, group.title or group.id, TEXT.muted)
+		button.Text:SetPoint("LEFT", button, "LEFT", 9, 0)
+		button.Text:SetPoint("RIGHT", button, "RIGHT", -9, 0)
+		button.Text:SetHeight(rowHeight)
+		button.Text.Text:SetJustifyV("MIDDLE")
+		if button.Text.Text.SetMaxLines then
+			button.Text.Text:SetMaxLines(1)
+		end
+		button:SetScript("OnEnter", function(self)
+			setFrameBackdrop(self, CARD_BG_HOVER, CARD_BORDER_HOVER)
+			setTextColor(self.Text and self.Text.Text, TEXT.main)
+		end)
+		button:SetScript("OnLeave", function(self)
+			setFrameBackdrop(self, { 0.060, 0.054, 0.040, 0.78 }, { 0.28, 0.24, 0.16, 0.52 })
+			setTextColor(self.Text and self.Text.Text, TEXT.muted)
+		end)
+		button:SetScript("OnClick", function()
+			state:SetPage(page.id, group.id)
+		end)
+		y = y - (rowHeight + rowGap)
+	end
+	return y
+end
+
+function lib._Internal.addPageSidePanel(state, page, category, groups)
 	local L = getLocale(state.app)
 	local _ = category
 	local aboutTextValue = lib.GetPageAboutText(state.app, page)
 	local aboutHeight = lib.EstimateTextHeight(aboutTextValue, (state.pageRightWidth or PAGE_RIGHT_WIDTH) - 28, 13, 58)
-	local panelHeight = math.max(148, math.min(320, aboutHeight + 52))
+	local showSubnav = lib._Internal.shouldShowPageSubnav(state, page, groups)
+	local subnavRows = showSubnav and math.min(#groups, 8) or 0
+	local subnavHeight = showSubnav and (46 + (subnavRows * 28)) or 0
+	local shellHeight = state.frame.ContentShell and state.frame.ContentShell:GetHeight() or 0
+	local maxPanelHeight = shellHeight > 0 and math.max(180, shellHeight - PAGE_LAYOUT.sidePanelTopOffset - PAGE_LAYOUT.contentPad) or 420
+	local panelHeight = math.max(148, math.min(maxPanelHeight, aboutHeight + 52 + subnavHeight))
 	local panel = trackFrame(state.fixedFrames, CreateFrame("Frame", nil, state.frame.ContentShell, "BackdropTemplate"))
 	panel:SetPoint(
 		"TOPRIGHT",
@@ -5579,10 +6065,11 @@ local function addPageSidePanel(state, page, category)
 	aboutText:SetPoint("TOPLEFT", aboutTitle, "BOTTOMLEFT", 0, -8)
 	aboutText:SetPoint("RIGHT", panel, "RIGHT", -14, 0)
 	aboutText:SetHeight(aboutHeight)
+	lib._Internal.addPageSubnav(state, panel, page, groups, -(aboutHeight + 50), panelHeight - (aboutHeight + 50))
 	return panel
 end
 
-local function addGroupSection(state, group, pagePath)
+function lib._Internal.addGroupSection(state, group, pagePath)
 	local collapsed = state.collapsedGroups and state.collapsedGroups[group.id] == true
 	local controlsHeight = 0
 	local customizedCount = lib.GetGroupCustomizedCount(state.app, group)
@@ -6055,10 +6542,10 @@ function lib.RenderInfoPage(state, page, pagePath)
 	local app = state.app
 	local category = app.categoriesByID[page.category or ""]
 	if state.sidePanelMode == "right" then
-		addPageLeftColumnShell(state)
-		addPageFixedHeader(state, category, pagePath)
-		addContentScrollbarRail(state)
-		addPageSidePanel(state, page, category)
+		lib._Internal.addPageLeftColumnShell(state)
+		lib._Internal.addPageFixedHeader(state, category, pagePath)
+		lib._Internal.addContentScrollbarRail(state)
+		lib._Internal.addPageSidePanel(state, page, category, nil)
 	end
 
 	local header = createPageLeftFrame(state, 74)
@@ -6090,10 +6577,10 @@ function lib.RenderCustomPage(state, page, pagePath)
 	local app = state.app
 	local category = app.categoriesByID[page.category or ""]
 	if state.sidePanelMode == "right" then
-		addPageLeftColumnShell(state)
-		addPageFixedHeader(state, category, pagePath)
-		addContentScrollbarRail(state)
-		addPageSidePanel(state, page, category)
+		lib._Internal.addPageLeftColumnShell(state)
+		lib._Internal.addPageFixedHeader(state, category, pagePath)
+		lib._Internal.addContentScrollbarRail(state)
+		lib._Internal.addPageSidePanel(state, page, category, nil)
 	end
 
 	local header = createPageLeftFrame(state, 74)
@@ -6118,11 +6605,11 @@ function lib.RenderCustomPage(state, page, pagePath)
 	lib.RenderCustomOwner(state, section, page, "page:" .. tostring(page.id))
 end
 
-local function renderPage(state, pageID)
+function lib._Internal.renderPage(state, pageID)
 	local app = state.app
 	local page = app:GetPage(pageID)
 	if not page then
-		renderDashboard(state)
+		lib._Internal.renderDashboard(state)
 		return
 	end
 	local category = app.categoriesByID[page.category or ""]
@@ -6136,11 +6623,12 @@ local function renderPage(state, pageID)
 		return
 	end
 
+	local groups = lib._Internal.collectPageGroups(app, page, nil)
 	if state.sidePanelMode == "right" then
-		addPageLeftColumnShell(state)
-		addPageFixedHeader(state, category, pagePath)
-		addContentScrollbarRail(state)
-		addPageSidePanel(state, page, category)
+		lib._Internal.addPageLeftColumnShell(state)
+		lib._Internal.addPageFixedHeader(state, category, pagePath)
+		lib._Internal.addContentScrollbarRail(state)
+		lib._Internal.addPageSidePanel(state, page, category, groups)
 	end
 
 	local header = createPageLeftFrame(state, 74)
@@ -6154,7 +6642,6 @@ local function renderPage(state, pageID)
 	state.y = state.y - 8
 
 	local groupsStartY = state.y
-	local groups = collectPageGroups(app, page, nil)
 	if #groups == 0 then
 		local empty = createPageLeftFrame(state, 72)
 		applyBackdrop(empty, DETAIL_SECTION_BG, DETAIL_COLORS.sectionBorder, "detailSection")
@@ -6164,7 +6651,7 @@ local function renderPage(state, pageID)
 		emptyText:SetPoint("BOTTOMRIGHT", empty, "BOTTOMRIGHT", -14, 14)
 	else
 		for _, group in ipairs(groups) do
-			addGroupSection(state, group, pagePath)
+			lib._Internal.addGroupSection(state, group, pagePath)
 		end
 	end
 	if state.sidePanelMode == "right" then
@@ -6172,11 +6659,11 @@ local function renderPage(state, pageID)
 	end
 end
 
-local function renderSearch(state, query)
+function lib._Internal.renderSearch(state, query)
 	local app = state.app
 	local L = getLocale(app)
 	local results = app:GetSearchResults(query, 80)
-	addContentScrollbarRail(state)
+	lib._Internal.addContentScrollbarRail(state)
 	addSectionTitle(state, (L["configCenterSearchPlaceholder"] or "Search settings") .. ": " .. query)
 	if #results == 0 then
 		addInfoCard(state, L["configCenterNoResults"] or "No settings found.", {}, 64)
@@ -6262,16 +6749,16 @@ function StateMixin:RenderContent()
 	if query ~= "" then
 		self.resetSearchScroll = self.lastSearchQuery ~= query
 		self.lastSearchQuery = query
-		renderSearch(self, query)
+		lib._Internal.renderSearch(self, query)
 	elseif self.view == "category" then
 		self.lastSearchQuery = nil
-		renderCategoryOverview(self, self.selectedCategoryID)
+		lib._Internal.renderCategoryOverview(self, self.selectedCategoryID)
 	elseif self.view == "page" then
 		self.lastSearchQuery = nil
-		renderPage(self, self.selectedPageID)
+		lib._Internal.renderPage(self, self.selectedPageID)
 	else
 		self.lastSearchQuery = nil
-		renderDashboard(self)
+		lib._Internal.renderDashboard(self)
 	end
 	setScrollHeight(self)
 	if self.resetContentScroll then
@@ -6557,7 +7044,7 @@ function StateMixin:SetDensity(density)
 	end
 	lib._densityByApp = lib._densityByApp or {}
 	lib._densityByApp[self.app.id or self.app.title or "default"] = density
-	lib.UpdateDensityButton(self.frame, self)
+	lib.RefreshTopbar(self.frame, self)
 	self.restoreContentScrollKey = self:GetContentScrollKey()
 	self.resetContentScroll = true
 	self:RenderContent()
@@ -6740,12 +7227,60 @@ local function createFrame(app)
 
 	frame.Title = frame.TopBar:CreateFontString(nil, "OVERLAY", FONT_TITLE)
 	frame.Title:SetPoint("LEFT", frame.HeaderIcon, "RIGHT", 10, 0)
-	frame.Title:SetPoint("RIGHT", frame.TopBar, "RIGHT", -600, 0)
+	frame.Title:SetWidth(320)
 	frame.Title:SetJustifyH("LEFT")
 	frame.Title:SetText(app.opts and app.opts.settingsTitle or L["configCenterTitle"] or (getAppTitle(app) .. " Settings"))
 	frame.Title:SetShadowColor(0, 0, 0, 0.95)
 	frame.Title:SetShadowOffset(1, -1)
 	setTextColor(frame.Title, TEXT.topbarGold)
+
+	local function createTopbarActionButton()
+		local button = makeFlatButton(frame.TopBar, "", 32, 28)
+		button:Hide()
+		setFrameBackdrop(button, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
+		setTextColor(button.Text, TEXT.topbarGold)
+		button:SetScript("OnEnter", function(self)
+			setFrameBackdrop(self, lib.ThemeColors.buttonTopbarHoverBg, lib.ThemeColors.buttonHoverBorder, "topbarButton")
+			local action = self._eqolTopbarAction
+			local tooltip = action and getTopbarActionTooltip(action, app, self._eqolTopbarState)
+			if tooltip and _G.GameTooltip then
+				_G.GameTooltip:SetOwner(self, "ANCHOR_TOP")
+				_G.GameTooltip:SetText(getTopbarActionText(action, app, self._eqolTopbarState))
+				_G.GameTooltip:AddLine(tooltip, 1, 1, 1, true)
+				_G.GameTooltip:Show()
+			end
+		end)
+		button:SetScript("OnLeave", function(self)
+			setFrameBackdrop(self, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
+			if _G.GameTooltip then
+				_G.GameTooltip:Hide()
+			end
+		end)
+		button:SetScript("OnClick", function(self)
+			local action = self._eqolTopbarAction
+			local state = self._eqolTopbarState
+			if not action then
+				return
+			end
+			if topbarActionHasMenu(action) then
+				openTopbarActionMenu(self, action, app, state)
+			elseif type(action.onClick) == "function" then
+				pcall(action.onClick, app, action, state, self)
+				lib.RefreshTopbar(frame, state)
+			end
+		end)
+		button:SetScript("OnHide", function(self)
+			self._eqolTopbarPulse = nil
+			self:SetAlpha(1)
+		end)
+		return button
+	end
+	frame.TopbarTitleActionButtons = {}
+	frame.TopbarActionButtons = {}
+	for i = 1, 8 do
+		frame.TopbarTitleActionButtons[i] = createTopbarActionButton()
+		frame.TopbarActionButtons[i] = createTopbarActionButton()
+	end
 
 	frame.CustomCloseButton = CreateFrame("Button", nil, frame, "BackdropTemplate")
 	frame.CustomCloseButton:SetSize(32, 32)
@@ -7034,7 +7569,7 @@ local function createFrame(app)
 			state:SetDensity(lib.IsCompactDensity(state) and "comfortable" or "compact")
 		end
 	end)
-	lib.UpdateDensityButton(frame, state)
+	lib.RefreshTopbar(frame, state)
 	lib.ApplyFrameLocked(frame, app)
 	frame:SetScript("OnSizeChanged", function()
 		lib.SaveFrameSize(app, frame:GetWidth(), frame:GetHeight())
@@ -7084,6 +7619,18 @@ local function refreshFrameTheme(frame, app)
 	if frame.DensityButton then
 		setFrameBackdrop(frame.DensityButton, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
 		setTextColor(frame.DensityButton.Text, TEXT.topbarGold)
+	end
+	if frame.TopbarTitleActionButtons then
+		for _, button in ipairs(frame.TopbarTitleActionButtons) do
+			setFrameBackdrop(button, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
+			setTextColor(button.Text, TEXT.topbarGold)
+		end
+	end
+	if frame.TopbarActionButtons then
+		for _, button in ipairs(frame.TopbarActionButtons) do
+			setFrameBackdrop(button, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
+			setTextColor(button.Text, TEXT.topbarGold)
+		end
 	end
 	if frame.SearchShell then
 		setFrameBackdrop(frame.SearchShell, lib.ThemeColors.searchBg, lib.ThemeColors.searchBorder, "search")
