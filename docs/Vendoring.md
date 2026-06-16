@@ -89,7 +89,9 @@ externals:
 ## [Sample Addon Packaging][Top]
 
 The sample addon's own `.pkgmeta` lives in
-`Samples/LibSettingsDesignerSample/` and packages that directory directly.
+`Samples/LibSettingsDesignerSample/`. The release workflow copies that sample
+addon into the checkout root before running BigWigsPackager, so the packager
+sees a normal addon root with a TOC file, `.pkgmeta`, and `CHANGELOG.md`.
 
 The GitHub Actions packaging workflow uploads only when changes are pushed to
 `main` or `master`, plus manual `workflow_dispatch` runs. Before portal uploads

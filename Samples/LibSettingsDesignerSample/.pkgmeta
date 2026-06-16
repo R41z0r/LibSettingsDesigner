@@ -1,8 +1,15 @@
 enable-nolib-creation: no
 
 ignore:
+  - .github
   - .pkgmeta
+  - docs
+  - runtime
+  - Samples
+  - scripts
+  - AGENTS.md
   - README.md
+  - SKILL.md
 
 manual-changelog:
   filename: CHANGELOG.md
