@@ -831,6 +831,18 @@ app:RegisterPage({
 	searchEntries = {
 		{ id = "custom.hosted.builder", label = "Hosted Builder", keywords = { "custom", "builder", "rules" }, focusID = "builder" },
 	},
+	getSettingCount = function()
+		return #(DB().brokerColumns or {}) + #(DB().customGroups or {}) + #(DB().shortcuts or {})
+	end,
+	getCustomizedCount = function()
+		local count = 0
+		for _, column in ipairs(DB().brokerColumns or {}) do
+			if column.visible == false or column.formatKey ~= "text" then
+				count = count + 1
+			end
+		end
+		return count
+	end,
 	getHeight = function() return 300 end,
 	render = renderSampleCustomPage,
 	order = 130,

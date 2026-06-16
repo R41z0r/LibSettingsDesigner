@@ -481,7 +481,7 @@ Canonical direct fields:
 | Object | Canonical fields |
 | :----- | :--------------- |
 | Category | `id`, `title`, `description`, `order`, `icon`, `iconAtlas`, `iconKey` |
-| Page | `id`, `category`, `title`, `description`, `descriptionKey`, `order`, `icon`, `iconAtlas`, `iconKey`, `mainToggleID`, `pageKey`, `newTagID`, `onOpen`, `layout`, `type`, `content`, `blocks`, `infoBlocks`, `searchEntries`, `getHeight`, `render`, `refresh`, `release` |
+| Page | `id`, `category`, `title`, `description`, `descriptionKey`, `order`, `icon`, `iconAtlas`, `iconKey`, `mainToggleID`, `pageKey`, `newTagID`, `onOpen`, `layout`, `type`, `content`, `blocks`, `infoBlocks`, `searchEntries`, `getHeight`, `render`, `refresh`, `release`, `getSettingCount`, `getCustomizedCount` |
 | Group | `id`, `title`, `order` |
 | Control | `id`, `key`, `type`, `label`, `description`, `default`, `dbDefault`, `getValue`, `setValue`, `getSelection`, `setSelection`, `setting`, `parentCheck`, `isEnabled`, visibility fields, search fields |
 
@@ -967,6 +967,12 @@ app:RegisterPage({
   searchEntries = {
     { id = "rule.create", label = "Create Rule", keywords = { "filter", "new" }, focusID = "create" },
   },
+  getSettingCount = function()
+    return MyAddon.RuleBuilder:GetRuleCount()
+  end,
+  getCustomizedCount = function()
+    return MyAddon.RuleBuilder:GetChangedRuleCount()
+  end,
   getHeight = function() return 560 end,
   render = function(parent, app, page, state, focusID)
     return MyAddon.RuleBuilder:Render(parent, state, focusID)
@@ -976,6 +982,13 @@ app:RegisterPage({
   end,
 })
 ```
+
+Custom pages do not expose host-rendered checkboxes, matrix cells, or table rows
+as LibSettingsDesigner controls. Provide `settingCount` / `getSettingCount` and
+`customizedCount` / `getCustomizedCount` when the page card, dashboard, or
+category badges should show meaningful totals. Aliases accepted by the runtime:
+`settingsCount`, `controlCount`, `getSettingsCount`, `getControlCount`,
+`changedCount`, and `getChangedCount`.
 
 Use custom pages for table-like database editors first. Do not add a new
 generic `datatable` control unless multiple host addons have converged on the
