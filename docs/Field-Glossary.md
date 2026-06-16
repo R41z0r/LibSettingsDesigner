@@ -48,8 +48,13 @@ Config:RegisterAddOn(addonID, opts)
 | `density` | string/function | Initial density, usually `"compact"` or `"comfortable"`. |
 | `getDensity(app)` / `setDensity(density, app)` | function | Read/write the user's selected density. |
 | `showDensityButton` / `showDensityButton(app)` | boolean/function | Controls whether users can switch density; only `false` hides the button. |
+| `topbar` / `header` / `topBar` | table | Configures built-in topbar controls and custom action buttons. |
+| `subnav` / `subnavigation` | table/boolean/function | Global default for automatic right-panel group links. |
+| `showSubnav` / `showSubnavigation` | boolean/function | Global show gate for automatic right-panel group links. |
 | `getSize()` / `setSize(width, height)` | function | Read/write persisted frame size. |
 | `getLocked()` / `setLocked(locked)` | function | Read/write whether the frame is locked. |
+| `getReloadPending(app)` / `setReloadPending(pending, reason, control, app)` | function | Optional storage bridge for reload-pending state. |
+| `getReloadPendingReason(app)` | function | Optional reason text that host actions can show in tooltips. |
 | `dashboard` | table/function | Dashboard configuration. |
 | `isNewTag` | function | Returns whether a `newTagID` should show a badge. |
 | `iconTextures` | table | Maps icon keys to texture paths. |
@@ -117,6 +122,8 @@ app:RegisterPage(data)
 | `description` | string | Summary shown on cards/detail views. |
 | `icon`, `iconAtlas`, `iconKey` | string | Page icon source. |
 | `mainToggleID` | string | Control id used as main feature toggle. |
+| `subnav` / `subnavigation` | table/boolean/function | Page-level automatic right-panel group-link configuration. |
+| `showSubnav` / `showSubnavigation` | boolean/function | Page-level show gate for automatic right-panel group links. |
 | `newTagID` | string | New badge tag for the page. |
 | `onOpen` | function | Called as `onOpen(page, app, state)` when the page opens. |
 | `order` | number | Sort order. |
@@ -171,6 +178,8 @@ app:RegisterControl(pageID, data)
 | `dbDefault` | any/function | Alternate DB default provider. |
 | `trackCustomized` | boolean | Set exactly `false` to disable customized-count behavior. |
 | `refreshOnChange` | boolean | Re-render visible content after a value changes. |
+| `requiresReload` / `reloadRequired` / `requiresUIReload` | boolean | Mark the app as reload-pending after a successful value write. |
+| `reloadReason` | string | Optional reason text shown in the reload button tooltip. |
 
 Direct `RegisterControl` calls should use canonical fields. Legacy aliases such
 as `var`, `text`, `name`, `desc`, `get`, and `set` are mapped by
@@ -254,7 +263,7 @@ app:RegisterControl("interface.names", {
 
 | Element | Key fields | Reference |
 | :------ | :--------- | :-------- |
-| Toggle | `default`, `getValue`, `setValue`, `parentCheck` | [Toggle](Elements/Toggle.md) |
+| Toggle | `default`, `getValue`, `setValue`, `parentCheck`, `requiresReload` | [Toggle](Elements/Toggle.md) |
 | Slider | `min`, `max`, `step`, `formatter`, `suffix` | [Slider](Elements/Slider.md) |
 | Dropdown | `list`, `options`, `orderList`, `listFunc`, `optionfunc`, `menuHeight` | [Dropdown](Elements/Dropdown.md) |
 | MultiDropdown | `getSelection`, `setSelection`, `isSelectedFunc`, `setSelectedFunc` | [MultiDropdown](Elements/MultiDropdown.md) |

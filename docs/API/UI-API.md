@@ -11,6 +11,8 @@
 - [ResolveOpenTarget](#resolveopentarget)
 - [Frame State](#frame-state)
 - [Size, Lock, and Density Persistence](#size-lock-and-density-persistence)
+- [Topbar Configuration](#topbar-configuration)
+- [Side Panel Subnavigation](#side-panel-subnavigation)
 - [Refresh Rules](#refresh-rules)
 - [Examples](#examples)
 
@@ -20,7 +22,8 @@
 
 The UI API renders the settings center for an app registered through the Config
 API. It owns the visible frame, navigation, dashboard, sidebar, search, page
-layout, control widgets, notes, density controls, and open/toggle helpers.
+layout, control widgets, notes, density controls, reload-pending state display
+hooks, topbar actions, side-panel subnavigation, and open/toggle helpers.
 
 It should render metadata. It should not contain host-addon-specific feature
 logic.
@@ -176,6 +179,118 @@ Use these callbacks instead of hard-coding frame size, lock, or density state
 inside the library. `density` sets the initial layout; `getDensity` and
 `setDensity` persist the user's compact/comfortable choice. Set
 `showDensityButton = false` when the density switch should not be shown.
+
+## [Topbar Configuration][Top]
+
+The app can configure built-in topbar parts and add action buttons without
+manual frame positioning:
+
+```lua
+local app = Config:RegisterAddOn(addonName, {
+  topbar = {
+    showSearch = true,
+    showDensity = true,
+    showLock = true,
+    showDefaults = true,
+
+    titleActions = {
+      {
+        id = "reload",
+        label = RELOADUI or "Reload UI",
+        visible = function(app) return app:IsReloadPending() end,
+        tooltip = function(app) return app:GetReloadPendingReason() end,
+        pulse = true,
+        onClick = function() ReloadUI() end,
+      },
+    },
+
+    actions = {
+      {
+        id = "tools",
+        icon = "Interface\\Icons\\INV_Misc_Gear_01",
+        iconOnly = true,
+        tooltip = "Tools",
+        menu = {
+          { text = "Open profile folder", onClick = function() MyAddon.ShowProfilePath() end },
+          { text = "Reset cache", onClick = function() MyAddon.ResetCache() end },
+        },
+      },
+    },
+  },
+})
+```
+
+`titleActions` render after the title from left to right. `actions` /
+`rightActions` render automatically to the left of the built-in search, lock,
+density, and defaults controls. The library owns spacing, button chrome, hover
+state, pulse state, and context-menu creation.
+
+Action fields:
+
+| Field | Purpose |
+| :---- | :------ |
+| `id` | Stable action id. |
+| `label` / `text` / `title` | Button text. May be a function. |
+| `icon` / `iconKey` | Optional icon texture or app icon-key lookup. |
+| `iconOnly` | `true` makes a compact icon button. |
+| `visible` / `visibleWhen` / `isVisible` | Show gate. May be a function. |
+| `enabled` / `enabledWhen` / `isEnabled` | Enabled gate. May be a function. |
+| `tooltip` / `description` | Tooltip text. May be a function. |
+| `pulse` | `true` applies a subtle alpha pulse. |
+| `onClick(app, action, state, button)` | Click callback for normal actions. |
+| `menu` / `menuItems` / `entries` | Static context-menu entries. |
+| `buildMenu` / `setupMenu` | Callback for custom `MenuUtil.CreateContextMenu` setup. |
+
+Menu entries support `text`/`label`, `onClick`, `checked`/`isSelected`,
+`setSelected`, nested `children`/`entries`, `visible`/`isVisible`, and
+`divider = true`.
+
+Reload prompts remain host-owned. A host addon can mark reload-pending via
+`requiresReload = true` on controls or `app:MarkReloadPending(reason)`, then
+show that state through a topbar action as above.
+
+```lua
+app:RegisterControl("interface.names", {
+  id = "nameplateFont",
+  key = "nameplateFont",
+  type = "dropdown",
+  label = "Nameplate font",
+  default = "default",
+  list = fontOptions,
+  orderList = fontOrder,
+  requiresReload = true,
+  reloadReason = "Nameplate font changes apply after reloading the UI.",
+})
+```
+
+## [Side Panel Subnavigation][Top]
+
+On detail pages with a right side panel, the library can render automatic links
+to page groups. The default is automatic: if a normal settings page has more
+than one visible group, the right panel shows a `Sections` block below the
+page about text. Clicking a section opens the same page, expands that group if
+needed, and scrolls to the first control in the group.
+
+Configure globally on app options or per page:
+
+```lua
+local app = Config:RegisterAddOn(addonName, {
+  subnav = {
+    enabled = true,
+  },
+})
+
+app:RegisterPage({
+  id = "interface.minimap",
+  category = "interface",
+  title = "Minimap",
+  showSubnav = true,
+})
+```
+
+Use `showSubnav = false`, `showSubnavigation = false`, or
+`subnav = { enabled = false }` to hide it for a page. Function values are
+called with the app/page context and only `false` hides the block.
 
 ## [Refresh Rules][Top]
 

@@ -225,6 +225,11 @@ app:GetDefaultPageID()
 app:GetControlValue(control)
 app:SetControlValue(control, value)
 app:GetControlDefault(control)
+app:IsReloadPending()
+app:GetReloadPendingReason()
+app:SetReloadPending(pending, reason, control)
+app:MarkReloadPending(reason, control)
+app:ClearReloadPending()
 app:IsControlEnabled(control)
 app:IsControlVisible(control)
 app:IsPageVisible(page)
@@ -345,8 +350,13 @@ ConfigUI:Open("MyAddon", "general.core")
 | `density` | Initial density, `"compact"` or `"comfortable"`, string or function. |
 | `getDensity(app)` / `setDensity(density, app)` | Persist the user's selected density. |
 | `showDensityButton` / `showDensityButton(app)` | Whether users can switch density; only `false` hides the button. |
+| `topbar` / `header` / `topBar` | Configures built-in topbar controls and custom action buttons. |
+| `subnav` / `subnavigation` | Global default for automatic right-panel group links. |
+| `showSubnav` / `showSubnavigation` | Global show gate for automatic right-panel group links. |
 | `getSize()` / `setSize(width, height)` | Persist frame size. |
 | `getLocked()` / `setLocked(locked)` | Persist frame lock state. |
+| `getReloadPending(app)` / `setReloadPending(pending, reason, control, app)` | Optional storage bridge for reload-pending state. |
+| `getReloadPendingReason(app)` | Optional reason text that host actions can show in tooltips. |
 | `dashboard` | Dashboard table or function. |
 | `isNewTag` | New badge resolver. |
 | `iconTextures` | `iconKey` to texture path map. |
@@ -542,6 +552,8 @@ Common page fields:
 | `order` | Page sort order. |
 | `icon` / `iconAtlas` / `iconKey` | Page icon source. |
 | `mainToggleID` | Control id used as the page's primary feature toggle. |
+| `subnav` / `subnavigation` | Page-level automatic right-panel group-link configuration. |
+| `showSubnav` / `showSubnavigation` | Page-level show gate for automatic right-panel group links. |
 | `pageKey` | Stable alternate page/tag key for wrappers and new badges. |
 | `newTagID` | Stable new badge tag. |
 | `onOpen` | Lightweight page-open callback. |
@@ -575,6 +587,8 @@ Common fields:
 | `newTagID` | New badge tag. |
 | `trackCustomized` | Customized-count override. |
 | `refreshOnChange` | Re-render content after change. |
+| `requiresReload` / `reloadRequired` / `requiresUIReload` | Mark the app reload-pending after a successful value write. |
+| `reloadReason` | Optional reason text for the reload button tooltip. |
 
 Use `key` for direct profile keys:
 
@@ -606,7 +620,7 @@ runtime actively consumes as UI behavior:
 
 | Element | Important runtime-consumed fields |
 | :------ | :-------------------------------- |
-| Toggle/Checkbox | `default`, `key`, `getValue`, `setValue`, `parentCheck`, `isEnabled`, `refreshOnChange` |
+| Toggle/Checkbox | `default`, `key`, `getValue`, `setValue`, `parentCheck`, `isEnabled`, `refreshOnChange`, `requiresReload` |
 | Slider | `min`, `max`, `step`, `formatter`, `valueFormatter`, `suffix` |
 | Dropdown/ScrollDropdown | `values`, `options`, `list`, `orderList`, `order`, `listFunc`, `optionfunc`, `menuHeight` |
 | MultiDropdown | `getSelection`, `setSelection`, `isSelectedFunc`, `setSelectedFunc`, `selectionSource`, `summary`, `callback`, `menuHeight` |

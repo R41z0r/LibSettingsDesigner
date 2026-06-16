@@ -11,6 +11,7 @@
 - [Legacy Bridge Methods](#legacy-bridge-methods)
 - [Lookup and Navigation Methods](#lookup-and-navigation-methods)
 - [Value Methods](#value-methods)
+- [Reload Pending Methods](#reload-pending-methods)
 - [Visibility and Enablement Methods](#visibility-and-enablement-methods)
 - [Search and Stats](#search-and-stats)
 - [Registration Order Example](#registration-order-example)
@@ -31,6 +32,7 @@ The Config API owns the settings data model:
 - value reads/writes
 - customized-state checks
 - reset handling
+- reload-pending state
 - visibility and enabled-state checks
 - search metadata
 - legacy wrapper bridge registration
@@ -107,8 +109,13 @@ and `setDensity` when that choice should persist in SavedVariables. Set
 | `density` | string/function | Initial density, `"compact"` or `"comfortable"`. |
 | `getDensity(app)` / `setDensity(density, app)` | function | Read/write the user's selected density. |
 | `showDensityButton` / `showDensityButton(app)` | boolean/function | Whether users can switch density; only `false` hides the button. |
+| `topbar` / `header` / `topBar` | table | Configures built-in topbar controls and custom action buttons. |
+| `subnav` / `subnavigation` | table/boolean/function | Global default for automatic right-panel group links. |
+| `showSubnav` / `showSubnavigation` | boolean/function | Global show gate for automatic right-panel group links. |
 | `getSize()` / `setSize(width, height)` | function | Persist settings window size. |
 | `getLocked()` / `setLocked(locked)` | function | Persist whether the frame can be moved/resized. |
+| `getReloadPending(app)` / `setReloadPending(pending, reason, control, app)` | function | Optional storage bridge for reload-pending state. |
+| `getReloadPendingReason(app)` | function | Optional reason text that host actions can show in tooltips. |
 | `dashboard` | table/function | Dashboard hero, cards, status, features, new entries. |
 | `isNewTag` | function | Returns whether a tag should show a new badge. |
 | `iconTextures` | table | Map `iconKey` to texture path. |
@@ -154,6 +161,7 @@ app:RegisterPage({
   description = "Configure action bar behavior.",
   iconKey = "actionbar",
   mainToggleID = "actionBarsEnabled",
+  showSubnav = true,
   order = 100,
 })
 ```
@@ -163,6 +171,12 @@ Required: `id`, `category`, `title`.
 Pages may provide `onOpen = function(page, app, state)` for host-addon side
 effects such as marking a `newTagID` as seen. Keep the callback lightweight and
 avoid rebuilding the settings frame from it.
+
+Normal settings pages with more than one visible group show automatic
+right-panel group links by default when the wide side-panel layout is active.
+Set `showSubnav = false`, `showSubnavigation = false`, or
+`subnav = { enabled = false }` on a page to hide them. Set the same fields in
+app options to define the global default.
 
 Use `layout = "info"` or `type = "info"` and table-based `content`, `blocks`,
 or `infoBlocks` for help/static pages.
@@ -206,6 +220,7 @@ app:RegisterControl("interface.action-bars", {
   label = "Mouseover",
   description = "Fade action bars until hovered.",
   default = false,
+  requiresReload = true,
 })
 ```
 
@@ -337,6 +352,38 @@ app:RegisterControl("bars.layout", {
   end,
 })
 ```
+
+## [Reload Pending Methods][Top]
+
+| Method | Purpose |
+| :----- | :------ |
+| `IsReloadPending()` | Returns whether the app currently has a pending UI reload. |
+| `GetReloadPendingReason()` | Returns optional reason text for the reload button tooltip. |
+| `SetReloadPending(pending, reason, control)` | Sets or clears the app reload-pending state. |
+| `MarkReloadPending(reason, control)` | Convenience wrapper for `SetReloadPending(true, ...)`. |
+| `ClearReloadPending()` | Convenience wrapper for `SetReloadPending(false)`. |
+
+Controls can set reload-pending automatically after a successful value write:
+
+```lua
+app:RegisterControl("interface.names", {
+  id = "nameplateFont",
+  key = "nameplateFont",
+  type = "dropdown",
+  label = "Nameplate font",
+  list = fontOptions,
+  orderList = fontOrder,
+  default = "default",
+  requiresReload = true,
+  reloadReason = "Nameplate font changes apply after reloading the UI.",
+})
+```
+
+The UI renderer does not show reload popups by itself. Host addons that still
+show their own reload confirmation popup should check `app:IsReloadPending()`
+before showing another popup. If the user cancels that popup, call
+`app:MarkReloadPending(reason)` and expose that state through a `topbar`
+action, for example a pulsing `Reload UI` button.
 
 ## [Visibility and Enablement Methods][Top]
 
