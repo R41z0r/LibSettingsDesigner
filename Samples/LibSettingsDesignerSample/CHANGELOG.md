@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Moved portal uploads into a dispatched tag run so CurseForge and Wago receive release files.
 - Changed the main-branch upload workflow to publish tagged release builds instead of alpha builds.
 - Updated the release workflow to use the Node.js 24-compatible checkout action.
 - Added the Wago project ID so main-branch package uploads can publish to Wago.
