@@ -10,6 +10,7 @@ local MINOR = 2
 local lib = addon.LibSettingsDesigner.UI or {}
 addon.LibSettingsDesigner.UI = lib
 lib.MINOR = MINOR
+lib._Internal = lib._Internal or {}
 
 local CreateFrame = _G.CreateFrame
 local UIParent = _G.UIParent
@@ -2069,11 +2070,10 @@ local function addTopbarMenuEntry(rootDescription, entry, app, action, state)
 	end
 	local text = lib.NormalizeTextValue(entry.label or entry.text or entry.title or entry.id)
 	local children = entry.children or entry.entries or entry.menu
-	local target = rootDescription
 	if type(children) == "table" and rootDescription.CreateButton then
-		target = rootDescription:CreateButton(text)
+		local childRoot = rootDescription:CreateButton(text)
 		for _, child in ipairs(children) do
-			addTopbarMenuEntry(target, child, app, action, state)
+			addTopbarMenuEntry(childRoot, child, app, action, state)
 		end
 		return
 	end
@@ -2208,7 +2208,7 @@ function lib.RefreshTopbar(frame, state)
 		end
 		return previous
 	end
-	local lastTitleAction = refreshSlot("title", frame.Title, 12)
+	refreshSlot("title", frame.Title, 12)
 	local rightAnchor = frame.TopBar
 	local rightPoint = "RIGHT"
 	local rightOffset = -12
@@ -5500,7 +5500,7 @@ local function isPageMasterToggle(page, control)
 	return page.mainToggleID ~= nil and page.mainToggleID == control.id
 end
 
-local function collectEnabledFeaturePages(app, limit)
+function lib._Internal.collectEnabledFeaturePages(app, limit)
 	local result = {}
 	local seen = {}
 	for _, control in ipairs(app.controls or {}) do
@@ -5519,7 +5519,7 @@ local function collectEnabledFeaturePages(app, limit)
 	return result
 end
 
-local function collectCustomizedPages(app, limit)
+function lib._Internal.collectCustomizedPages(app, limit)
 	local result = {}
 	local pages = app and type(app.GetPages) == "function" and app:GetPages() or (app and app.pages) or {}
 	for _, page in ipairs(pages) do
@@ -5584,7 +5584,7 @@ function lib.IsCategoryNew(app, categoryID)
 	return false
 end
 
-local function collectNewEntries(app, limit)
+function lib._Internal.collectNewEntries(app, limit)
 	local result = {}
 	local seen = {}
 	for _, control in ipairs(app.controls or {}) do
@@ -5600,7 +5600,7 @@ local function collectNewEntries(app, limit)
 	return result
 end
 
-local function addDashboardNewPanel(state, parent, entries, width, titleText)
+function lib._Internal.addDashboardNewPanel(state, parent, entries, width, titleText)
 	local app = state.app
 	local L = getLocale(app)
 	local panel = CreateFrame("Frame", nil, parent, "BackdropTemplate")
@@ -5673,15 +5673,13 @@ function lib.AddDashboardCards(state, cards)
 	end
 end
 
-local addContentScrollbarRail
-
-local function renderDashboard(state)
+function lib._Internal.renderDashboard(state)
 	local app = state.app
 	local L = getLocale(app)
 	local stats = app:GetStats()
 	local dashboard = lib.GetDashboardOptions(app)
 	local hero = type(dashboard.hero) == "table" and dashboard.hero or {}
-	addContentScrollbarRail(state)
+	lib._Internal.addContentScrollbarRail(state)
 	addDashboardHero(
 		state,
 		hero.title or L["configCenterTitle"] or (getAppTitle(app) .. " Settings"),
@@ -5703,8 +5701,8 @@ local function renderDashboard(state)
 	local enabledPages = {}
 	local customizedPages = {}
 	if dashboard.features ~= nil and dashboard.features ~= false then
-		enabledPages = collectEnabledFeaturePages(app, featureConfig.limit or 5)
-		customizedPages = #enabledPages == 0 and collectCustomizedPages(app, 5) or {}
+		enabledPages = lib._Internal.collectEnabledFeaturePages(app, featureConfig.limit or 5)
+		customizedPages = #enabledPages == 0 and lib._Internal.collectCustomizedPages(app, 5) or {}
 	end
 	local featurePages = #enabledPages > 0 and enabledPages or customizedPages
 	local featureBadgeText = #enabledPages > 0 and (featureConfig.enabledBadge or L["configCenterEnabled"] or "")
@@ -5713,7 +5711,7 @@ local function renderDashboard(state)
 		or (featureConfig.customizedTitle or L["configCenterSettings"] or "Settings")
 	local newConfig = type(dashboard.newEntries) == "table" and dashboard.newEntries or {}
 	local newEntries = (dashboard.newEntries == nil or dashboard.newEntries == false) and {}
-		or collectNewEntries(app, newConfig.limit or 3)
+		or lib._Internal.collectNewEntries(app, newConfig.limit or 3)
 	local hasFeaturePanel = dashboard.features ~= nil and dashboard.features ~= false
 	local hasNewPanel = #newEntries > 0
 	if not hasFeaturePanel and not hasNewPanel then
@@ -5725,7 +5723,7 @@ local function renderDashboard(state)
 		or panelWidth
 	local enabledWidth = hasNewPanel and (panelWidth - newPanelWidth - GRID_GAP) or panelWidth
 	if hasNewPanel then
-		addDashboardNewPanel(state, panelRow, newEntries, newPanelWidth, newConfig.title)
+		lib._Internal.addDashboardNewPanel(state, panelRow, newEntries, newPanelWidth, newConfig.title)
 	end
 	if not hasFeaturePanel then
 		return
@@ -5775,14 +5773,14 @@ local function renderDashboard(state)
 	state.y = state.y - 14
 end
 
-local function renderCategoryOverview(state, categoryID)
+function lib._Internal.renderCategoryOverview(state, categoryID)
 	local app = state.app
 	local category = app.categoriesByID[categoryID]
 	if not category then
-		renderDashboard(state)
+		lib._Internal.renderDashboard(state)
 		return
 	end
-	addContentScrollbarRail(state)
+	lib._Internal.addContentScrollbarRail(state)
 	addSectionTitle(state, category.title or category.id, category.description)
 	local pages = app:GetPages(categoryID)
 	if #pages == 0 then
@@ -5798,7 +5796,7 @@ local function renderCategoryOverview(state, categoryID)
 	end
 end
 
-local function collectPageGroups(app, page, mainToggle)
+function lib._Internal.collectPageGroups(app, page, mainToggle)
 	local L = getLocale(app)
 	local groups = {}
 	local groupsByID = {}
@@ -5845,7 +5843,7 @@ local function collectPageGroups(app, page, mainToggle)
 	return groups
 end
 
-local function addPageLeftColumnShell(state)
+function lib._Internal.addPageLeftColumnShell(state)
 	if state.sidePanelMode ~= "right" or not state.frame.ContentShell then
 		return nil
 	end
@@ -5871,7 +5869,7 @@ local function addPageLeftColumnShell(state)
 	return shell
 end
 
-function addContentScrollbarRail(state)
+function lib._Internal.addContentScrollbarRail(state)
 	if not state.frame.ContentShell or not state.frame.Scroll then
 		return nil
 	end
@@ -5887,7 +5885,7 @@ function addContentScrollbarRail(state)
 	return rail
 end
 
-local function addPageFixedHeader(state, category, pagePath)
+function lib._Internal.addPageFixedHeader(state, category, pagePath)
 	if state.sidePanelMode ~= "right" or not state.frame.ContentShell then
 		return nil
 	end
@@ -5930,7 +5928,7 @@ local function addPageFixedHeader(state, category, pagePath)
 	return header
 end
 
-local function resolvePagePanelOption(app, page, key, alternateKey, ...)
+function lib._Internal.resolvePagePanelOption(app, page, key, alternateKey, ...)
 	local value
 	if page then
 		value = page[key]
@@ -5952,7 +5950,7 @@ local function resolvePagePanelOption(app, page, key, alternateKey, ...)
 	return value
 end
 
-local function shouldShowPageSubnav(state, page, groups)
+function lib._Internal.shouldShowPageSubnav(state, page, groups)
 	if not groups or #groups <= 1 then
 		return false
 	end
@@ -5967,21 +5965,21 @@ local function shouldShowPageSubnav(state, page, groups)
 			local ok, result = pcall(enabled, app, page, groups, state)
 			enabled = ok and result or nil
 		end
-		return enabled ~= false
+		return enabled == true
 	end
 	if type(subnav) == "function" then
 		local ok, result = pcall(subnav, app, page, groups, state)
-		return ok and result ~= false
+		return ok and result == true
 	end
-	local visible = resolvePagePanelOption(app, page, "showSubnav", "showSubnavigation", groups, state)
+	local visible = lib._Internal.resolvePagePanelOption(app, page, "showSubnav", "showSubnavigation", groups, state)
 	if visible ~= nil then
-		return visible ~= false
+		return visible == true
 	end
-	return true
+	return false
 end
 
-local function addPageSubnav(state, panel, page, groups, y, availableHeight)
-	if not shouldShowPageSubnav(state, page, groups) then
+function lib._Internal.addPageSubnav(state, panel, page, groups, y, availableHeight)
+	if not lib._Internal.shouldShowPageSubnav(state, page, groups) then
 		return y
 	end
 
@@ -6036,12 +6034,12 @@ local function addPageSubnav(state, panel, page, groups, y, availableHeight)
 	return y
 end
 
-local function addPageSidePanel(state, page, category, groups)
+function lib._Internal.addPageSidePanel(state, page, category, groups)
 	local L = getLocale(state.app)
 	local _ = category
 	local aboutTextValue = lib.GetPageAboutText(state.app, page)
 	local aboutHeight = lib.EstimateTextHeight(aboutTextValue, (state.pageRightWidth or PAGE_RIGHT_WIDTH) - 28, 13, 58)
-	local showSubnav = shouldShowPageSubnav(state, page, groups)
+	local showSubnav = lib._Internal.shouldShowPageSubnav(state, page, groups)
 	local subnavRows = showSubnav and math.min(#groups, 8) or 0
 	local subnavHeight = showSubnav and (46 + (subnavRows * 28)) or 0
 	local shellHeight = state.frame.ContentShell and state.frame.ContentShell:GetHeight() or 0
@@ -6067,11 +6065,11 @@ local function addPageSidePanel(state, page, category, groups)
 	aboutText:SetPoint("TOPLEFT", aboutTitle, "BOTTOMLEFT", 0, -8)
 	aboutText:SetPoint("RIGHT", panel, "RIGHT", -14, 0)
 	aboutText:SetHeight(aboutHeight)
-	addPageSubnav(state, panel, page, groups, -(aboutHeight + 50), panelHeight - (aboutHeight + 50))
+	lib._Internal.addPageSubnav(state, panel, page, groups, -(aboutHeight + 50), panelHeight - (aboutHeight + 50))
 	return panel
 end
 
-local function addGroupSection(state, group, pagePath)
+function lib._Internal.addGroupSection(state, group, pagePath)
 	local collapsed = state.collapsedGroups and state.collapsedGroups[group.id] == true
 	local controlsHeight = 0
 	local customizedCount = lib.GetGroupCustomizedCount(state.app, group)
@@ -6544,10 +6542,10 @@ function lib.RenderInfoPage(state, page, pagePath)
 	local app = state.app
 	local category = app.categoriesByID[page.category or ""]
 	if state.sidePanelMode == "right" then
-		addPageLeftColumnShell(state)
-		addPageFixedHeader(state, category, pagePath)
-		addContentScrollbarRail(state)
-		addPageSidePanel(state, page, category, nil)
+		lib._Internal.addPageLeftColumnShell(state)
+		lib._Internal.addPageFixedHeader(state, category, pagePath)
+		lib._Internal.addContentScrollbarRail(state)
+		lib._Internal.addPageSidePanel(state, page, category, nil)
 	end
 
 	local header = createPageLeftFrame(state, 74)
@@ -6579,10 +6577,10 @@ function lib.RenderCustomPage(state, page, pagePath)
 	local app = state.app
 	local category = app.categoriesByID[page.category or ""]
 	if state.sidePanelMode == "right" then
-		addPageLeftColumnShell(state)
-		addPageFixedHeader(state, category, pagePath)
-		addContentScrollbarRail(state)
-		addPageSidePanel(state, page, category, nil)
+		lib._Internal.addPageLeftColumnShell(state)
+		lib._Internal.addPageFixedHeader(state, category, pagePath)
+		lib._Internal.addContentScrollbarRail(state)
+		lib._Internal.addPageSidePanel(state, page, category, nil)
 	end
 
 	local header = createPageLeftFrame(state, 74)
@@ -6607,11 +6605,11 @@ function lib.RenderCustomPage(state, page, pagePath)
 	lib.RenderCustomOwner(state, section, page, "page:" .. tostring(page.id))
 end
 
-local function renderPage(state, pageID)
+function lib._Internal.renderPage(state, pageID)
 	local app = state.app
 	local page = app:GetPage(pageID)
 	if not page then
-		renderDashboard(state)
+		lib._Internal.renderDashboard(state)
 		return
 	end
 	local category = app.categoriesByID[page.category or ""]
@@ -6625,12 +6623,12 @@ local function renderPage(state, pageID)
 		return
 	end
 
-	local groups = collectPageGroups(app, page, nil)
+	local groups = lib._Internal.collectPageGroups(app, page, nil)
 	if state.sidePanelMode == "right" then
-		addPageLeftColumnShell(state)
-		addPageFixedHeader(state, category, pagePath)
-		addContentScrollbarRail(state)
-		addPageSidePanel(state, page, category, groups)
+		lib._Internal.addPageLeftColumnShell(state)
+		lib._Internal.addPageFixedHeader(state, category, pagePath)
+		lib._Internal.addContentScrollbarRail(state)
+		lib._Internal.addPageSidePanel(state, page, category, groups)
 	end
 
 	local header = createPageLeftFrame(state, 74)
@@ -6653,7 +6651,7 @@ local function renderPage(state, pageID)
 		emptyText:SetPoint("BOTTOMRIGHT", empty, "BOTTOMRIGHT", -14, 14)
 	else
 		for _, group in ipairs(groups) do
-			addGroupSection(state, group, pagePath)
+			lib._Internal.addGroupSection(state, group, pagePath)
 		end
 	end
 	if state.sidePanelMode == "right" then
@@ -6661,11 +6659,11 @@ local function renderPage(state, pageID)
 	end
 end
 
-local function renderSearch(state, query)
+function lib._Internal.renderSearch(state, query)
 	local app = state.app
 	local L = getLocale(app)
 	local results = app:GetSearchResults(query, 80)
-	addContentScrollbarRail(state)
+	lib._Internal.addContentScrollbarRail(state)
 	addSectionTitle(state, (L["configCenterSearchPlaceholder"] or "Search settings") .. ": " .. query)
 	if #results == 0 then
 		addInfoCard(state, L["configCenterNoResults"] or "No settings found.", {}, 64)
@@ -6751,16 +6749,16 @@ function StateMixin:RenderContent()
 	if query ~= "" then
 		self.resetSearchScroll = self.lastSearchQuery ~= query
 		self.lastSearchQuery = query
-		renderSearch(self, query)
+		lib._Internal.renderSearch(self, query)
 	elseif self.view == "category" then
 		self.lastSearchQuery = nil
-		renderCategoryOverview(self, self.selectedCategoryID)
+		lib._Internal.renderCategoryOverview(self, self.selectedCategoryID)
 	elseif self.view == "page" then
 		self.lastSearchQuery = nil
-		renderPage(self, self.selectedPageID)
+		lib._Internal.renderPage(self, self.selectedPageID)
 	else
 		self.lastSearchQuery = nil
-		renderDashboard(self)
+		lib._Internal.renderDashboard(self)
 	end
 	setScrollHeight(self)
 	if self.resetContentScroll then

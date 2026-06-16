@@ -265,13 +265,16 @@ app:RegisterControl("interface.names", {
 
 ## [Side Panel Subnavigation][Top]
 
-On detail pages with a right side panel, the library can render automatic links
-to page groups. The default is automatic: if a normal settings page has more
-than one visible group, the right panel shows a `Sections` block below the
-page about text. Clicking a section opens the same page, expands that group if
-needed, and scrolls to the first control in the group.
+On detail pages with a right side panel, the library can render optional links
+to page groups. The default is off: existing pages do not show a `Sections`
+block unless the host addon enables it. When enabled for a normal settings page
+with more than one visible group, the right panel shows a `Sections` block below
+the page about text. Clicking a section opens the same page, expands that group
+if needed, and scrolls to the first control in the group.
 
-Configure globally on app options or per page:
+![Side panel subnavigation example](../assets/images/side-panel-subnavigation-example.png)
+
+Enable it globally on app options or for one page:
 
 ```lua
 local app = Config:RegisterAddOn(addonName, {
@@ -288,9 +291,87 @@ app:RegisterPage({
 })
 ```
 
-Use `showSubnav = false`, `showSubnavigation = false`, or
-`subnav = { enabled = false }` to hide it for a page. Function values are
-called with the app/page context and only `false` hides the block.
+Then register page groups and assign controls with `groupID`. Each visible group
+becomes one button in the side-panel `Sections` block:
+
+```lua
+app:RegisterCategory({
+  id = "interface",
+  title = "Interface",
+  order = 100,
+})
+
+app:RegisterPage({
+  id = "interface.action-bars",
+  category = "interface",
+  title = "Action Bars & Buttons",
+  description = "Configure action bar visibility and button labels.",
+  showSubnav = true,
+  order = 100,
+})
+
+app:RegisterGroup("interface.action-bars", {
+  id = "visibility",
+  title = "Visibility rules",
+  order = 100,
+})
+
+app:RegisterGroup("interface.action-bars", {
+  id = "growth",
+  title = "Button growth",
+  order = 200,
+})
+
+app:RegisterGroup("interface.action-bars", {
+  id = "text",
+  title = "Button text",
+  order = 300,
+})
+
+app:RegisterControl("interface.action-bars", {
+  id = "bar1Visibility",
+  key = "bar1Visibility",
+  type = "dropdown",
+  label = "Action Bar",
+  groupID = "visibility",
+  default = "mouseover",
+  list = {
+    always = "Always",
+    mouseover = "Mouseover",
+    never = "Never",
+  },
+  orderList = { "always", "mouseover", "never" },
+})
+
+app:RegisterControl("interface.action-bars", {
+  id = "buttonGrowth",
+  key = "buttonGrowth",
+  type = "dropdown",
+  label = "Growth direction",
+  groupID = "growth",
+  default = "right",
+  list = {
+    left = "Left",
+    right = "Right",
+    up = "Up",
+    down = "Down",
+  },
+  orderList = { "left", "right", "up", "down" },
+})
+
+app:RegisterControl("interface.action-bars", {
+  id = "macroText",
+  key = "macroText",
+  type = "toggle",
+  label = "Macro text",
+  groupID = "text",
+  default = true,
+})
+```
+
+Use `showSubnav = true`, `showSubnavigation = true`, or
+`subnav = { enabled = true }` to show it for a page. Function values are called
+with the app/page context and must return `true` to show the block.
 
 ## [Refresh Rules][Top]
 

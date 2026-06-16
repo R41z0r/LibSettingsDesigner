@@ -110,8 +110,8 @@ and `setDensity` when that choice should persist in SavedVariables. Set
 | `getDensity(app)` / `setDensity(density, app)` | function | Read/write the user's selected density. |
 | `showDensityButton` / `showDensityButton(app)` | boolean/function | Whether users can switch density; only `false` hides the button. |
 | `topbar` / `header` / `topBar` | table | Configures built-in topbar controls and custom action buttons. |
-| `subnav` / `subnavigation` | table/boolean/function | Global default for automatic right-panel group links. |
-| `showSubnav` / `showSubnavigation` | boolean/function | Global show gate for automatic right-panel group links. |
+| `subnav` / `subnavigation` | table/boolean/function | Global opt-in for right-panel group links. |
+| `showSubnav` / `showSubnavigation` | boolean/function | Global show gate for optional right-panel group links. |
 | `getSize()` / `setSize(width, height)` | function | Persist settings window size. |
 | `getLocked()` / `setLocked(locked)` | function | Persist whether the frame can be moved/resized. |
 | `getReloadPending(app)` / `setReloadPending(pending, reason, control, app)` | function | Optional storage bridge for reload-pending state. |
@@ -172,11 +172,11 @@ Pages may provide `onOpen = function(page, app, state)` for host-addon side
 effects such as marking a `newTagID` as seen. Keep the callback lightweight and
 avoid rebuilding the settings frame from it.
 
-Normal settings pages with more than one visible group show automatic
-right-panel group links by default when the wide side-panel layout is active.
-Set `showSubnav = false`, `showSubnavigation = false`, or
-`subnav = { enabled = false }` on a page to hide them. Set the same fields in
-app options to define the global default.
+Normal settings pages with more than one visible group can show optional
+right-panel group links when the wide side-panel layout is active. The default is
+off for compatibility. Set `showSubnav = true`, `showSubnavigation = true`, or
+`subnav = { enabled = true }` on a page to show them. Set the same fields in app
+options to define the global default.
 
 Use `layout = "info"` or `type = "info"` and table-based `content`, `blocks`,
 or `infoBlocks` for help/static pages.

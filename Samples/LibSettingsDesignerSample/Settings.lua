@@ -262,6 +262,9 @@ app = Config:RegisterAddOn(addonName, {
 	assetRoot = "Interface\\AddOns\\LibSettingsDesignerSample\\libs\\LibSettingsDesigner\\Assets\\",
 	density = "compact",
 	showDensityButton = true,
+	subnav = {
+		enabled = true,
+	},
 	colors = getSampleThemeColors,
 	borders = getSampleThemeBorders,
 	db = DB,

@@ -328,6 +328,10 @@ local LEGACY_CONTROL_METADATA_FIELDS = {
 	"previewSoundFunc",
 	"previewTooltip",
 	"readOnly",
+	"reloadRequired",
+	"reloadReason",
+	"requiresReload",
+	"requiresUIReload",
 	"refreshOnChange",
 	"release",
 	"removeEntry",
@@ -832,6 +836,53 @@ function AppMixin:SetDefaultPage(pageID)
 	self.defaultPageID = pageID
 end
 
+local function notifyReloadPendingChanged(app)
+	local ui = addon.LibSettingsDesigner and addon.LibSettingsDesigner.UI
+	if ui and type(ui.RefreshTopbarForApp) == "function" then
+		ui.RefreshTopbarForApp(app)
+	end
+end
+
+function AppMixin:IsReloadPending()
+	if self.opts and type(self.opts.getReloadPending) == "function" then
+		local ok, pending = pcall(self.opts.getReloadPending, self)
+		if ok then
+			return pending == true
+		end
+	end
+	return self.reloadPending == true
+end
+
+function AppMixin:GetReloadPendingReason()
+	if self.opts and type(self.opts.getReloadPendingReason) == "function" then
+		local ok, reason = pcall(self.opts.getReloadPendingReason, self)
+		if ok and reason ~= nil then
+			return reason
+		end
+	end
+	return self.reloadPendingReason
+end
+
+function AppMixin:SetReloadPending(pending, reason, control)
+	pending = pending == true
+	self.reloadPending = pending
+	self.reloadPendingReason = pending and reason or nil
+	self.reloadPendingControlID = pending and control and control.id or nil
+	if self.opts and type(self.opts.setReloadPending) == "function" then
+		pcall(self.opts.setReloadPending, pending, reason, control, self)
+	end
+	notifyReloadPendingChanged(self)
+	return pending
+end
+
+function AppMixin:MarkReloadPending(reason, control)
+	return self:SetReloadPending(true, reason, control)
+end
+
+function AppMixin:ClearReloadPending()
+	return self:SetReloadPending(false)
+end
+
 function AppMixin:GetControlValue(control)
 	if control.setting and control.setting.GetValue then
 		local ok, value = pcall(control.setting.GetValue, control.setting)
@@ -890,36 +941,42 @@ local function getStoredControlValue(app, control)
 end
 
 function AppMixin:SetControlValue(control, value)
+	local function finish(success)
+		if success and control and (control.requiresReload == true or control.reloadRequired == true or control.requiresUIReload == true) then
+			self:MarkReloadPending(control.reloadReason or control.label or control.title or control.id, control)
+		end
+		return success == true
+	end
 	if control.setting and control.setting.SetValue then
 		local ok = pcall(control.setting.SetValue, control.setting, value)
 		if ok then
-			return true
+			return finish(true)
 		end
 	end
 	if type(control.setSelection) == "function" then
 		local ok = pcall(control.setSelection, value, control)
 		if ok then
-			return true
+			return finish(true)
 		end
 		ok = pcall(control.setSelection, value)
 		if ok then
-			return true
+			return finish(true)
 		end
 	end
 	if type(control.setValue) == "function" then
 		local ok = pcall(control.setValue, value)
 		if ok then
-			return true
+			return finish(true)
 		end
 		ok = pcall(control.setValue, nil, value)
-		return ok == true
+		return finish(ok == true)
 	end
 	local db = self.opts and self.opts.db and self.opts.db()
 	if type(db) == "table" and control.key ~= nil then
 		db[control.key] = value
-		return true
+		return finish(true)
 	end
-	return false
+	return finish(false)
 end
 
 function AppMixin:IsControlEnabled(control)

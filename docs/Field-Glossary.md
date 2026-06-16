@@ -49,8 +49,8 @@ Config:RegisterAddOn(addonID, opts)
 | `getDensity(app)` / `setDensity(density, app)` | function | Read/write the user's selected density. |
 | `showDensityButton` / `showDensityButton(app)` | boolean/function | Controls whether users can switch density; only `false` hides the button. |
 | `topbar` / `header` / `topBar` | table | Configures built-in topbar controls and custom action buttons. |
-| `subnav` / `subnavigation` | table/boolean/function | Global default for automatic right-panel group links. |
-| `showSubnav` / `showSubnavigation` | boolean/function | Global show gate for automatic right-panel group links. |
+| `subnav` / `subnavigation` | table/boolean/function | Global opt-in for right-panel group links. |
+| `showSubnav` / `showSubnavigation` | boolean/function | Global show gate for optional right-panel group links. |
 | `getSize()` / `setSize(width, height)` | function | Read/write persisted frame size. |
 | `getLocked()` / `setLocked(locked)` | function | Read/write whether the frame is locked. |
 | `getReloadPending(app)` / `setReloadPending(pending, reason, control, app)` | function | Optional storage bridge for reload-pending state. |
@@ -122,8 +122,8 @@ app:RegisterPage(data)
 | `description` | string | Summary shown on cards/detail views. |
 | `icon`, `iconAtlas`, `iconKey` | string | Page icon source. |
 | `mainToggleID` | string | Control id used as main feature toggle. |
-| `subnav` / `subnavigation` | table/boolean/function | Page-level automatic right-panel group-link configuration. |
-| `showSubnav` / `showSubnavigation` | boolean/function | Page-level show gate for automatic right-panel group links. |
+| `subnav` / `subnavigation` | table/boolean/function | Page-level opt-in for right-panel group links. |
+| `showSubnav` / `showSubnavigation` | boolean/function | Page-level show gate for optional right-panel group links. |
 | `newTagID` | string | New badge tag for the page. |
 | `onOpen` | function | Called as `onOpen(page, app, state)` when the page opens. |
 | `order` | number | Sort order. |

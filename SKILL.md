@@ -351,8 +351,8 @@ ConfigUI:Open("MyAddon", "general.core")
 | `getDensity(app)` / `setDensity(density, app)` | Persist the user's selected density. |
 | `showDensityButton` / `showDensityButton(app)` | Whether users can switch density; only `false` hides the button. |
 | `topbar` / `header` / `topBar` | Configures built-in topbar controls and custom action buttons. |
-| `subnav` / `subnavigation` | Global default for automatic right-panel group links. |
-| `showSubnav` / `showSubnavigation` | Global show gate for automatic right-panel group links. |
+| `subnav` / `subnavigation` | Global opt-in for right-panel group links. |
+| `showSubnav` / `showSubnavigation` | Global show gate for optional right-panel group links. |
 | `getSize()` / `setSize(width, height)` | Persist frame size. |
 | `getLocked()` / `setLocked(locked)` | Persist frame lock state. |
 | `getReloadPending(app)` / `setReloadPending(pending, reason, control, app)` | Optional storage bridge for reload-pending state. |
@@ -552,8 +552,8 @@ Common page fields:
 | `order` | Page sort order. |
 | `icon` / `iconAtlas` / `iconKey` | Page icon source. |
 | `mainToggleID` | Control id used as the page's primary feature toggle. |
-| `subnav` / `subnavigation` | Page-level automatic right-panel group-link configuration. |
-| `showSubnav` / `showSubnavigation` | Page-level show gate for automatic right-panel group links. |
+| `subnav` / `subnavigation` | Page-level opt-in for right-panel group links. |
+| `showSubnav` / `showSubnavigation` | Page-level show gate for optional right-panel group links. |
 | `pageKey` | Stable alternate page/tag key for wrappers and new badges. |
 | `newTagID` | Stable new badge tag. |
 | `onOpen` | Lightweight page-open callback. |
