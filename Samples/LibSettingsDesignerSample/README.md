@@ -15,6 +15,8 @@ In game:
 /lsdsample
 ```
 
+The sample addon also prints this command in chat after login.
+
 The sample shows dashboard cards, clickable dashboard status tiles, expandable
 version notes, support link buttons, generated enabled-feature and
 new-in-version panels, categories, pages, groups, notes, info pages, toggles,

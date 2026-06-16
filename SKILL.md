@@ -152,6 +152,10 @@ Use a version tag instead of `branch: main` for reproducible release snapshots.
 contains docs, samples, and agent guidance. Only the runtime folder belongs in
 the host addon's packaged runtime. `Assets/` must be included.
 
+Before opening a pull request, update `CHANGELOG.md` with a short user-facing
+entry suitable for CurseForge and Wago. The repository `.pkgmeta` uses that file
+as the BigWigsPackager manual changelog for the standalone sample addon.
+
 Using LibStub for unrelated dependencies such as AceLocale or LibSharedMedia is
 fine. The LibStub ban applies to LibSettingsDesigner itself.
 

@@ -60,6 +60,9 @@ Do not remove this notice from redistributed copies.
   the user confirmed that it works.
 - Sample addon TOC-only metadata updates, such as adding a new `## Interface`
   version, may be opened and merged automatically by the scheduled workflow.
+- Before opening a pull request, add or update a short `CHANGELOG.md` entry that
+  is suitable for CurseForge and Wago. Keep it user-facing and focused on the
+  release impact, because BigWigsPackager uses it as the portal changelog.
 - Documentation-only pull requests do not require an in-game test, but must
   still keep documentation validation clean.
 - Host addons may use BigWigsPackager with `branch: main` only because `main` is

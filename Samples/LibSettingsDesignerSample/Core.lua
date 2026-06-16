@@ -71,6 +71,12 @@ function addon.Print(message)
 	end
 end
 
+local loginFrame = _G.CreateFrame("Frame")
+loginFrame:RegisterEvent("PLAYER_LOGIN")
+loginFrame:SetScript("OnEvent", function()
+	addon.Print("Type /lsdsample to open the sample settings menu.")
+end)
+
 function addon.RefreshPreview()
 	local db = addon.GetDB()
 	addon.Print(("Preview refreshed: %s, scale %.0f%%."):format(db.enabled and "enabled" or "disabled", (tonumber(db.scale) or 1) * 100))
