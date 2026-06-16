@@ -1,0 +1,19 @@
+package-as: LibSettingsDesignerSample
+
+enable-nolib-creation: no
+
+ignore:
+  - .github
+  - docs
+  - runtime
+  - scripts
+  - AGENTS.md
+  - SKILL.md
+  - README.md
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
+move-folders:
+  LibSettingsDesigner/Samples/LibSettingsDesignerSample: LibSettingsDesignerSample

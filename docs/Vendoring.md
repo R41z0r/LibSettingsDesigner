@@ -5,6 +5,7 @@
 - [Overview](#overview)
 - [Required Layout](#required-layout)
 - [BigWigsPackager External](#bigwigspackager-external)
+- [Sample Addon Packaging](#sample-addon-packaging)
 - [Loading](#loading)
 - [Asset Root](#asset-root)
 - [Do Not Use Shared LibStub](#do-not-use-shared-libstub)
@@ -84,6 +85,20 @@ externals:
     tag: v1
     path: runtime/LibSettingsDesigner
 ```
+
+## [Sample Addon Packaging][Top]
+
+This repository's own `.pkgmeta` packages the standalone sample addon from
+`Samples/LibSettingsDesignerSample/` as `LibSettingsDesignerSample`.
+
+The GitHub Actions packaging workflow uploads only when changes are pushed to
+`main` or `master`, plus manual `workflow_dispatch` runs. Before portal uploads
+are enabled, uncomment and fill `## X-Curse-Project-ID` and `## X-Wago-ID` in
+`Samples/LibSettingsDesignerSample/LibSettingsDesignerSample.toc`.
+
+Before opening a release pull request, update `CHANGELOG.md` with a short
+portal-ready entry. BigWigsPackager uses that file as the manual changelog for
+CurseForge and Wago.
 
 ## [Loading][Top]
 

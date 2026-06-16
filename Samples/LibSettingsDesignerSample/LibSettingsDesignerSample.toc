@@ -4,6 +4,8 @@
 ## Author: LibSettingsDesigner
 ## Version: 1.0.0
 ## SavedVariables: LibSettingsDesignerSampleDB
+## X-Curse-Project-ID: 1577626
+# ## X-Wago-ID: REPLACE_WITH_WAGO_ID
 
 libs\LibSettingsDesigner\LibSettingsDesigner.xml
 Core.lua
