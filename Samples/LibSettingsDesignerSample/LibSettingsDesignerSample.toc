@@ -1,4 +1,4 @@
-## Interface: 120005
+## Interface: 120005, 120007
 ## Title: LibSettingsDesigner Sample
 ## Notes: Standalone sample addon for previewing LibSettingsDesigner settings in game.
 ## Author: LibSettingsDesigner
