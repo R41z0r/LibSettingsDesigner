@@ -56,6 +56,10 @@ jobs:
       - name: Prepare sample package root
         run: |
           cp -R Samples/LibSettingsDesignerSample/. .
+          python3 scripts/update_sample_toc.py \
+            --toc LibSettingsDesignerSample.toc \
+            --skip-interface \
+            --addon-version "$GITHUB_REF_NAME"
           git add -f .pkgmeta CHANGELOG.md Core.lua Settings.lua LibSettingsDesignerSample.toc libs
 
       - name: Package and upload addon
