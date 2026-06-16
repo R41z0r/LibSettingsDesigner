@@ -16,4 +16,4 @@ manual-changelog:
   markup-type: markdown
 
 move-folders:
-  LibSettingsDesigner/Samples/LibSettingsDesignerSample: LibSettingsDesignerSample
+  Samples/LibSettingsDesignerSample: LibSettingsDesignerSample
