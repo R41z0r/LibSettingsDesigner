@@ -8,6 +8,7 @@ ignore:
   - runtime
   - scripts
   - AGENTS.md
+  - LibSettingsDesignerSample.toc
   - SKILL.md
   - README.md
 
