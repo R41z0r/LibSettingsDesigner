@@ -19,15 +19,6 @@ DEFAULT_VERSION_SOURCES = {
     "mists": "https://raw.githubusercontent.com/Gethe/wow-ui-source/classic/version.txt",
     "titan": "https://raw.githubusercontent.com/Gethe/wow-ui-source/classic_titan/version.txt",
 }
-TOC_KEYS = {
-    "retail": "Interface",
-    "classic": "Interface-Classic",
-    "bcc": "Interface-BCC",
-    "wrath": "Interface-Wrath",
-    "cata": "Interface-Cata",
-    "mists": "Interface-Mists",
-    "titan": "Interface-Titan",
-}
 DISPLAY_NAMES = {
     "retail": "Retail",
     "classic": "Classic Era",
@@ -37,7 +28,7 @@ DISPLAY_NAMES = {
     "mists": "Mists Classic",
     "titan": "Titan Classic",
 }
-CHANGELOG_ENTRY = "- Updated sample addon Interface metadata for Retail and Classic game flavors."
+CHANGELOG_ENTRY = "- Kept all supported Retail and Classic Interface versions in the main TOC Interface list."
 
 
 def parse_interface(version_text: str) -> int:
@@ -67,8 +58,9 @@ def parse_version_source(value: str) -> tuple[str, str]:
     game_type = game_type.strip().lower()
     url = url.strip()
 
-    if game_type not in TOC_KEYS:
-        known = ", ".join(sorted(TOC_KEYS))
+    known_game_types = set(DEFAULT_VERSION_SOURCES) | {"wrath", "cata"}
+    if game_type not in known_game_types:
+        known = ", ".join(sorted(known_game_types))
         raise argparse.ArgumentTypeError(f"unknown game type {game_type!r}; expected one of: {known}")
     if not url:
         raise argparse.ArgumentTypeError("version source URL must not be empty")
@@ -76,13 +68,12 @@ def parse_version_source(value: str) -> tuple[str, str]:
     return game_type, url
 
 
-def update_toc_interface(toc_path: pathlib.Path, interface_version: int, toc_key: str = "Interface") -> bool:
+def update_toc_interface(toc_path: pathlib.Path, interface_version: int) -> bool:
     text = toc_path.read_text(encoding="utf-8")
     lines = text.splitlines(keepends=True)
-    pattern = re.compile(rf"^(## {re.escape(toc_key)}:\s*)(.*?)(\r?\n)?$")
 
     for index, line in enumerate(lines):
-        match = pattern.match(line)
+        match = re.match(r"^(## Interface:\s*)(.*?)(\r?\n)?$", line)
         if not match:
             continue
 
@@ -97,26 +88,18 @@ def update_toc_interface(toc_path: pathlib.Path, interface_version: int, toc_key
         toc_path.write_text("".join(lines), encoding="utf-8")
         return True
 
-    if toc_key != "Interface":
-        insert_at = 0
-        for index, line in enumerate(lines):
-            if re.match(r"^## Interface(?:-[A-Za-z]+)?:", line):
-                insert_at = index + 1
-                continue
-            if insert_at:
-                break
-
-        newline = "\n"
-        for line in lines:
-            if line.endswith("\r\n"):
-                newline = "\r\n"
-                break
-
-        lines.insert(insert_at, f"## {toc_key}: {interface_version}{newline}")
-        toc_path.write_text("".join(lines), encoding="utf-8")
-        return True
-
     raise ValueError(f"No '## Interface:' line found in {toc_path}")
+
+
+def remove_flavor_interface_lines(toc_path: pathlib.Path) -> bool:
+    text = toc_path.read_text(encoding="utf-8")
+    lines = text.splitlines(keepends=True)
+    kept_lines = [line for line in lines if not re.match(r"^## Interface-[A-Za-z]+:", line)]
+    if kept_lines == lines:
+        return False
+
+    toc_path.write_text("".join(kept_lines), encoding="utf-8")
+    return True
 
 
 def update_toc_version(toc_path: pathlib.Path, addon_version: str) -> bool:
@@ -204,6 +187,12 @@ def main() -> int:
     interface_changed = False
 
     if not args.skip_interface:
+        removed_flavor_lines = remove_flavor_interface_lines(args.toc)
+        changed = changed or removed_flavor_lines
+        interface_changed = interface_changed or removed_flavor_lines
+        if removed_flavor_lines:
+            print(f"Removed flavor-specific Interface metadata from {args.toc}")
+
         if args.version_text is not None:
             version_sources = {"retail": args.version_text}
             source_is_literal = True
@@ -220,16 +209,15 @@ def main() -> int:
         for game_type, source in version_sources.items():
             version_text = source if source_is_literal else fetch_text(source)
             interface_version = parse_interface(version_text)
-            toc_key = TOC_KEYS[game_type]
-            game_changed = update_toc_interface(args.toc, interface_version, toc_key)
+            game_changed = update_toc_interface(args.toc, interface_version)
             changed = changed or game_changed
             interface_changed = interface_changed or game_changed
             display_name = DISPLAY_NAMES[game_type]
 
             if game_changed:
-                print(f"Added {toc_key} {interface_version} for {display_name} to {args.toc}")
+                print(f"Added Interface {interface_version} for {display_name} to {args.toc}")
             else:
-                print(f"{toc_key} {interface_version} for {display_name} already present in {args.toc}")
+                print(f"Interface {interface_version} for {display_name} already present in {args.toc}")
 
         if args.changelog and interface_changed:
             changelog_changed = update_changelog(args.changelog)

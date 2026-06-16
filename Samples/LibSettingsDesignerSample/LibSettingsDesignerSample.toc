@@ -1,8 +1,4 @@
-## Interface: 120005, 120007
-## Interface-Classic: 11508
-## Interface-BCC: 20505
-## Interface-Mists: 50504
-## Interface-Titan: 38001
+## Interface: 11508, 20505, 38001, 50504, 120005, 120007
 ## Title: LibSettingsDesigner Sample
 ## Notes: Standalone sample addon for previewing LibSettingsDesigner settings in game.
 ## Author: LibSettingsDesigner
