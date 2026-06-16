@@ -69,9 +69,10 @@ externals:
 Use a version tag instead of `branch: main` when a host addon needs a fully
 reproducible dependency snapshot.
 
-This repository also includes `.pkgmeta` and a GitHub Actions release workflow
-for packaging the standalone sample addon. Uploads run only after changes land
-on `main` or `master`, or when the workflow is started manually.
+The standalone sample addon includes its own `.pkgmeta` and a GitHub Actions
+release workflow packages that sample directory directly. Uploads run only
+after changes land on `main` or `master`, or when the workflow is started
+manually.
 
 ## Sample Addon
 

@@ -88,17 +88,18 @@ externals:
 
 ## [Sample Addon Packaging][Top]
 
-This repository's own `.pkgmeta` packages the standalone sample addon from
-`Samples/LibSettingsDesignerSample/` as `LibSettingsDesignerSample`.
+The sample addon's own `.pkgmeta` lives in
+`Samples/LibSettingsDesignerSample/` and packages that directory directly.
 
 The GitHub Actions packaging workflow uploads only when changes are pushed to
 `main` or `master`, plus manual `workflow_dispatch` runs. Before portal uploads
 are enabled, uncomment and fill `## X-Curse-Project-ID` and `## X-Wago-ID` in
 `Samples/LibSettingsDesignerSample/LibSettingsDesignerSample.toc`.
 
-Before opening a release pull request, update `CHANGELOG.md` with a short
-portal-ready entry. BigWigsPackager uses that file as the manual changelog for
-CurseForge and Wago.
+Before opening a sample release pull request, update
+`Samples/LibSettingsDesignerSample/CHANGELOG.md` with a short portal-ready
+entry. BigWigsPackager uses that file as the manual changelog for CurseForge
+and Wago.
 
 ## [Loading][Top]
 
