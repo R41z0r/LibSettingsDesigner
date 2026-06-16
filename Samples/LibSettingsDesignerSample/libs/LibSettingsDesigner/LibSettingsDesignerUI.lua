@@ -1707,6 +1707,13 @@ local function getVisiblePageControls(app, page)
 	return controls
 end
 
+function lib.GetPageSettingCount(app, page)
+	if app and type(app.GetPageSettingCount) == "function" then
+		return app:GetPageSettingCount(page)
+	end
+	return #getVisiblePageControls(app, page)
+end
+
 function lib.GetPageCustomizedCount(app, page)
 	if app and type(app.GetPageCustomizedCount) == "function" then
 		return app:GetPageCustomizedCount(page)
@@ -5052,7 +5059,7 @@ local function confirmResetCurrentPage(state)
 end
 
 local function addPageCard(state, page, row, index, columns)
-	local controlCount = #getVisiblePageControls(state.app, page)
+	local controlCount = lib.GetPageSettingCount(state.app, page)
 	local customizedCount = lib.GetPageCustomizedCount(state.app, page)
 	local card = row and createGridCard(state, row, index, columns or 2, PAGE_CARD_HEIGHT)
 		or createContentFrame(state, PAGE_CARD_HEIGHT)
@@ -5137,15 +5144,11 @@ end
 
 local function collectCustomizedPages(app, limit)
 	local result = {}
-	local seen = {}
-	for _, control in ipairs(app.controls or {}) do
-		if (not app.IsControlVisible or app:IsControlVisible(control)) and app:IsControlCustomized(control) and not seen[control.pageID] then
-			local page = app:GetPage(control.pageID)
-			if page then
-				result[#result + 1] = page
-				seen[control.pageID] = true
-				if limit and #result >= limit then break end
-			end
+	local pages = app and type(app.GetPages) == "function" and app:GetPages() or (app and app.pages) or {}
+	for _, page in ipairs(pages) do
+		if lib.GetPageCustomizedCount(app, page) > 0 then
+			result[#result + 1] = page
+			if limit and #result >= limit then break end
 		end
 	end
 	return result

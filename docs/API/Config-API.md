@@ -169,7 +169,8 @@ or `infoBlocks` for help/static pages.
 
 Use `layout = "custom"` or `type = "custom"` when a host addon needs to render
 specialized content inside a LibSettingsDesigner page. Custom pages can provide
-`getHeight`, `render`, `refresh`, `release`, and `searchEntries`; see
+`getHeight`, `render`, `refresh`, `release`, `searchEntries`, and optional
+count callbacks such as `getSettingCount` and `getCustomizedCount`; see
 [Custom](../Elements/Custom.md).
 
 ### `app:RegisterGroup(pageID, data)`

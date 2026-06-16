@@ -732,10 +732,71 @@ function AppMixin:GetPageControls(pageOrID)
 	return controls
 end
 
+local function normalizeCount(value)
+	local count = tonumber(value)
+	if not count then
+		return nil
+	end
+	return math.max(0, math.floor(count))
+end
+
+local function resolvePageCount(app, page, resolverNames, valueNames)
+	if type(page) ~= "table" then
+		return nil
+	end
+	for _, name in ipairs(resolverNames or {}) do
+		local resolver = page[name]
+		if type(resolver) == "function" then
+			local ok, value = pcall(resolver, app, page)
+			local count = ok and normalizeCount(value)
+			if count ~= nil then
+				return count
+			end
+		end
+	end
+	for _, name in ipairs(valueNames or {}) do
+		local count = normalizeCount(page[name])
+		if count ~= nil then
+			return count
+		end
+	end
+	return nil
+end
+
+function AppMixin:GetPageSettingCount(pageOrID)
+	local page = type(pageOrID) == "string" and self.pagesByID[pageOrID] or pageOrID
+	if not page or not self:IsPageVisible(page) then
+		return 0
+	end
+	local explicitCount = resolvePageCount(self, page, {
+		"getSettingCount",
+		"getSettingsCount",
+		"getControlCount",
+	}, {
+		"settingCount",
+		"settingsCount",
+		"controlCount",
+	})
+	if explicitCount ~= nil then
+		return explicitCount
+	end
+	return #self:GetPageControls(page)
+end
+
 function AppMixin:GetPageCustomizedCount(pageOrID)
 	local page = type(pageOrID) == "string" and self.pagesByID[pageOrID] or pageOrID
 	if not page or not self:IsPageVisible(page) then
 		return 0
+	end
+	local explicitCount = resolvePageCount(self, page, {
+		"getCustomizedCount",
+		"getChangedCount",
+	}, {
+		"customizedCount",
+		"changedCount",
+	})
+	if explicitCount ~= nil then
+		return explicitCount
 	end
 	local count = 0
 	for _, control in ipairs(page.controls or {}) do

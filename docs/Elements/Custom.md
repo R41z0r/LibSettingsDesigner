@@ -4,6 +4,7 @@
 - [Overview](#overview)
 - [Custom Control](#custom-control)
 - [Custom Page](#custom-page)
+- [Custom Page Counts](#custom-page-counts)
 - [Search Entries](#search-entries)
 - [Lifecycle](#lifecycle)
 
@@ -65,6 +66,40 @@ app:RegisterPage({
 
 Custom pages still get the standard page header, side panel, scroll frame, and
 window controls.
+
+## [Custom Page Counts][Top]
+
+Custom pages do not automatically expose the host-rendered checkboxes, table
+cells, or nested controls to LibSettingsDesigner. If the page card should show a
+meaningful count instead of `0 settings`, provide count fields or callbacks:
+
+```lua
+app:RegisterPage({
+  id = "auras.ignore-matrix",
+  category = "auras",
+  title = "Aura Ignore Matrix",
+  layout = "custom",
+  getSettingCount = function(app, page)
+    return MyAddon.AuraMatrix:GetCellCount()
+  end,
+  getCustomizedCount = function(app, page)
+    return MyAddon.AuraMatrix:GetChangedCellCount()
+  end,
+  render = function(parent, app, page, state)
+    return MyAddon.AuraMatrix:Render(parent, state)
+  end,
+})
+```
+
+Static values are also supported:
+
+```lua
+settingCount = 25,
+customizedCount = 3,
+```
+
+Aliases are accepted for host wrappers: `settingsCount`, `controlCount`,
+`getSettingsCount`, `getControlCount`, `changedCount`, and `getChangedCount`.
 
 ## [Search Entries][Top]
 

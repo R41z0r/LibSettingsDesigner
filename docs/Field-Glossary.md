@@ -126,6 +126,10 @@ app:RegisterPage(data)
 | `searchEntries` | table | Search-only child entries for custom/action pages. |
 | `render`, `refresh`, `release` | function | Custom page hosting callbacks. |
 | `getHeight` | function | Dynamic height for custom pages. |
+| `settingCount`, `settingsCount`, `controlCount` | number | Explicit settings count for custom/action pages. |
+| `getSettingCount`, `getSettingsCount`, `getControlCount` | function | Dynamic settings count callback: `function(app, page)`. |
+| `customizedCount`, `changedCount` | number | Explicit changed count for custom/action pages. |
+| `getCustomizedCount`, `getChangedCount` | function | Dynamic changed count callback: `function(app, page)`. |
 | `visible`, `isVisible`, `visibleWhen` | boolean/function | Show gates. |
 | `hidden`, `hiddenWhen` | boolean/function | Hide gates. |
 

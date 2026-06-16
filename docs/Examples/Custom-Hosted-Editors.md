@@ -62,6 +62,12 @@ app:RegisterPage({
       focusID = "delete",
     },
   },
+  getSettingCount = function(app, page)
+    return MyAddon.SyncDatabaseEditor:GetVisibleRecordCount()
+  end,
+  getCustomizedCount = function(app, page)
+    return MyAddon.SyncDatabaseEditor:GetPendingChangeCount()
+  end,
   getHeight = function(app, page, state)
     return 520
   end,
@@ -88,6 +94,11 @@ When a user searches for `restore friend`, the Settings Center search can open
 the custom page and pass `focusID = "restore"` to `render`. The host editor then
 decides whether to scroll, highlight, open a nested editor state, or select a
 record.
+
+The count callbacks are optional but recommended for custom pages that contain
+host-rendered checkboxes, table rows, or matrix cells. Without them, page cards
+only count registered LibSettingsDesigner controls and a fully custom page will
+display `0 settings`.
 
 ## [Table-Like Record Editors][Top]
 
