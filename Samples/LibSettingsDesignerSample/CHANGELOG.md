@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added the Wago project ID so main-branch package uploads can publish to Wago.
+- Added a detailed portal-ready project description for CurseForge and Wago.
 - Added BigWigsPackager metadata for publishing the standalone sample addon.
 - Added a login chat hint showing how to open the sample settings menu.
 - Configured the release workflow to prepare the sample addon as the package root.
