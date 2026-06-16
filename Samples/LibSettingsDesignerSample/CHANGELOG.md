@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Changed the main-branch upload workflow to publish tagged release builds instead of alpha builds.
+- Updated the release workflow to use the Node.js 24-compatible checkout action.
 - Added the Wago project ID so main-branch package uploads can publish to Wago.
 - Added a detailed portal-ready project description for CurseForge and Wago.
 - Added BigWigsPackager metadata for publishing the standalone sample addon.
