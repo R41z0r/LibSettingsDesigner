@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -26,9 +26,20 @@ jobs:
           cp -R Samples/LibSettingsDesignerSample/. .
           git add -f .pkgmeta CHANGELOG.md Core.lua Settings.lua LibSettingsDesignerSample.toc libs
 
+      - name: Create release tag
+        run: |
+          release_tag="v$(date -u +'%Y.%m.%d.%H%M%S')"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$release_tag" -m "Release $release_tag"
+          git push origin "$release_tag"
+          echo "RELEASE_TAG=$release_tag" >> "$GITHUB_ENV"
+
       - name: Package and upload addon
         uses: BigWigsMods/packager@v2
         env:
+          GITHUB_REF: refs/tags/${{ env.RELEASE_TAG }}
+          GITHUB_REF_NAME: ${{ env.RELEASE_TAG }}
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
