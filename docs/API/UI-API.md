@@ -294,6 +294,12 @@ app:RegisterCategory({
     enabled = true,
     defaultPageID = "icons.catalog",
     remember = true,
+    font = "GameFontHighlight",
+    gap = 12,
+    paddingX = 8,
+    minWidth = 44,
+    maxWidth = 180,
+    underlineHeight = 3,
   },
 })
 ```
@@ -308,6 +314,19 @@ Tab clicks call `state:SetPage(page.id)`. The left sidebar continues to mark the
 owning category as selected, while the horizontal tab strip marks the active
 page. Pages can set `tabTitle` for a shorter label or `tabHidden = true` /
 `hideTab = true` to stay out of the tab strip.
+
+`tabView` can also tune the tab strip for that category:
+
+| Field | Use |
+| :---- | :-- |
+| `font` / `tabFont` / `fontObject` | Font object name used by tab labels. |
+| `gap` / `spacing` / `tabGap` / `tabSpacing` | Horizontal space between tabs. |
+| `paddingX` / `padX` / `tabPaddingX` | Left and right text padding inside each tab hit area. |
+| `minWidth` / `tabMinWidth` | Minimum tab hit-area width. |
+| `maxWidth` / `tabMaxWidth` | Maximum tab hit-area width before labels are clipped. |
+| `height` / `tabHeight` | Tab hit-area height. |
+| `textOffsetY` / `tabTextOffsetY` | Vertical text offset inside the tab. |
+| `underlineHeight` / `tabUnderlineHeight` | Active underline thickness. |
 
 ## [Side Panel Subnavigation][Top]
 
