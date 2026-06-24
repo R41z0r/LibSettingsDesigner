@@ -34,11 +34,14 @@ local PAGE_LAYOUT = {
 	scrollbarGutter = 26, -- reserved, visible gutter between settings column and side panel
 	columnInset = 5, -- keep section borders away from the scroll clipping edge
 	scrollbarOffset = 8,
-	detailNavHeight = 30,
+	detailNavHeight = 34,
 	detailNavGap = 8,
 	scrollInset = 8,
 	scrollBottomPad = 20,
 	sidePanelTopOffset = 48,
+	pageTabMinWidth = 52,
+	pageTabMaxWidth = 220,
+	pageTabGap = 18,
 	windowMinWidth = 1080,
 	windowMinHeight = 640,
 }
@@ -1193,67 +1196,274 @@ local function createCollapseArrow(parent, app, size, collapsed)
 	return createAssetArrow(parent, app, size, "collapse", collapsed and "right" or "down")
 end
 
+local function resolveWindowBorderConfig(app)
+	local overrides = lib.ReadAppThemeBorders(app)
+	local config = overrides and (overrides.windowBorder or overrides.window or overrides.outerBorder or overrides.frameBorder)
+	if type(config) == "function" then
+		local ok, result = pcall(config, app)
+		config = ok and result or nil
+	end
+	if config == false or (type(config) == "table" and config.enabled == false) then
+		return { enabled = false }
+	end
+	config = type(config) == "table" and config or {}
+	local cornerOffset = tonumber(config.cornerOffset or config.offset) or 10
+	local color = lib.CopyThemeColor(config.color or config.tint or config.vertexColor) or { 1, 1, 1, 1 }
+	return {
+		enabled = true,
+		prefix = config.prefix or config.texturePrefix or config.filePrefix or config.path or (getAssetRoot(app) .. "PanelBorder_"),
+		suffix = config.suffix or config.extension or ".tga",
+		files = type(config.files) == "table" and config.files or nil,
+		cornerSize = tonumber(config.cornerSize) or 58,
+		edgeThickness = tonumber(config.edgeThickness or config.edgeSize or config.thickness) or 58,
+		cornerOffset = cornerOffset,
+		rightOffset = tonumber(config.rightOffset) or (cornerOffset + 6),
+		alpha = tonumber(config.alpha) or color[4] or 1,
+		color = color,
+		hideBasicFrameBorder = config.hideBasicFrameBorder ~= false,
+	}
+end
+
 local function applyWindowBorder(frame, app)
-	if not frame or frame.WindowBorder then
+	if not frame then
 		return
 	end
-	local borderPath = getAssetRoot(app) .. "PanelBorder_"
-	local cornerSize = 58
-	local edgeThickness = 58
-	local cornerOffset = 10
-	local rightOffset = cornerOffset + 6
+	local config = resolveWindowBorderConfig(app)
+	if config.enabled == false then
+		if frame.WindowBorder then
+			for _, texture in pairs(frame.WindowBorder) do
+				if texture.Hide then texture:Hide() end
+			end
+		end
+		setBasicFrameBorderAlpha(frame, 1)
+		return
+	end
+
 	local parts = {}
+	if frame.WindowBorder then
+		parts = frame.WindowBorder
+	end
 
 	local function makePart(key, subLevel)
-		local texture = frame:CreateTexture(nil, "BORDER", nil, subLevel or 0)
-		texture:SetTexture(borderPath .. key .. ".tga")
-		texture:SetAlpha(1)
+		local texture = parts[key] or frame:CreateTexture(nil, "BORDER", nil, subLevel or 0)
+		texture:ClearAllPoints()
+		texture:SetTexture((config.files and config.files[key]) or (config.prefix .. key .. config.suffix))
+		texture:SetVertexColor(config.color[1], config.color[2], config.color[3], config.color[4] or 1)
+		texture:SetAlpha(config.alpha)
+		texture:Show()
 		parts[key] = texture
 		return texture
 	end
 
 	local tl = makePart("tl", 1)
-	tl:SetSize(cornerSize, cornerSize)
-	tl:SetPoint("TOPLEFT", frame, "TOPLEFT", -cornerOffset, cornerOffset)
+	tl:SetSize(config.cornerSize, config.cornerSize)
+	tl:SetPoint("TOPLEFT", frame, "TOPLEFT", -config.cornerOffset, config.cornerOffset)
 
 	local tr = makePart("tr", 1)
-	tr:SetSize(cornerSize, cornerSize)
-	tr:SetPoint("TOPRIGHT", frame, "TOPRIGHT", rightOffset, cornerOffset)
+	tr:SetSize(config.cornerSize, config.cornerSize)
+	tr:SetPoint("TOPRIGHT", frame, "TOPRIGHT", config.rightOffset, config.cornerOffset)
 
 	local bl = makePart("bl", 1)
-	bl:SetSize(cornerSize, cornerSize)
-	bl:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", -cornerOffset, -cornerOffset)
+	bl:SetSize(config.cornerSize, config.cornerSize)
+	bl:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", -config.cornerOffset, -config.cornerOffset)
 
 	local br = makePart("br", 1)
-	br:SetSize(cornerSize, cornerSize)
-	br:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", rightOffset, -cornerOffset)
+	br:SetSize(config.cornerSize, config.cornerSize)
+	br:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", config.rightOffset, -config.cornerOffset)
 
 	local top = makePart("t", 0)
 	top:SetPoint("TOPLEFT", tl, "TOPRIGHT", 0, 0)
 	top:SetPoint("TOPRIGHT", tr, "TOPLEFT", 0, 0)
-	top:SetHeight(edgeThickness)
+	top:SetHeight(config.edgeThickness)
 	top:SetHorizTile(true)
 
 	local bottom = makePart("b", 0)
 	bottom:SetPoint("BOTTOMLEFT", bl, "BOTTOMRIGHT", 0, 0)
 	bottom:SetPoint("BOTTOMRIGHT", br, "BOTTOMLEFT", 0, 0)
-	bottom:SetHeight(edgeThickness)
+	bottom:SetHeight(config.edgeThickness)
 	bottom:SetHorizTile(true)
 
 	local left = makePart("l", 0)
 	left:SetPoint("TOPLEFT", tl, "BOTTOMLEFT", 0, 0)
 	left:SetPoint("BOTTOMLEFT", bl, "TOPLEFT", 0, 0)
-	left:SetWidth(edgeThickness)
+	left:SetWidth(config.edgeThickness)
 	left:SetVertTile(true)
 
 	local right = makePart("r", 0)
 	right:SetPoint("TOPRIGHT", tr, "BOTTOMRIGHT", 0, 0)
 	right:SetPoint("BOTTOMRIGHT", br, "TOPRIGHT", 0, 0)
-	right:SetWidth(edgeThickness)
+	right:SetWidth(config.edgeThickness)
 	right:SetVertTile(true)
 
 	frame.WindowBorder = parts
-	setBasicFrameBorderAlpha(frame, 0)
+	setBasicFrameBorderAlpha(frame, config.hideBasicFrameBorder and 0 or 1)
+end
+
+function lib._Internal.resolveCloseButtonConfig(app)
+	local opts = app and app.opts
+	local theme = opts and opts.theme
+	local config = opts and (opts.closeButton or opts.windowCloseButton or opts.close)
+	if not config and type(theme) == "table" then
+		config = theme.closeButton or theme.windowCloseButton or theme.close
+	end
+	if type(config) == "function" then
+		local ok, result = pcall(config, app)
+		config = ok and result or nil
+	end
+	if config == false or (type(config) == "table" and config.enabled == false) then
+		return { enabled = false }
+	end
+	return type(config) == "table" and config or nil
+end
+
+function lib._Internal.setCloseButtonTextColor(button, color)
+	if button and button.Label and button.Label.SetTextColor and type(color) == "table" then
+		button.Label:SetTextColor(color[1], color[2], color[3], color[4] or 1)
+	end
+end
+
+function lib._Internal.setCloseButtonBgColor(button, color)
+	if button and button.Bg and button.Bg.SetColorTexture and type(color) == "table" then
+		button.Bg:SetColorTexture(color[1], color[2], color[3], color[4] or 0)
+	end
+end
+
+function lib._Internal.setCloseButtonBorderColor(button, color)
+	if not button or type(color) ~= "table" then
+		return
+	end
+	local parts = button.BorderParts
+	if not parts then
+		parts = {}
+		button.BorderParts = parts
+		for _, key in ipairs({ "Top", "Bottom", "Left", "Right" }) do
+			parts[key] = button:CreateTexture(nil, "BORDER")
+		end
+		parts.Top:SetPoint("TOPLEFT", button, "TOPLEFT", 0, 0)
+		parts.Top:SetPoint("TOPRIGHT", button, "TOPRIGHT", 0, 0)
+		parts.Bottom:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 0, 0)
+		parts.Bottom:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 0, 0)
+		parts.Left:SetPoint("TOPLEFT", button, "TOPLEFT", 0, 0)
+		parts.Left:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 0, 0)
+		parts.Right:SetPoint("TOPRIGHT", button, "TOPRIGHT", 0, 0)
+		parts.Right:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 0, 0)
+		parts.Top:SetHeight(1)
+		parts.Bottom:SetHeight(1)
+		parts.Left:SetWidth(1)
+		parts.Right:SetWidth(1)
+	end
+	for _, texture in pairs(parts) do
+		texture:SetColorTexture(color[1], color[2], color[3], color[4] or 1)
+		texture:Show()
+	end
+end
+
+function lib._Internal.hideCloseButtonBorder(button)
+	if not button or not button.BorderParts then
+		return
+	end
+	for _, texture in pairs(button.BorderParts) do
+		texture:Hide()
+	end
+end
+
+function lib._Internal.resolveCloseButtonRelativeFrame(frame, config)
+	local relativeTo = config and (config.relativeTo or config.anchor or config.parent)
+	if type(relativeTo) == "table" then
+		return relativeTo
+	end
+	relativeTo = relativeTo and tostring(relativeTo):lower() or "frame"
+	if relativeTo == "topbar" or relativeTo == "topbarframe" or relativeTo == "header" then
+		return frame.TopBar or frame
+	elseif relativeTo == "sidebar" then
+		return frame.SidebarShell or frame.Sidebar or frame
+	elseif relativeTo == "content" or relativeTo == "contentshell" then
+		return frame.ContentShell or frame.Content or frame
+	elseif relativeTo == "search" then
+		return frame.SearchShell or frame
+	end
+	return frame
+end
+
+function lib._Internal.configureCloseButton(button, frame, app)
+	if not button or not frame then
+		return
+	end
+	local config = lib._Internal.resolveCloseButtonConfig(app)
+	if config and config.enabled == false then
+		button:Hide()
+		return
+	end
+
+	button:Show()
+	local useTextStyle = config and ((config.style or config.type or config.mode) == "text")
+	local size = tonumber(config and config.size) or 32
+	local offsetX = tonumber(config and (config.offsetX or config.x)) or 16
+	local offsetY = tonumber(config and (config.offsetY or config.y)) or 10
+	local point = (config and (config.point or config.anchorPoint)) or "TOPRIGHT"
+	local relativePoint = (config and (config.relativePoint or config.relativeAnchorPoint)) or point
+	local relativeFrame = lib._Internal.resolveCloseButtonRelativeFrame(frame, config)
+	button:SetSize(size, size)
+	button:ClearAllPoints()
+	button:SetPoint(point, relativeFrame, relativePoint, offsetX, offsetY)
+	if button.SetFrameLevel and frame.GetFrameLevel then
+		button:SetFrameLevel((frame:GetFrameLevel() or 0) + (tonumber(config and config.frameLevelOffset) or 30))
+	end
+
+	if useTextStyle then
+		button.NormalTexture:Hide()
+		button.HoverTexture:Hide()
+		button.Bg:Show()
+		button.Label:Show()
+		button.Label:SetFontObject(config.font or FONT_HEADER)
+		button.Label:SetText(config.text or "X")
+		button.Label:ClearAllPoints()
+		button.Label:SetPoint("CENTER", button, "CENTER", tonumber(config.textOffsetX) or 0, tonumber(config.textOffsetY) or 0)
+		local normalText = lib.CopyThemeColor(config.textColor or config.color) or TEXT.gold
+		local hoverText = lib.CopyThemeColor(config.hoverTextColor or config.hoverColor) or TEXT.main
+		local normalBg = lib.CopyThemeColor(config.bgColor or config.backgroundColor) or { 0, 0, 0, 0 }
+		local hoverBg = lib.CopyThemeColor(config.hoverBgColor or config.hoverBackgroundColor) or SELECTED_BG
+		local normalBorder = lib.CopyThemeColor(config.borderColor)
+		local hoverBorder = lib.CopyThemeColor(config.hoverBorderColor) or normalBorder
+		lib._Internal.setCloseButtonTextColor(button, normalText)
+		lib._Internal.setCloseButtonBgColor(button, normalBg)
+		if normalBorder then
+			lib._Internal.setCloseButtonBorderColor(button, normalBorder)
+		else
+			lib._Internal.hideCloseButtonBorder(button)
+		end
+		button:SetScript("OnEnter", function(self)
+			lib._Internal.setCloseButtonTextColor(self, hoverText)
+			lib._Internal.setCloseButtonBgColor(self, hoverBg)
+			if hoverBorder then
+				lib._Internal.setCloseButtonBorderColor(self, hoverBorder)
+			end
+		end)
+		button:SetScript("OnLeave", function(self)
+			lib._Internal.setCloseButtonTextColor(self, normalText)
+			lib._Internal.setCloseButtonBgColor(self, normalBg)
+			if normalBorder then
+				lib._Internal.setCloseButtonBorderColor(self, normalBorder)
+			end
+		end)
+	else
+		button.Bg:Hide()
+		button.Label:Hide()
+		lib._Internal.hideCloseButtonBorder(button)
+		button.NormalTexture:Show()
+		button.NormalTexture:SetTexture(getLibAssetPath(app, "LibSettingsDesigner_CloseButton.tga"))
+		button.HoverTexture:SetTexture(getLibAssetPath(app, "LibSettingsDesigner_CloseButtonHover.tga"))
+		button.HoverTexture:Hide()
+		button:SetScript("OnEnter", function(self)
+			self.HoverTexture:Show()
+		end)
+		button:SetScript("OnLeave", function(self)
+			self.HoverTexture:Hide()
+		end)
+	end
+	button:SetScript("OnClick", function()
+		frame:Hide()
+	end)
 end
 
 local function setBackdropColor(frame, color)
@@ -5885,7 +6095,244 @@ function lib._Internal.addContentScrollbarRail(state)
 	return rail
 end
 
-function lib._Internal.addPageFixedHeader(state, category, pagePath)
+function lib._Internal.resolveCategoryTabViewConfig(app, category)
+	if not category then
+		return nil
+	end
+	local value = category.tabView
+	if value == nil then value = category.pageTabs end
+	if value == nil then value = category.tabs end
+	if value == nil then value = category.tabbedPages end
+	if type(value) == "function" then
+		local ok, result = pcall(value, app, category)
+		value = ok and result or nil
+	end
+	if type(value) == "table" then
+		local enabled = value.enabled
+		if enabled == nil then enabled = value.show end
+		if enabled == nil then enabled = value.visible end
+		if type(enabled) == "function" then
+			local ok, result = pcall(enabled, app, category, value)
+			enabled = ok and result or nil
+		end
+		return enabled ~= false and value or nil
+	end
+	return value == true and {} or nil
+end
+
+function lib._Internal.getCategoryTabPages(app, category)
+	local pages = {}
+	if not app or not category or not category.id then
+		return pages
+	end
+	for _, page in ipairs(app:GetPages(category.id)) do
+		local hidden = page.tabHidden == true or page.hideTab == true
+		if not hidden then
+			pages[#pages + 1] = page
+		end
+	end
+	return pages
+end
+
+function lib._Internal.isCategoryTabViewEnabled(app, category)
+	if not lib._Internal.resolveCategoryTabViewConfig(app, category) then
+		return false
+	end
+	return #lib._Internal.getCategoryTabPages(app, category) > 0
+end
+
+function lib._Internal.getCategoryTabRemember(config, category)
+	local remember = config and config.remember
+	if remember == nil then remember = config and config.rememberSelectedPage end
+	if remember == nil then remember = category and category.rememberSelectedPage end
+	if remember == nil then remember = category and category.rememberTab end
+	return remember == true
+end
+
+function lib._Internal.callCategoryTabGetter(app, category, config)
+	local resolver = config and (config.getSelectedPage or config.getSelectedPageID)
+	if type(resolver) == "function" then
+		local ok, pageID = pcall(resolver, app, category)
+		if ok and pageID then
+			return pageID
+		end
+	end
+	local opts = app and app.opts
+	resolver = opts and (opts.getSelectedCategoryPage or opts.getSelectedCategoryPageID)
+	if type(resolver) == "function" then
+		local ok, pageID = pcall(resolver, category.id, app, category)
+		if ok and pageID then
+			return pageID
+		end
+	end
+	return nil
+end
+
+function lib._Internal.storeCategoryTabPage(state, category, page)
+	if not state or not category or not page then
+		return
+	end
+	local config = lib._Internal.resolveCategoryTabViewConfig(state.app, category)
+	if not config then
+		return
+	end
+	state.categoryTabPageIDs = state.categoryTabPageIDs or {}
+	state.categoryTabPageIDs[category.id] = page.id
+	if not lib._Internal.getCategoryTabRemember(config, category) then
+		return
+	end
+	local setter = config.setSelectedPage or config.setSelectedPageID
+	if type(setter) == "function" then
+		pcall(setter, page.id, state.app, category, page)
+	end
+	local opts = state.app and state.app.opts
+	setter = opts and (opts.setSelectedCategoryPage or opts.setSelectedCategoryPageID)
+	if type(setter) == "function" then
+		pcall(setter, category.id, page.id, state.app, category, page)
+	end
+end
+
+function lib._Internal.resolveCategoryTabPageID(state, category)
+	local app = state and state.app
+	local config = lib._Internal.resolveCategoryTabViewConfig(app, category)
+	if not config then
+		return nil
+	end
+	local pages = lib._Internal.getCategoryTabPages(app, category)
+	if #pages == 0 then
+		return nil
+	end
+	local pageByID = {}
+	for _, page in ipairs(pages) do
+		pageByID[page.id] = page
+	end
+	local function valid(pageID)
+		pageID = pageID and tostring(pageID) or nil
+		return pageID and pageByID[pageID] and pageID or nil
+	end
+	if lib._Internal.getCategoryTabRemember(config, category) then
+		local stored = state.categoryTabPageIDs and state.categoryTabPageIDs[category.id]
+		stored = valid(stored) or valid(lib._Internal.callCategoryTabGetter(app, category, config))
+		if stored then
+			return stored
+		end
+	end
+	local defaultPageID = config.defaultPageID or config.defaultPage or config.pageID
+		or category.defaultPageID or category.defaultPage or category.pageID
+	return valid(defaultPageID) or pages[1].id
+end
+
+function lib._Internal.addPageTabs(state, header, category, selectedPage, startX)
+	local config = lib._Internal.resolveCategoryTabViewConfig(state.app, category)
+	if not config then
+		return nil
+	end
+	local pages = lib._Internal.getCategoryTabPages(state.app, category)
+	if #pages <= 1 then
+		return nil
+	end
+	local function resolveNumber(...)
+		for index = 1, select("#", ...) do
+			local value = select(index, ...)
+			if type(value) == "function" then
+				local ok, result = pcall(value, state.app, category, config)
+				value = ok and result or nil
+			end
+			value = tonumber(value)
+			if value then
+				return value
+			end
+		end
+		return nil
+	end
+	local headerWidth = state.pageSectionWidth or state.pageLeftWidth or 420
+	startX = tonumber(startX) or 116
+	local availableWidth = math.max(1, headerWidth - startX - 2)
+	local tabGap = resolveNumber(config.gap, config.spacing, config.tabGap, config.tabSpacing) or PAGE_LAYOUT.pageTabGap
+	local tabMinWidth = resolveNumber(config.minWidth, config.tabMinWidth) or PAGE_LAYOUT.pageTabMinWidth
+	local tabMaxWidth = resolveNumber(config.maxWidth, config.tabMaxWidth) or PAGE_LAYOUT.pageTabMaxWidth
+	local tabPaddingX = resolveNumber(config.paddingX, config.padX, config.tabPaddingX) or 14
+	local tabHeight = resolveNumber(config.height, config.tabHeight) or 30
+	local tabTextOffsetY = resolveNumber(config.textOffsetY, config.tabTextOffsetY) or 2
+	local underlineHeight = resolveNumber(config.underlineHeight, config.tabUnderlineHeight) or 3
+	local tabFont = config.font or config.tabFont or config.fontObject or FONT_MUTED
+	tabGap = math.max(0, tabGap)
+	tabMinWidth = math.max(1, tabMinWidth)
+	tabMaxWidth = math.max(tabMinWidth, tabMaxWidth)
+	tabPaddingX = math.max(0, tabPaddingX)
+	tabHeight = math.max(18, tabHeight)
+	underlineHeight = math.max(1, underlineHeight)
+	local labels = {}
+	local textWidths = {}
+	local widths = {}
+	local totalWidth = 0
+	local measure = header:CreateFontString(nil, "OVERLAY", tabFont)
+	for index = 1, #pages do
+		local page = pages[index]
+		local label = lib.NormalizeTextValue(page.tabTitle or page.title or page.id)
+		labels[index] = label
+		measure:SetText(label)
+		local textWidth = math.ceil(measure:GetStringWidth() or 0)
+		textWidths[index] = textWidth
+		local measuredWidth = textWidth + (tabPaddingX * 2)
+		widths[index] = math.max(tabMinWidth, math.min(tabMaxWidth, measuredWidth))
+		totalWidth = totalWidth + widths[index]
+	end
+	measure:SetText("")
+	local availableTabsWidth = availableWidth - ((#pages - 1) * tabGap)
+	if totalWidth > availableTabsWidth then
+		local evenWidth = math.floor(availableTabsWidth / #pages)
+		for index = 1, #widths do
+			widths[index] = math.max(tabMinWidth, math.min(widths[index], evenWidth))
+		end
+	end
+	local x = startX
+	local y = -4
+	for index = 1, #pages do
+		local page = pages[index]
+		local selected = selectedPage and selectedPage.id == page.id
+		local tabWidth = widths[index]
+		local button = trackFrame(state.fixedFrames, CreateFrame("Button", nil, header))
+		button:SetPoint("TOPLEFT", header, "TOPLEFT", x, y)
+		button:SetSize(tabWidth, tabHeight)
+		button.Highlight = button:CreateTexture(nil, "BACKGROUND")
+		button.Highlight:SetPoint("TOPLEFT", button, "TOPLEFT", 0, -2)
+		button.Highlight:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 0, 3)
+		button.Highlight:SetColorTexture(SELECTED_BG[1], SELECTED_BG[2], SELECTED_BG[3], selected and 0.20 or 0)
+		button.Underline = button:CreateTexture(nil, "ARTWORK")
+		button.Underline:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", tabPaddingX, 0)
+		button.Underline:SetWidth(math.max(16, math.min(tabWidth - (tabPaddingX * 2), textWidths[index] or tabWidth)))
+		button.Underline:SetHeight(underlineHeight)
+		button.Underline:SetColorTexture(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], selected and 1 or 0)
+		button.Text = createText(button, tabFont, labels[index], selected and TEXT.gold or TEXT.muted)
+		button.Text:SetPoint("LEFT", button, "LEFT", tabPaddingX, tabTextOffsetY)
+		button.Text:SetPoint("RIGHT", button, "RIGHT", -tabPaddingX, tabTextOffsetY)
+		button.Text:SetHeight(math.max(1, tabHeight - underlineHeight - 3))
+		button.Text.Text:SetJustifyV("MIDDLE")
+		if button.Text.Text.SetMaxLines then
+			button.Text.Text:SetMaxLines(1)
+		end
+		button:SetScript("OnEnter", function(self)
+			if self.Highlight then
+				self.Highlight:SetColorTexture(SELECTED_BG[1], SELECTED_BG[2], SELECTED_BG[3], selected and 0.26 or 0.14)
+			end
+			setTextColor(self.Text and self.Text.Text, TEXT.main)
+		end)
+		button:SetScript("OnLeave", function(self)
+			if self.Highlight then
+				self.Highlight:SetColorTexture(SELECTED_BG[1], SELECTED_BG[2], SELECTED_BG[3], selected and 0.20 or 0)
+			end
+			setTextColor(self.Text and self.Text.Text, selected and TEXT.gold or TEXT.muted)
+		end)
+		button:SetScript("OnClick", function()
+			state:SetPage(page.id)
+		end)
+		x = x + tabWidth + tabGap
+	end
+	return true
+end
+
+function lib._Internal.addPageFixedHeader(state, category, pagePath, page)
 	if state.sidePanelMode ~= "right" or not state.frame.ContentShell then
 		return nil
 	end
@@ -5900,6 +6347,10 @@ function lib._Internal.addPageFixedHeader(state, category, pagePath)
 	header:SetSize(state.pageSectionWidth or state.pageLeftWidth or 420, PAGE_LAYOUT.detailNavHeight)
 	if state.frame.Scroll and header.SetFrameLevel and state.frame.Scroll.GetFrameLevel then
 		header:SetFrameLevel((state.frame.Scroll:GetFrameLevel() or 1) + 2)
+	end
+
+	if lib._Internal.addPageTabs(state, header, category, page, 0) then
+		return header
 	end
 
 	local L = getLocale(state.app)
@@ -6543,7 +6994,7 @@ function lib.RenderInfoPage(state, page, pagePath)
 	local category = app.categoriesByID[page.category or ""]
 	if state.sidePanelMode == "right" then
 		lib._Internal.addPageLeftColumnShell(state)
-		lib._Internal.addPageFixedHeader(state, category, pagePath)
+		lib._Internal.addPageFixedHeader(state, category, pagePath, page)
 		lib._Internal.addContentScrollbarRail(state)
 		lib._Internal.addPageSidePanel(state, page, category, nil)
 	end
@@ -6578,7 +7029,7 @@ function lib.RenderCustomPage(state, page, pagePath)
 	local category = app.categoriesByID[page.category or ""]
 	if state.sidePanelMode == "right" then
 		lib._Internal.addPageLeftColumnShell(state)
-		lib._Internal.addPageFixedHeader(state, category, pagePath)
+		lib._Internal.addPageFixedHeader(state, category, pagePath, page)
 		lib._Internal.addContentScrollbarRail(state)
 		lib._Internal.addPageSidePanel(state, page, category, nil)
 	end
@@ -6626,7 +7077,7 @@ function lib._Internal.renderPage(state, pageID)
 	local groups = lib._Internal.collectPageGroups(app, page, nil)
 	if state.sidePanelMode == "right" then
 		lib._Internal.addPageLeftColumnShell(state)
-		lib._Internal.addPageFixedHeader(state, category, pagePath)
+		lib._Internal.addPageFixedHeader(state, category, pagePath, page)
 		lib._Internal.addContentScrollbarRail(state)
 		lib._Internal.addPageSidePanel(state, page, category, groups)
 	end
@@ -6940,6 +7391,12 @@ function StateMixin:SetDashboard(restoreScroll)
 end
 
 function StateMixin:SetCategory(categoryID, restoreScroll)
+	local category = self.app and self.app.categoriesByID and self.app.categoriesByID[categoryID]
+	local tabPageID = lib._Internal.resolveCategoryTabPageID(self, category)
+	if tabPageID then
+		self:SetPage(tabPageID)
+		return
+	end
 	self.resetContentScroll = true
 	self.restoreContentScrollKey = restoreScroll and ("category:" .. tostring(categoryID)) or nil
 	self.view = "category"
@@ -7009,6 +7466,8 @@ function StateMixin:SetPage(pageID, focusControlID)
 	self.selectedPageID = pageID
 	if page then
 		self.selectedCategoryID = page.category
+		local category = self.app.categoriesByID and self.app.categoriesByID[page.category or ""]
+		lib._Internal.storeCategoryTabPage(self, category, page)
 	end
 	if focusControlID then
 		local resolvedControlID, groupID = self:ResolveFocusControlID(page, focusControlID)
@@ -7290,17 +7749,13 @@ local function createFrame(app)
 	frame.CustomCloseButton.NormalTexture:SetTexture(getLibAssetPath(app, "LibSettingsDesigner_CloseButton.tga"))
 	frame.CustomCloseButton.HoverTexture = frame.CustomCloseButton:CreateTexture(nil, "OVERLAY")
 	frame.CustomCloseButton.HoverTexture:SetAllPoints(frame.CustomCloseButton)
-	frame.CustomCloseButton.HoverTexture:SetTexture(getLibAssetPath(app, "LibSettingsDesigner_CloseButtonHover.tga"))
-	frame.CustomCloseButton.HoverTexture:Hide()
-	frame.CustomCloseButton:SetScript("OnEnter", function(self)
-		self.HoverTexture:Show()
-	end)
-	frame.CustomCloseButton:SetScript("OnLeave", function(self)
-		self.HoverTexture:Hide()
-	end)
-	frame.CustomCloseButton:SetScript("OnClick", function()
-		frame:Hide()
-	end)
+	frame.CustomCloseButton.Bg = frame.CustomCloseButton:CreateTexture(nil, "BACKGROUND")
+	frame.CustomCloseButton.Bg:SetAllPoints(frame.CustomCloseButton)
+	frame.CustomCloseButton.Bg:Hide()
+	frame.CustomCloseButton.Label = frame.CustomCloseButton:CreateFontString(nil, "OVERLAY", FONT_HEADER)
+	frame.CustomCloseButton.Label:SetPoint("CENTER")
+	frame.CustomCloseButton.Label:Hide()
+	lib._Internal.configureCloseButton(frame.CustomCloseButton, frame, app)
 
 	frame.ResetButton = makeFlatButton(frame.TopBar, L["configCenterDefaults"] or "Defaults", 104, 28)
 	frame.ResetButton:SetPoint("RIGHT", frame.TopBar, "RIGHT", -12, 0)
@@ -7605,6 +8060,7 @@ local function refreshFrameTheme(frame, app)
 			lib.ThemeColors.overlayTint[4] or 1
 		)
 	end
+	applyWindowBorder(frame, app)
 	if frame.TopBar then
 		setFrameBackdrop(frame.TopBar, TOPBAR_BG, lib.ThemeColors.topbarBorder, "topbar")
 	end
@@ -7661,6 +8117,9 @@ local function refreshFrameTheme(frame, app)
 			frame.ResizeGrip:GetPushedTexture():SetVertexColor(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.82)
 		end
 	end
+	if frame.CustomCloseButton then
+		lib._Internal.configureCloseButton(frame.CustomCloseButton, frame, app)
+	end
 end
 
 function lib.ResolveOpenTarget(app, pageID, focusControlID)
@@ -7704,7 +8163,11 @@ function lib:Open(appOrID, pageID, focusControlID)
 	local state = frame._LibSettingsDesignerState
 	pageID, focusControlID = lib.ResolveOpenTarget(app, pageID, focusControlID)
 	if pageID and pageID ~= "dashboard" then
-		state:SetPage(pageID, focusControlID)
+		if not app:GetPage(pageID) and app.categoriesByID and app.categoriesByID[pageID] then
+			state:SetCategory(pageID)
+		else
+			state:SetPage(pageID, focusControlID)
+		end
 	elseif not pageID then
 		state:RenderContent()
 	else

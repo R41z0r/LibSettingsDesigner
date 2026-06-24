@@ -44,13 +44,16 @@ Config:RegisterAddOn(addonID, opts)
 | `db` | function | Returns the table used for simple DB-backed controls. |
 | `locale` | table | Host addon locale table. |
 | `colors` / `colorTable` / `themeColors` | table/function | Optional global UI theme color overrides. Missing keys keep defaults. |
-| `borders` / `themeBorders` / `borderAssets` | table/function | Optional global UI border asset overrides. Missing keys keep defaults. |
+| `borders` / `themeBorders` / `borderAssets` | table/function | Optional global UI border asset overrides. Missing keys keep defaults. Use `window` / `windowBorder` for the decorative outer frame. |
 | `density` | string/function | Initial density, usually `"compact"` or `"comfortable"`. |
 | `getDensity(app)` / `setDensity(density, app)` | function | Read/write the user's selected density. |
 | `showDensityButton` / `showDensityButton(app)` | boolean/function | Controls whether users can switch density; only `false` hides the button. |
 | `topbar` / `header` / `topBar` | table | Configures built-in topbar controls and custom action buttons. |
+| `closeButton` / `windowCloseButton` / `close` | table/function | Optional window close-button style and placement override. Missing values keep the built-in close texture and position. |
 | `subnav` / `subnavigation` | table/boolean/function | Global opt-in for right-panel group links. |
 | `showSubnav` / `showSubnavigation` | boolean/function | Global show gate for optional right-panel group links. |
+| `getSelectedCategoryPage(categoryID, app, category)` | function | Optional persisted page resolver for category tab views. |
+| `setSelectedCategoryPage(categoryID, pageID, app, category, page)` | function | Optional persisted page writer for category tab views. |
 | `getSize()` / `setSize(width, height)` | function | Read/write persisted frame size. |
 | `getLocked()` / `setLocked(locked)` | function | Read/write whether the frame is locked. |
 | `getReloadPending(app)` / `setReloadPending(pending, reason, control, app)` | function | Optional storage bridge for reload-pending state. |
@@ -105,6 +108,10 @@ app:RegisterCategory(data)
 | `icon` | string | Texture path. |
 | `iconAtlas` | string | Blizzard atlas name. |
 | `iconKey` | string | Lookup key in app icon maps. |
+| `tabView` | table/boolean/function | Enables horizontal page tabs for this category. Table values can also set tab font, gap, padding, width, height, text offset, and underline height. |
+| `pageTabs` / `tabs` / `tabbedPages` | boolean/function | Simple aliases for `tabView`. |
+| `defaultPageID` / `defaultPage` / `pageID` | string | Initial page for category tab view. |
+| `rememberSelectedPage` / `rememberTab` | boolean | Remember last selected tab page for this category. |
 
 ## [Page Fields][Top]
 
@@ -122,6 +129,8 @@ app:RegisterPage(data)
 | `description` | string | Summary shown on cards/detail views. |
 | `icon`, `iconAtlas`, `iconKey` | string | Page icon source. |
 | `mainToggleID` | string | Control id used as main feature toggle. |
+| `tabTitle` | string | Optional shorter label when the page is rendered as a category tab. |
+| `tabHidden` / `hideTab` | boolean | Hide this page from category tab strips. |
 | `subnav` / `subnavigation` | table/boolean/function | Page-level opt-in for right-panel group links. |
 | `showSubnav` / `showSubnavigation` | boolean/function | Page-level show gate for optional right-panel group links. |
 | `newTagID` | string | New badge tag for the page. |

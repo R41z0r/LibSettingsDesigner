@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added an Atomic sample theme preset with dark panels and cyan accents.
+- Added a sample category tab view that remembers the last selected tab page.
 - Kept all supported Retail and Classic Interface versions in the main TOC Interface list.
 - Updated sample addon Interface metadata for Retail and Classic game flavors.
 - Set the packaged sample addon's TOC version from the generated release tag.

@@ -105,13 +105,16 @@ and `setDensity` when that choice should persist in SavedVariables. Set
 | `db` | function | Returns the table used for simple `control.key` reads/writes. |
 | `locale` | table | Host addon locale table. |
 | `colors` / `colorTable` / `themeColors` | table/function | Optional global UI theme color overrides. Missing keys keep defaults. |
-| `borders` / `themeBorders` / `borderAssets` | table/function | Optional global UI border asset overrides. Missing keys keep defaults. |
+| `borders` / `themeBorders` / `borderAssets` | table/function | Optional global UI border asset overrides. Missing keys keep defaults. Use `window` / `windowBorder` for the decorative outer frame. |
 | `density` | string/function | Initial density, `"compact"` or `"comfortable"`. |
 | `getDensity(app)` / `setDensity(density, app)` | function | Read/write the user's selected density. |
 | `showDensityButton` / `showDensityButton(app)` | boolean/function | Whether users can switch density; only `false` hides the button. |
 | `topbar` / `header` / `topBar` | table | Configures built-in topbar controls and custom action buttons. |
+| `closeButton` / `windowCloseButton` / `close` | table/function | Optional window close-button style and placement override. Missing values keep the built-in close texture and position. |
 | `subnav` / `subnavigation` | table/boolean/function | Global opt-in for right-panel group links. |
 | `showSubnav` / `showSubnavigation` | boolean/function | Global show gate for optional right-panel group links. |
+| `getSelectedCategoryPage(categoryID, app, category)` | function | Optional persisted page resolver for category tab views. |
+| `setSelectedCategoryPage(categoryID, pageID, app, category, page)` | function | Optional persisted page writer for category tab views. |
 | `getSize()` / `setSize(width, height)` | function | Persist settings window size. |
 | `getLocked()` / `setLocked(locked)` | function | Persist whether the frame can be moved/resized. |
 | `getReloadPending(app)` / `setReloadPending(pending, reason, control, app)` | function | Optional storage bridge for reload-pending state. |
@@ -129,6 +132,27 @@ and `setDensity` when that choice should persist in SavedVariables. Set
 `profile` and `version` are host-owned metadata in the current runtime. Do not
 expect automatic profile/status/version rendering from these fields unless host
 addon code or a custom dashboard function explicitly reads them.
+
+`closeButton` is opt-in. If it is omitted or a function returns `nil`, the
+runtime uses the built-in close-button textures and default placement. A host
+addon can set a custom text close button and anchor it with normal frame points:
+
+```lua
+closeButton = {
+  style = "text",
+  text = "X",
+  relativeTo = "frame", -- frame, topbar, sidebar, content, or search
+  point = "TOPRIGHT",
+  relativePoint = "TOPRIGHT",
+  offsetX = -18,
+  offsetY = -18,
+  size = 26,
+  font = "GameFontNormalLarge",
+  textColor = { 0.00, 0.78, 1.00, 0.95 },
+  bgColor = { 0.00, 0.05, 0.07, 0.36 },
+  borderColor = { 0.00, 0.58, 0.78, 0.46 },
+}
+```
 
 ## [Registration Methods][Top]
 
@@ -148,6 +172,48 @@ app:RegisterCategory({
 Required: `id`.
 
 Common fields: `title`, `order`, `icon`, `iconAtlas`, `iconKey`.
+
+Set `tabView = { enabled = true }` on a category when clicking the sidebar
+category should open one of that category's pages directly and show sibling
+pages as horizontal tabs above the detail content. Boolean aliases
+`pageTabs = true`, `tabs = true`, and `tabbedPages = true` are accepted for
+simple opt-in.
+
+```lua
+app:RegisterCategory({
+  id = "icons",
+  title = "Icons",
+  tabView = {
+    enabled = true,
+    defaultPageID = "icons.catalog",
+    remember = true,
+    font = "GameFontHighlight",
+    gap = 12,
+    paddingX = 8,
+    minWidth = 44,
+    maxWidth = 180,
+  },
+  order = 100,
+})
+```
+
+When a tab category is opened, the UI resolves the selected page in this order:
+
+1. remembered page when `remember = true`
+2. `defaultPageID` / `defaultPage` / `pageID`
+3. first visible page in category order
+
+Remembered pages are stored in the open frame state. To persist them across UI
+sessions, provide `getSelectedCategoryPage` and `setSelectedCategoryPage` on app
+options, or `getSelectedPage` and `setSelectedPage` inside the category's
+`tabView` table.
+
+Tab-strip styling can be customized per category through `tabView` fields:
+`font` / `tabFont` / `fontObject`, `gap` / `spacing` / `tabGap` /
+`tabSpacing`, `paddingX` / `padX` / `tabPaddingX`, `minWidth` /
+`tabMinWidth`, `maxWidth` / `tabMaxWidth`, `height` / `tabHeight`,
+`textOffsetY` / `tabTextOffsetY`, and `underlineHeight` /
+`tabUnderlineHeight`.
 
 ### `app:RegisterPage(data)`
 
@@ -171,6 +237,10 @@ Required: `id`, `category`, `title`.
 Pages may provide `onOpen = function(page, app, state)` for host-addon side
 effects such as marking a `newTagID` as seen. Keep the callback lightweight and
 avoid rebuilding the settings frame from it.
+
+When a page belongs to a tab-view category, `tabTitle` can provide a shorter tab
+label than the page title. Use `tabHidden = true` or `hideTab = true` when a
+page should stay addressable but not appear in that category's tab strip.
 
 Normal settings pages with more than one visible group can show optional
 right-panel group links when the wide side-panel layout is active. The default is

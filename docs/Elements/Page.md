@@ -23,6 +23,8 @@ inside a category.
 | `description` | string | Page summary/about text. |
 | `icon`, `iconAtlas`, `iconKey` | string | Icon source. |
 | `mainToggleID` | string | Control id used as main feature toggle. |
+| `tabTitle` | string | Optional shorter label when rendered in a category tab strip. |
+| `tabHidden` / `hideTab` | boolean | Hide this page from category tab strips. |
 | `newTagID` | string | New badge tag. |
 | `layout` | string | Use `"info"` for static content pages. |
 | `content` | table | Info page content. |

@@ -55,6 +55,15 @@ local app = Config:RegisterAddOn(addonName, {
       edgeSize = 9,
       insets = { left = 2, right = 2, top = 2, bottom = 2 },
     },
+    window = {
+      prefix = "Interface\\AddOns\\MyAddon\\Media\\OuterBorder_",
+      cornerSize = 44,
+      edgeThickness = 44,
+      cornerOffset = 8,
+      rightOffset = 10,
+      color = { 0.00, 0.72, 0.92, 0.90 },
+      alpha = 0.90,
+    },
   },
 })
 ```
@@ -106,6 +115,24 @@ default, panel, topbar, content, sidebar, card, dashboardCard, detailSection,
 detailColumn, row, button, topbarButton, search, control, toggle, toggleKnob,
 swatch, reorderItem
 ```
+
+The outer decorative frame uses a separate sliced texture config under
+`window`, `windowBorder`, `outerBorder`, or `frameBorder`. It expects textures
+named with the suffixes `tl`, `tr`, `bl`, `br`, `t`, `b`, `l`, and `r` when
+using `prefix`, such as `OuterBorder_tl.tga`. Supported fields are:
+
+| Field | Use |
+| :---- | :-- |
+| `prefix` / `texturePrefix` / `filePrefix` / `path` | Texture prefix before the slice suffix. Defaults to the vendored `PanelBorder_` assets. |
+| `suffix` / `extension` | Texture suffix. Defaults to `.tga`. |
+| `files` | Optional per-slice texture map keyed by `tl`, `tr`, `bl`, `br`, `t`, `b`, `l`, and `r`. |
+| `cornerSize` | Width and height for corner slices. |
+| `edgeThickness` / `edgeSize` / `thickness` | Thickness for edge slices. |
+| `cornerOffset` / `offset` | Offset of the decorative border outside the frame. |
+| `rightOffset` | Right-side offset override. |
+| `color` / `tint` / `vertexColor` | Vertex color for the border textures. |
+| `alpha` | Border alpha. |
+| `enabled = false` | Hides the decorative window border. |
 
 Aliases:
 

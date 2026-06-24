@@ -12,6 +12,7 @@
 - [Frame State](#frame-state)
 - [Size, Lock, and Density Persistence](#size-lock-and-density-persistence)
 - [Topbar Configuration](#topbar-configuration)
+- [Category Page Tabs](#category-page-tabs)
 - [Side Panel Subnavigation](#side-panel-subnavigation)
 - [Refresh Rules](#refresh-rules)
 - [Examples](#examples)
@@ -23,7 +24,8 @@
 The UI API renders the settings center for an app registered through the Config
 API. It owns the visible frame, navigation, dashboard, sidebar, search, page
 layout, control widgets, notes, density controls, reload-pending state display
-hooks, topbar actions, side-panel subnavigation, and open/toggle helpers.
+hooks, topbar actions, category page tabs, side-panel subnavigation, and
+open/toggle helpers.
 
 It should render metadata. It should not contain host-addon-specific feature
 logic.
@@ -52,6 +54,7 @@ The UI API expects `addon.LibSettingsDesigner.Config` to be loaded first.
 ConfigUI:Open(app)
 ConfigUI:Open(app, "interface.action-bars")
 ConfigUI:Open(app, "interface.action-bars", "barScale")
+ConfigUI:Open(app, "icons") -- opens the category, or its resolved tab page
 ```
 
 `appOrID` can be the app object or the registered addon id:
@@ -60,7 +63,9 @@ ConfigUI:Open(app, "interface.action-bars", "barScale")
 ConfigUI:Open("MyAddon", "general.core")
 ```
 
-Use stable page/control ids. Do not use localized labels.
+Use stable category/page/control ids. Do not use localized labels. A category id
+opens that category; when the category has `tabView` enabled, it resolves to the
+remembered, default, or first visible tab page.
 
 Good:
 
@@ -262,6 +267,66 @@ app:RegisterControl("interface.names", {
   reloadReason = "Nameplate font changes apply after reloading the UI.",
 })
 ```
+
+## [Category Page Tabs][Top]
+
+Category page tabs turn a sidebar category into a tabbed page group. When the
+user clicks the category in the left sidebar, the UI opens a resolved page from
+that category and renders sibling pages as horizontal tabs above the detail
+content.
+
+```lua
+local app = Config:RegisterAddOn(addonName, {
+  getSelectedCategoryPage = function(categoryID)
+    return MyAddonDB.profile.settingsTabs
+      and MyAddonDB.profile.settingsTabs[categoryID]
+  end,
+  setSelectedCategoryPage = function(categoryID, pageID)
+    MyAddonDB.profile.settingsTabs = MyAddonDB.profile.settingsTabs or {}
+    MyAddonDB.profile.settingsTabs[categoryID] = pageID
+  end,
+})
+
+app:RegisterCategory({
+  id = "icons",
+  title = "Icons",
+  tabView = {
+    enabled = true,
+    defaultPageID = "icons.catalog",
+    remember = true,
+    font = "GameFontHighlight",
+    gap = 12,
+    paddingX = 8,
+    minWidth = 44,
+    maxWidth = 180,
+    underlineHeight = 3,
+  },
+})
+```
+
+Resolution order when the category is opened:
+
+1. remembered visible page when `remember = true`
+2. `defaultPageID`, `defaultPage`, or `pageID`
+3. first visible page in category order
+
+Tab clicks call `state:SetPage(page.id)`. The left sidebar continues to mark the
+owning category as selected, while the horizontal tab strip marks the active
+page. Pages can set `tabTitle` for a shorter label or `tabHidden = true` /
+`hideTab = true` to stay out of the tab strip.
+
+`tabView` can also tune the tab strip for that category:
+
+| Field | Use |
+| :---- | :-- |
+| `font` / `tabFont` / `fontObject` | Font object name used by tab labels. |
+| `gap` / `spacing` / `tabGap` / `tabSpacing` | Horizontal space between tabs. |
+| `paddingX` / `padX` / `tabPaddingX` | Left and right text padding inside each tab hit area. |
+| `minWidth` / `tabMinWidth` | Minimum tab hit-area width. |
+| `maxWidth` / `tabMaxWidth` | Maximum tab hit-area width before labels are clipped. |
+| `height` / `tabHeight` | Tab hit-area height. |
+| `textOffsetY` / `tabTextOffsetY` | Vertical text offset inside the tab. |
+| `underlineHeight` / `tabUnderlineHeight` | Active underline thickness. |
 
 ## [Side Panel Subnavigation][Top]
 

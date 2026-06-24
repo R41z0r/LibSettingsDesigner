@@ -149,6 +149,46 @@ local SAMPLE_THEME_COLORS = {
 		accent = { 0.42, 0.72, 1.00, 1 },
 		topbarText = { 0.70, 0.86, 1.00, 1 },
 	},
+	atomic = {
+		background = { 0.006, 0.007, 0.011, 0.985 },
+		overlay = { 0.00, 0.82, 1.00, 1 },
+		panel = { 0.010, 0.012, 0.016, 0.96 },
+		panelBorder = { 0.00, 0.55, 0.72, 0.72 },
+		content = { 0.008, 0.010, 0.014, 0.96 },
+		sidebar = { 0.006, 0.010, 0.014, 0.96 },
+		card = { 0.012, 0.014, 0.019, 0.96 },
+		cardHover = { 0.016, 0.082, 0.100, 0.98 },
+		cardBorder = { 0.07, 0.18, 0.24, 0.56 },
+		cardHoverBorder = { 0.00, 0.78, 1.00, 0.88 },
+		dashboardCardBg = { 0.012, 0.016, 0.021, 0.96 },
+		dashboardCardBorder = { 0.06, 0.20, 0.27, 0.56 },
+		detailSectionBg = { 0.006, 0.008, 0.011, 0.92 },
+		detailColumnBg = { 0.006, 0.010, 0.013, 0.90 },
+		detailColumnBorder = { 0.00, 0.46, 0.60, 0.52 },
+		detailSectionBorder = { 0.00, 0.44, 0.58, 0.50 },
+		detailSectionHeaderBg = { 0.010, 0.014, 0.016, 0.92 },
+		row = { 0.012, 0.014, 0.019, 0.90 },
+		rowHover = { 0.016, 0.078, 0.095, 0.98 },
+		rowBorder = { 0.07, 0.17, 0.23, 0.44 },
+		rowHoverBorder = { 0.00, 0.72, 0.94, 0.78 },
+		rowSeparator = { 0.00, 0.44, 0.58, 0.34 },
+		button = { 0.010, 0.016, 0.022, 0.95 },
+		buttonHover = { 0.000, 0.118, 0.150, 0.98 },
+		buttonBorder = { 0.00, 0.42, 0.58, 0.66 },
+		buttonHoverBorder = { 0.00, 0.82, 1.00, 0.92 },
+		buttonTopbarBg = { 0.010, 0.014, 0.018, 0.94 },
+		buttonTopbarBorder = { 0.00, 0.54, 0.72, 0.72 },
+		buttonTopbarHoverBg = { 0.000, 0.105, 0.135, 0.98 },
+		search = { 0.010, 0.012, 0.018, 0.98 },
+		searchBorder = { 0.00, 0.62, 0.82, 0.88 },
+		selected = { 0.000, 0.145, 0.175, 0.78 },
+		accent = { 0.00, 0.78, 1.00, 1 },
+		text = { 0.88, 0.94, 0.98, 1 },
+		mutedText = { 0.68, 0.74, 0.80, 1 },
+		subtleText = { 0.45, 0.52, 0.58, 1 },
+		topbarText = { 0.00, 0.78, 1.00, 1 },
+		topbarBorder = { 0.00, 0.58, 0.78, 0.72 },
+	},
 	ember = {
 		background = { 0.034, 0.024, 0.020, 0.98 },
 		overlay = { 0.92, 0.50, 0.32, 1 },
@@ -198,6 +238,51 @@ local SAMPLE_THEME_BORDERS = {
 			insets = { left = 3, right = 3, top = 3, bottom = 3 },
 		},
 	},
+	atomic = {
+		window = {
+			enabled = false,
+		},
+		default = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 8,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+		topbar = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 8,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+		content = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 8,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+		sidebar = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 8,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+		detailSection = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 8,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+		button = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 8,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+		topbarButton = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 8,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+		search = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 8,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+	},
 	ember = {
 		default = {
 			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
@@ -242,6 +327,30 @@ local function getSampleThemeBorders()
 	return SAMPLE_THEME_BORDERS[preset]
 end
 
+local function getSampleCloseButton()
+	if (DB().themePreset or "gold") ~= "atomic" then
+		return nil
+	end
+	return {
+		style = "text",
+		text = "X",
+		relativeTo = "frame",
+		point = "TOPRIGHT",
+		relativePoint = "TOPRIGHT",
+		size = 26,
+		offsetX = 0,
+		offsetY = -8,
+		frameLevelOffset = 80,
+		font = "GameFontNormalLarge",
+		textColor = { 0.00, 0.78, 1.00, 0.95 },
+		hoverTextColor = { 0.88, 0.96, 1.00, 1 },
+		bgColor = { 0.00, 0.05, 0.07, 0.36 },
+		hoverBgColor = { 0.00, 0.16, 0.20, 0.82 },
+		borderColor = { 0.00, 0.58, 0.78, 0.46 },
+		hoverBorderColor = { 0.00, 0.82, 1.00, 0.90 },
+	}
+end
+
 local function applySampleThemePreset(preset)
 	DB().themePreset = SAMPLE_THEME_COLORS[preset] and preset or "gold"
 	addon.Print(("Theme preset applied: %s."):format(DB().themePreset))
@@ -267,6 +376,7 @@ app = Config:RegisterAddOn(addonName, {
 	},
 	colors = getSampleThemeColors,
 	borders = getSampleThemeBorders,
+	closeButton = getSampleCloseButton,
 	db = DB,
 	locale = addon.L,
 	version = function()
@@ -287,6 +397,15 @@ app = Config:RegisterAddOn(addonName, {
 	setDensity = function(density)
 		DB().settingsWindow = DB().settingsWindow or {}
 		DB().settingsWindow.density = density == "compact" and "compact" or "comfortable"
+	end,
+	getSelectedCategoryPage = function(categoryID)
+		local tabs = DB().settingsWindow and DB().settingsWindow.categoryTabs
+		return tabs and tabs[categoryID]
+	end,
+	setSelectedCategoryPage = function(categoryID, pageID)
+		DB().settingsWindow = DB().settingsWindow or {}
+		DB().settingsWindow.categoryTabs = DB().settingsWindow.categoryTabs or {}
+		DB().settingsWindow.categoryTabs[categoryID] = pageID
 	end,
 	getLocked = function()
 		return DB().settingsWindow and DB().settingsWindow.locked == true
@@ -413,7 +532,23 @@ app = Config:RegisterAddOn(addonName, {
 
 app:RegisterCategory({ id = "general", title = "General", iconAtlas = "communities-icon-chat", order = 100 })
 app:RegisterCategory({ id = "visuals", title = "Visuals", iconAtlas = "transmog-icon-revert", order = 200 })
-app:RegisterCategory({ id = "advanced", title = "Advanced", iconAtlas = "Professions-Icon-Quality-Tier5", order = 300 })
+app:RegisterCategory({
+	id = "advanced",
+	title = "Advanced",
+	iconAtlas = "Professions-Icon-Quality-Tier5",
+	tabView = {
+		enabled = true,
+		defaultPageID = "advanced.editor-showcase",
+		remember = true,
+		font = "GameFontHighlight",
+		gap = 12,
+		paddingX = 8,
+		minWidth = 44,
+		maxWidth = 180,
+		underlineHeight = 3,
+	},
+	order = 300,
+})
 app:RegisterCategory({ id = "help", title = "Help", iconAtlas = "QuestNormal", order = 900 })
 
 app:RegisterPage({
@@ -677,6 +812,19 @@ app:RegisterControl("visuals.theme", {
 	onClick = function() applySampleThemePreset("ember") end,
 	parentCheck = function() return DB().enabled == true and DB().visualsEnabled == true end,
 	order = 240,
+})
+
+app:RegisterControl("visuals.theme", {
+	id = "themePresetAtomic",
+	groupID = "colors",
+	groupTitle = "Colors",
+	type = "button",
+	label = "Apply Atomic Theme",
+	description = "Switches the sample app color table to a high-contrast dark cyan preset.",
+	buttonText = "Atomic",
+	onClick = function() applySampleThemePreset("atomic") end,
+	parentCheck = function() return DB().enabled == true and DB().visualsEnabled == true end,
+	order = 250,
 })
 
 app:RegisterPage({
