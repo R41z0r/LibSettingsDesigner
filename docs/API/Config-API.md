@@ -112,6 +112,8 @@ and `setDensity` when that choice should persist in SavedVariables. Set
 | `topbar` / `header` / `topBar` | table | Configures built-in topbar controls and custom action buttons. |
 | `subnav` / `subnavigation` | table/boolean/function | Global opt-in for right-panel group links. |
 | `showSubnav` / `showSubnavigation` | boolean/function | Global show gate for optional right-panel group links. |
+| `getSelectedCategoryPage(categoryID, app, category)` | function | Optional persisted page resolver for category tab views. |
+| `setSelectedCategoryPage(categoryID, pageID, app, category, page)` | function | Optional persisted page writer for category tab views. |
 | `getSize()` / `setSize(width, height)` | function | Persist settings window size. |
 | `getLocked()` / `setLocked(locked)` | function | Persist whether the frame can be moved/resized. |
 | `getReloadPending(app)` / `setReloadPending(pending, reason, control, app)` | function | Optional storage bridge for reload-pending state. |
@@ -149,6 +151,36 @@ Required: `id`.
 
 Common fields: `title`, `order`, `icon`, `iconAtlas`, `iconKey`.
 
+Set `tabView = { enabled = true }` on a category when clicking the sidebar
+category should open one of that category's pages directly and show sibling
+pages as horizontal tabs above the detail content. Boolean aliases
+`pageTabs = true`, `tabs = true`, and `tabbedPages = true` are accepted for
+simple opt-in.
+
+```lua
+app:RegisterCategory({
+  id = "icons",
+  title = "Icons",
+  tabView = {
+    enabled = true,
+    defaultPageID = "icons.catalog",
+    remember = true,
+  },
+  order = 100,
+})
+```
+
+When a tab category is opened, the UI resolves the selected page in this order:
+
+1. remembered page when `remember = true`
+2. `defaultPageID` / `defaultPage` / `pageID`
+3. first visible page in category order
+
+Remembered pages are stored in the open frame state. To persist them across UI
+sessions, provide `getSelectedCategoryPage` and `setSelectedCategoryPage` on app
+options, or `getSelectedPage` and `setSelectedPage` inside the category's
+`tabView` table.
+
 ### `app:RegisterPage(data)`
 
 Registers a page under a category.
@@ -171,6 +203,10 @@ Required: `id`, `category`, `title`.
 Pages may provide `onOpen = function(page, app, state)` for host-addon side
 effects such as marking a `newTagID` as seen. Keep the callback lightweight and
 avoid rebuilding the settings frame from it.
+
+When a page belongs to a tab-view category, `tabTitle` can provide a shorter tab
+label than the page title. Use `tabHidden = true` or `hideTab = true` when a
+page should stay addressable but not appear in that category's tab strip.
 
 Normal settings pages with more than one visible group can show optional
 right-panel group links when the wide side-panel layout is active. The default is

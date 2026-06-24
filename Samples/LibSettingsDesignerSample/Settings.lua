@@ -288,6 +288,15 @@ app = Config:RegisterAddOn(addonName, {
 		DB().settingsWindow = DB().settingsWindow or {}
 		DB().settingsWindow.density = density == "compact" and "compact" or "comfortable"
 	end,
+	getSelectedCategoryPage = function(categoryID)
+		local tabs = DB().settingsWindow and DB().settingsWindow.categoryTabs
+		return tabs and tabs[categoryID]
+	end,
+	setSelectedCategoryPage = function(categoryID, pageID)
+		DB().settingsWindow = DB().settingsWindow or {}
+		DB().settingsWindow.categoryTabs = DB().settingsWindow.categoryTabs or {}
+		DB().settingsWindow.categoryTabs[categoryID] = pageID
+	end,
 	getLocked = function()
 		return DB().settingsWindow and DB().settingsWindow.locked == true
 	end,
@@ -413,7 +422,17 @@ app = Config:RegisterAddOn(addonName, {
 
 app:RegisterCategory({ id = "general", title = "General", iconAtlas = "communities-icon-chat", order = 100 })
 app:RegisterCategory({ id = "visuals", title = "Visuals", iconAtlas = "transmog-icon-revert", order = 200 })
-app:RegisterCategory({ id = "advanced", title = "Advanced", iconAtlas = "Professions-Icon-Quality-Tier5", order = 300 })
+app:RegisterCategory({
+	id = "advanced",
+	title = "Advanced",
+	iconAtlas = "Professions-Icon-Quality-Tier5",
+	tabView = {
+		enabled = true,
+		defaultPageID = "advanced.editor-showcase",
+		remember = true,
+	},
+	order = 300,
+})
 app:RegisterCategory({ id = "help", title = "Help", iconAtlas = "QuestNormal", order = 900 })
 
 app:RegisterPage({

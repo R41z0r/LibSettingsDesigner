@@ -353,6 +353,7 @@ ConfigUI:Open("MyAddon", "general.core")
 | `topbar` / `header` / `topBar` | Configures built-in topbar controls and custom action buttons. |
 | `subnav` / `subnavigation` | Global opt-in for right-panel group links. |
 | `showSubnav` / `showSubnavigation` | Global show gate for optional right-panel group links. |
+| `getSelectedCategoryPage` / `setSelectedCategoryPage` | Optional persistence callbacks for category tab views. |
 | `getSize()` / `setSize(width, height)` | Persist frame size. |
 | `getLocked()` / `setLocked(locked)` | Persist frame lock state. |
 | `getReloadPending(app)` / `setReloadPending(pending, reason, control, app)` | Optional storage bridge for reload-pending state. |
@@ -495,8 +496,8 @@ Canonical direct fields:
 
 | Object | Canonical fields |
 | :----- | :--------------- |
-| Category | `id`, `title`, `description`, `order`, `icon`, `iconAtlas`, `iconKey` |
-| Page | `id`, `category`, `title`, `description`, `descriptionKey`, `order`, `icon`, `iconAtlas`, `iconKey`, `mainToggleID`, `pageKey`, `newTagID`, `onOpen`, `layout`, `type`, `content`, `blocks`, `infoBlocks`, `searchEntries`, `getHeight`, `render`, `refresh`, `release`, `getSettingCount`, `getCustomizedCount` |
+| Category | `id`, `title`, `description`, `order`, `icon`, `iconAtlas`, `iconKey`, `tabView`, `pageTabs`, `tabs`, `tabbedPages`, `defaultPageID`, `rememberSelectedPage` |
+| Page | `id`, `category`, `title`, `description`, `descriptionKey`, `order`, `icon`, `iconAtlas`, `iconKey`, `mainToggleID`, `tabTitle`, `tabHidden`, `pageKey`, `newTagID`, `onOpen`, `layout`, `type`, `content`, `blocks`, `infoBlocks`, `searchEntries`, `getHeight`, `render`, `refresh`, `release`, `getSettingCount`, `getCustomizedCount` |
 | Group | `id`, `title`, `order` |
 | Control | `id`, `key`, `type`, `label`, `description`, `default`, `dbDefault`, `getValue`, `setValue`, `getSelection`, `setSelection`, `setting`, `parentCheck`, `isEnabled`, visibility fields, search fields |
 
@@ -540,6 +541,9 @@ Common category fields:
 | `icon` | Texture path. |
 | `iconAtlas` | Blizzard atlas name. |
 | `iconKey` | Lookup key in app icon maps. |
+| `tabView` / `pageTabs` / `tabs` / `tabbedPages` | Enables horizontal page tabs for a category. |
+| `defaultPageID` / `defaultPage` / `pageID` | Initial page for category tab view. |
+| `rememberSelectedPage` / `rememberTab` | Remember the last selected tab page. |
 
 Common page fields:
 
@@ -552,6 +556,8 @@ Common page fields:
 | `order` | Page sort order. |
 | `icon` / `iconAtlas` / `iconKey` | Page icon source. |
 | `mainToggleID` | Control id used as the page's primary feature toggle. |
+| `tabTitle` | Optional shorter label when the page is shown as a category tab. |
+| `tabHidden` / `hideTab` | Hide this page from category tab strips. |
 | `subnav` / `subnavigation` | Page-level opt-in for right-panel group links. |
 | `showSubnav` / `showSubnavigation` | Page-level show gate for optional right-panel group links. |
 | `pageKey` | Stable alternate page/tag key for wrappers and new badges. |

@@ -34,11 +34,14 @@ local PAGE_LAYOUT = {
 	scrollbarGutter = 26, -- reserved, visible gutter between settings column and side panel
 	columnInset = 5, -- keep section borders away from the scroll clipping edge
 	scrollbarOffset = 8,
-	detailNavHeight = 30,
+	detailNavHeight = 34,
 	detailNavGap = 8,
 	scrollInset = 8,
 	scrollBottomPad = 20,
 	sidePanelTopOffset = 48,
+	pageTabMinWidth = 52,
+	pageTabMaxWidth = 142,
+	pageTabGap = 6,
 	windowMinWidth = 1080,
 	windowMinHeight = 640,
 }
@@ -5885,7 +5888,188 @@ function lib._Internal.addContentScrollbarRail(state)
 	return rail
 end
 
-function lib._Internal.addPageFixedHeader(state, category, pagePath)
+function lib._Internal.resolveCategoryTabViewConfig(app, category)
+	if not category then
+		return nil
+	end
+	local value = category.tabView
+	if value == nil then value = category.pageTabs end
+	if value == nil then value = category.tabs end
+	if value == nil then value = category.tabbedPages end
+	if type(value) == "function" then
+		local ok, result = pcall(value, app, category)
+		value = ok and result or nil
+	end
+	if type(value) == "table" then
+		local enabled = value.enabled
+		if enabled == nil then enabled = value.show end
+		if enabled == nil then enabled = value.visible end
+		if type(enabled) == "function" then
+			local ok, result = pcall(enabled, app, category, value)
+			enabled = ok and result or nil
+		end
+		return enabled ~= false and value or nil
+	end
+	return value == true and {} or nil
+end
+
+function lib._Internal.getCategoryTabPages(app, category)
+	local pages = {}
+	if not app or not category or not category.id then
+		return pages
+	end
+	for _, page in ipairs(app:GetPages(category.id)) do
+		local hidden = page.tabHidden == true or page.hideTab == true
+		if not hidden then
+			pages[#pages + 1] = page
+		end
+	end
+	return pages
+end
+
+function lib._Internal.isCategoryTabViewEnabled(app, category)
+	if not lib._Internal.resolveCategoryTabViewConfig(app, category) then
+		return false
+	end
+	return #lib._Internal.getCategoryTabPages(app, category) > 0
+end
+
+function lib._Internal.getCategoryTabRemember(config, category)
+	local remember = config and config.remember
+	if remember == nil then remember = config and config.rememberSelectedPage end
+	if remember == nil then remember = category and category.rememberSelectedPage end
+	if remember == nil then remember = category and category.rememberTab end
+	return remember == true
+end
+
+function lib._Internal.callCategoryTabGetter(app, category, config)
+	local resolver = config and (config.getSelectedPage or config.getSelectedPageID)
+	if type(resolver) == "function" then
+		local ok, pageID = pcall(resolver, app, category)
+		if ok and pageID then
+			return pageID
+		end
+	end
+	local opts = app and app.opts
+	resolver = opts and (opts.getSelectedCategoryPage or opts.getSelectedCategoryPageID)
+	if type(resolver) == "function" then
+		local ok, pageID = pcall(resolver, category.id, app, category)
+		if ok and pageID then
+			return pageID
+		end
+	end
+	return nil
+end
+
+function lib._Internal.storeCategoryTabPage(state, category, page)
+	if not state or not category or not page then
+		return
+	end
+	local config = lib._Internal.resolveCategoryTabViewConfig(state.app, category)
+	if not config then
+		return
+	end
+	state.categoryTabPageIDs = state.categoryTabPageIDs or {}
+	state.categoryTabPageIDs[category.id] = page.id
+	if not lib._Internal.getCategoryTabRemember(config, category) then
+		return
+	end
+	local setter = config.setSelectedPage or config.setSelectedPageID
+	if type(setter) == "function" then
+		pcall(setter, page.id, state.app, category, page)
+	end
+	local opts = state.app and state.app.opts
+	setter = opts and (opts.setSelectedCategoryPage or opts.setSelectedCategoryPageID)
+	if type(setter) == "function" then
+		pcall(setter, category.id, page.id, state.app, category, page)
+	end
+end
+
+function lib._Internal.resolveCategoryTabPageID(state, category)
+	local app = state and state.app
+	local config = lib._Internal.resolveCategoryTabViewConfig(app, category)
+	if not config then
+		return nil
+	end
+	local pages = lib._Internal.getCategoryTabPages(app, category)
+	if #pages == 0 then
+		return nil
+	end
+	local pageByID = {}
+	for _, page in ipairs(pages) do
+		pageByID[page.id] = page
+	end
+	local function valid(pageID)
+		pageID = pageID and tostring(pageID) or nil
+		return pageID and pageByID[pageID] and pageID or nil
+	end
+	if lib._Internal.getCategoryTabRemember(config, category) then
+		local stored = state.categoryTabPageIDs and state.categoryTabPageIDs[category.id]
+		stored = valid(stored) or valid(lib._Internal.callCategoryTabGetter(app, category, config))
+		if stored then
+			return stored
+		end
+	end
+	local defaultPageID = config.defaultPageID or config.defaultPage or config.pageID
+		or category.defaultPageID or category.defaultPage or category.pageID
+	return valid(defaultPageID) or pages[1].id
+end
+
+function lib._Internal.addPageTabs(state, header, category, selectedPage, startX)
+	if not lib._Internal.isCategoryTabViewEnabled(state.app, category) then
+		return nil
+	end
+	local pages = lib._Internal.getCategoryTabPages(state.app, category)
+	if #pages <= 1 then
+		return nil
+	end
+	local headerWidth = state.pageSectionWidth or state.pageLeftWidth or 420
+	startX = tonumber(startX) or 116
+	local availableWidth = math.max(1, headerWidth - startX - 2)
+	local tabGap = PAGE_LAYOUT.pageTabGap
+	local tabWidth = math.floor((availableWidth - ((#pages - 1) * tabGap)) / #pages)
+	tabWidth = math.max(PAGE_LAYOUT.pageTabMinWidth, math.min(PAGE_LAYOUT.pageTabMaxWidth, tabWidth))
+	local y = -3
+	for index = 1, #pages do
+		local page = pages[index]
+		local selected = selectedPage and selectedPage.id == page.id
+		local button = trackFrame(state.fixedFrames, CreateFrame("Button", nil, header, "BackdropTemplate"))
+		button:SetPoint("TOPLEFT", header, "TOPLEFT", startX + ((index - 1) * (tabWidth + tabGap)), y)
+		button:SetSize(tabWidth, 30)
+		setFrameBackdrop(
+			button,
+			selected and SELECTED_BG or { 0.060, 0.054, 0.040, 0.78 },
+			selected and CARD_BORDER_HOVER or { 0.28, 0.24, 0.16, 0.52 },
+			"button"
+		)
+		button.Text = createText(button, FONT_MUTED, page.tabTitle or page.title or page.id, selected and TEXT.gold or TEXT.muted)
+		button.Text:SetPoint("LEFT", button, "LEFT", 9, 0)
+		button.Text:SetPoint("RIGHT", button, "RIGHT", -9, 0)
+		button.Text:SetHeight(28)
+		button.Text.Text:SetJustifyV("MIDDLE")
+		if button.Text.Text.SetMaxLines then
+			button.Text.Text:SetMaxLines(1)
+		end
+		button:SetScript("OnEnter", function(self)
+			setFrameBackdrop(self, selected and SELECTED_BG or CARD_BG_HOVER, CARD_BORDER_HOVER)
+			setTextColor(self.Text and self.Text.Text, TEXT.main)
+		end)
+		button:SetScript("OnLeave", function(self)
+			setFrameBackdrop(
+				self,
+				selected and SELECTED_BG or { 0.060, 0.054, 0.040, 0.78 },
+				selected and CARD_BORDER_HOVER or { 0.28, 0.24, 0.16, 0.52 }
+			)
+			setTextColor(self.Text and self.Text.Text, selected and TEXT.gold or TEXT.muted)
+		end)
+		button:SetScript("OnClick", function()
+			state:SetPage(page.id)
+		end)
+	end
+	return true
+end
+
+function lib._Internal.addPageFixedHeader(state, category, pagePath, page)
 	if state.sidePanelMode ~= "right" or not state.frame.ContentShell then
 		return nil
 	end
@@ -5900,6 +6084,10 @@ function lib._Internal.addPageFixedHeader(state, category, pagePath)
 	header:SetSize(state.pageSectionWidth or state.pageLeftWidth or 420, PAGE_LAYOUT.detailNavHeight)
 	if state.frame.Scroll and header.SetFrameLevel and state.frame.Scroll.GetFrameLevel then
 		header:SetFrameLevel((state.frame.Scroll:GetFrameLevel() or 1) + 2)
+	end
+
+	if lib._Internal.addPageTabs(state, header, category, page, 0) then
+		return header
 	end
 
 	local L = getLocale(state.app)
@@ -6543,7 +6731,7 @@ function lib.RenderInfoPage(state, page, pagePath)
 	local category = app.categoriesByID[page.category or ""]
 	if state.sidePanelMode == "right" then
 		lib._Internal.addPageLeftColumnShell(state)
-		lib._Internal.addPageFixedHeader(state, category, pagePath)
+		lib._Internal.addPageFixedHeader(state, category, pagePath, page)
 		lib._Internal.addContentScrollbarRail(state)
 		lib._Internal.addPageSidePanel(state, page, category, nil)
 	end
@@ -6578,7 +6766,7 @@ function lib.RenderCustomPage(state, page, pagePath)
 	local category = app.categoriesByID[page.category or ""]
 	if state.sidePanelMode == "right" then
 		lib._Internal.addPageLeftColumnShell(state)
-		lib._Internal.addPageFixedHeader(state, category, pagePath)
+		lib._Internal.addPageFixedHeader(state, category, pagePath, page)
 		lib._Internal.addContentScrollbarRail(state)
 		lib._Internal.addPageSidePanel(state, page, category, nil)
 	end
@@ -6626,7 +6814,7 @@ function lib._Internal.renderPage(state, pageID)
 	local groups = lib._Internal.collectPageGroups(app, page, nil)
 	if state.sidePanelMode == "right" then
 		lib._Internal.addPageLeftColumnShell(state)
-		lib._Internal.addPageFixedHeader(state, category, pagePath)
+		lib._Internal.addPageFixedHeader(state, category, pagePath, page)
 		lib._Internal.addContentScrollbarRail(state)
 		lib._Internal.addPageSidePanel(state, page, category, groups)
 	end
@@ -6940,6 +7128,12 @@ function StateMixin:SetDashboard(restoreScroll)
 end
 
 function StateMixin:SetCategory(categoryID, restoreScroll)
+	local category = self.app and self.app.categoriesByID and self.app.categoriesByID[categoryID]
+	local tabPageID = lib._Internal.resolveCategoryTabPageID(self, category)
+	if tabPageID then
+		self:SetPage(tabPageID)
+		return
+	end
 	self.resetContentScroll = true
 	self.restoreContentScrollKey = restoreScroll and ("category:" .. tostring(categoryID)) or nil
 	self.view = "category"
@@ -7009,6 +7203,8 @@ function StateMixin:SetPage(pageID, focusControlID)
 	self.selectedPageID = pageID
 	if page then
 		self.selectedCategoryID = page.category
+		local category = self.app.categoriesByID and self.app.categoriesByID[page.category or ""]
+		lib._Internal.storeCategoryTabPage(self, category, page)
 	end
 	if focusControlID then
 		local resolvedControlID, groupID = self:ResolveFocusControlID(page, focusControlID)
@@ -7704,7 +7900,11 @@ function lib:Open(appOrID, pageID, focusControlID)
 	local state = frame._LibSettingsDesignerState
 	pageID, focusControlID = lib.ResolveOpenTarget(app, pageID, focusControlID)
 	if pageID and pageID ~= "dashboard" then
-		state:SetPage(pageID, focusControlID)
+		if not app:GetPage(pageID) and app.categoriesByID and app.categoriesByID[pageID] then
+			state:SetCategory(pageID)
+		else
+			state:SetPage(pageID, focusControlID)
+		end
 	elseif not pageID then
 		state:RenderContent()
 	else
