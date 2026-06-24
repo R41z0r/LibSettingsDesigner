@@ -149,6 +149,34 @@ local SAMPLE_THEME_COLORS = {
 		accent = { 0.42, 0.72, 1.00, 1 },
 		topbarText = { 0.70, 0.86, 1.00, 1 },
 	},
+	atomic = {
+		background = { 0.012, 0.014, 0.020, 0.98 },
+		overlay = { 0.00, 0.82, 1.00, 1 },
+		panel = { 0.018, 0.020, 0.028, 0.94 },
+		content = { 0.016, 0.017, 0.024, 0.94 },
+		sidebar = { 0.014, 0.018, 0.024, 0.96 },
+		card = { 0.025, 0.027, 0.036, 0.95 },
+		cardHover = { 0.030, 0.105, 0.128, 0.96 },
+		cardBorder = { 0.18, 0.24, 0.30, 0.46 },
+		cardHoverBorder = { 0.00, 0.78, 1.00, 0.88 },
+		row = { 0.024, 0.026, 0.034, 0.94 },
+		rowHover = { 0.030, 0.096, 0.116, 0.98 },
+		rowBorder = { 0.16, 0.22, 0.28, 0.48 },
+		rowHoverBorder = { 0.00, 0.72, 0.94, 0.82 },
+		button = { 0.024, 0.030, 0.040, 0.95 },
+		buttonHover = { 0.000, 0.128, 0.165, 0.98 },
+		buttonBorder = { 0.12, 0.34, 0.42, 0.72 },
+		buttonHoverBorder = { 0.00, 0.82, 1.00, 0.92 },
+		search = { 0.030, 0.030, 0.040, 0.96 },
+		searchBorder = { 0.00, 0.62, 0.82, 0.90 },
+		selected = { 0.000, 0.145, 0.175, 0.82 },
+		accent = { 0.00, 0.78, 1.00, 1 },
+		text = { 0.88, 0.94, 0.98, 1 },
+		mutedText = { 0.68, 0.74, 0.80, 1 },
+		subtleText = { 0.45, 0.52, 0.58, 1 },
+		topbarText = { 0.00, 0.78, 1.00, 1 },
+		topbarBorder = { 0.00, 0.62, 0.82, 0.76 },
+	},
 	ember = {
 		background = { 0.034, 0.024, 0.020, 0.98 },
 		overlay = { 0.92, 0.50, 0.32, 1 },
@@ -196,6 +224,28 @@ local SAMPLE_THEME_BORDERS = {
 			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
 			edgeSize = 14,
 			insets = { left = 3, right = 3, top = 3, bottom = 3 },
+		},
+	},
+	atomic = {
+		default = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 12,
+			insets = { left = 3, right = 3, top = 3, bottom = 3 },
+		},
+		topbar = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 12,
+			insets = { left = 3, right = 3, top = 3, bottom = 3 },
+		},
+		button = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 10,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+		search = {
+			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+			edgeSize = 10,
+			insets = { left = 2, right = 2, top = 2, bottom = 2 },
 		},
 	},
 	ember = {
@@ -696,6 +746,19 @@ app:RegisterControl("visuals.theme", {
 	onClick = function() applySampleThemePreset("ember") end,
 	parentCheck = function() return DB().enabled == true and DB().visualsEnabled == true end,
 	order = 240,
+})
+
+app:RegisterControl("visuals.theme", {
+	id = "themePresetAtomic",
+	groupID = "colors",
+	groupTitle = "Colors",
+	type = "button",
+	label = "Apply Atomic Theme",
+	description = "Switches the sample app color table to a high-contrast dark cyan preset.",
+	buttonText = "Atomic",
+	onClick = function() applySampleThemePreset("atomic") end,
+	parentCheck = function() return DB().enabled == true and DB().visualsEnabled == true end,
+	order = 250,
 })
 
 app:RegisterPage({
