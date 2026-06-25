@@ -876,12 +876,22 @@ function lib.CopyThemeInset(insets)
 end
 
 function lib.CopyThemeBorder(style)
+	if style == false then
+		return {
+			bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+			edgeFile = false,
+			tile = false,
+			tileSize = 0,
+			edgeSize = 0,
+			insets = { left = 0, right = 0, top = 0, bottom = 0 },
+		}
+	end
 	if type(style) ~= "table" then
 		return nil
 	end
 	return {
 		bgFile = style.bgFile or style.backgroundFile or "Interface\\Tooltips\\UI-Tooltip-Background",
-		edgeFile = style.edgeFile or style.borderFile or style.file or "Interface\\Tooltips\\UI-Tooltip-Border",
+		edgeFile = style.edgeFile ~= false and (style.edgeFile or style.borderFile or style.file or "Interface\\Tooltips\\UI-Tooltip-Border") or false,
 		tile = style.tile ~= false,
 		tileSize = tonumber(style.tileSize) or 16,
 		edgeSize = tonumber(style.edgeSize) or tonumber(style.size) or 12,
@@ -952,7 +962,14 @@ end
 
 function lib.ResolveThemeBorders(app)
 	local overrides = lib.ReadAppThemeBorders(app)
-	local defaultStyle = lib.CopyThemeBorder(overrides and (overrides.default or overrides.all)) or lib.CopyThemeBorder(lib.DEFAULT_BORDER_STYLE)
+	local defaultOverride
+	if overrides then
+		defaultOverride = overrides.default
+		if defaultOverride == nil then
+			defaultOverride = overrides.all
+		end
+	end
+	local defaultStyle = lib.CopyThemeBorder(defaultOverride) or lib.CopyThemeBorder(lib.DEFAULT_BORDER_STYLE)
 	local borders = {}
 	for _, key in ipairs(lib.BORDER_KEYS) do
 		borders[key] = lib.CopyThemeBorder(defaultStyle)
@@ -960,13 +977,13 @@ function lib.ResolveThemeBorders(app)
 	if overrides then
 		for _, key in ipairs(lib.BORDER_KEYS) do
 			local value = overrides[key]
-			if type(value) == "table" then
+			if type(value) == "table" or value == false then
 				borders[key] = lib.CopyThemeBorder(value)
 			end
 		end
 		for alias, key in pairs(lib.BORDER_ALIASES) do
 			local value = overrides[alias]
-			if type(value) == "table" then
+			if type(value) == "table" or value == false then
 				borders[key] = lib.CopyThemeBorder(value)
 			end
 		end
@@ -979,6 +996,94 @@ function lib.ApplyThemeBorders(app)
 end
 
 lib.ThemeBorders = lib.ResolveThemeBorders(nil)
+
+function lib.CopyThemeTextureStyle(style)
+	if type(style) ~= "table" then
+		return nil
+	end
+	local texture = style.texture or style.file or style.borderTexture or style.shapeTexture
+	if type(texture) ~= "string" or texture == "" then
+		return nil
+	end
+	return {
+		texture = texture,
+		inset = tonumber(style.inset) or 1,
+		borderInset = tonumber(style.borderInset),
+		capRatio = tonumber(style.capRatio) or 0.5,
+		replaceBackdrop = style.replaceBackdrop == true or style.hideBackdrop == true,
+		fillLayer = style.fillLayer or "BACKGROUND",
+		borderLayer = style.borderLayer or "BORDER",
+		fillSubLevel = tonumber(style.fillSubLevel) or 0,
+		borderSubLevel = tonumber(style.borderSubLevel) or 1,
+		alpha = tonumber(style.alpha) or 1,
+		fillAlpha = tonumber(style.fillAlpha),
+		borderAlpha = tonumber(style.borderAlpha),
+	}
+end
+
+function lib.ReadAppThemeTextures(app)
+	local opts = app and app.opts
+	local theme = opts and opts.theme
+	local textures = opts and (opts.textures or opts.themeTextures or opts.textureBorders or opts.shapeTextures)
+	if not textures and type(theme) == "table" then
+		textures = theme.textures or theme.themeTextures or theme.textureBorders or theme.shapeTextures
+	end
+	if type(textures) == "function" then
+		local ok, result = pcall(textures, app)
+		textures = ok and result or nil
+	end
+	return type(textures) == "table" and textures or nil
+end
+
+function lib.ResolveThemeTextures(app)
+	local overrides = lib.ReadAppThemeTextures(app)
+	local defaultStyle = lib.CopyThemeTextureStyle(overrides and (overrides.default or overrides.all))
+	local textures = {}
+	if defaultStyle then
+		for _, key in ipairs(lib.BORDER_KEYS) do
+			textures[key] = lib.CopyThemeTextureStyle(defaultStyle)
+		end
+	end
+	if overrides then
+		for _, key in ipairs(lib.BORDER_KEYS) do
+			local value = overrides[key]
+			if type(value) == "table" then
+				textures[key] = lib.CopyThemeTextureStyle(value)
+			elseif value == false then
+				textures[key] = nil
+			end
+		end
+		for alias, key in pairs(lib.BORDER_ALIASES) do
+			local value = overrides[alias]
+			if type(value) == "table" then
+				textures[key] = lib.CopyThemeTextureStyle(value)
+			elseif value == false then
+				textures[key] = nil
+			end
+		end
+	end
+	return textures
+end
+
+function lib.ApplyThemeTextures(app)
+	lib.ThemeTextures = lib.ResolveThemeTextures(app)
+end
+
+lib.ThemeTextures = lib.ResolveThemeTextures(nil)
+
+function lib.ReadAppWindowBorder(app)
+	local opts = app and app.opts
+	local theme = opts and opts.theme
+	local value = opts and (opts.windowBorder or opts.windowBorderArt or opts.panelBorderArt)
+	if value == nil and type(theme) == "table" then
+		value = theme.windowBorder or theme.windowBorderArt or theme.panelBorderArt
+	end
+	if type(value) == "function" then
+		local ok, result = pcall(value, app)
+		value = ok and result or nil
+	end
+	return value ~= false
+end
 
 local ASSET = {
 	fallback = "Interface\\Icons\\INV_Misc_Gear_01",
@@ -1123,12 +1228,215 @@ local function applyBackdropDefinition(frame, styleOrKey)
 	local style = getThemeBorder(styleOrKey)
 	frame:SetBackdrop({
 		bgFile = style.bgFile,
-		edgeFile = style.edgeFile,
+		edgeFile = style.edgeFile ~= false and style.edgeFile or nil,
 		tile = style.tile,
 		tileSize = style.tileSize,
 		edgeSize = style.edgeSize,
 		insets = lib.CopyThemeInset(style.insets),
 	})
+end
+
+function lib.SetTextureStyleShown(parts, shown)
+	if not parts then
+		return
+	end
+	for _, group in ipairs({ parts.Fill, parts.Border }) do
+		if group and group.Parts then
+			for _, texture in ipairs(group.Parts) do
+				texture:SetShown(shown)
+			end
+		end
+	end
+end
+
+function lib.HideTextureStyle(frame)
+	if frame and frame._LibSettingsDesignerTextureStyleParts then
+		lib.SetTextureStyleShown(frame._LibSettingsDesignerTextureStyleParts, false)
+	end
+end
+
+function lib.LayoutTextureStyle(frame, parts, style)
+	if not frame or not parts or not style then
+		return
+	end
+	local width = (frame.GetWidth and frame:GetWidth()) or 120
+	local height = (frame.GetHeight and frame:GetHeight()) or 22
+	local inset = tonumber(style.inset) or 1
+	local innerWidth = math.max(1, width - inset * 2)
+	local innerHeight = math.max(1, height - inset * 2)
+	local capWidth = math.min(math.floor(innerHeight * style.capRatio + 0.5), math.floor(innerWidth * 0.5))
+	parts.Fill.L:ClearAllPoints()
+	parts.Fill.M:ClearAllPoints()
+	parts.Fill.R:ClearAllPoints()
+	parts.Fill.L:SetPoint("TOPLEFT", frame, "TOPLEFT", inset, -inset)
+	parts.Fill.L:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", inset, inset)
+	parts.Fill.L:SetWidth(capWidth)
+	parts.Fill.R:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -inset, -inset)
+	parts.Fill.R:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -inset, inset)
+	parts.Fill.R:SetWidth(capWidth)
+	parts.Fill.M:SetPoint("TOPLEFT", parts.Fill.L, "TOPRIGHT")
+	parts.Fill.M:SetPoint("BOTTOMRIGHT", parts.Fill.R, "BOTTOMLEFT")
+
+	local borderInset = style.borderInset
+	if borderInset == nil then
+		borderInset = math.max(0, inset - 1)
+	end
+	local borderInnerWidth = math.max(1, width - borderInset * 2)
+	local borderInnerHeight = math.max(1, height - borderInset * 2)
+	local borderCapWidth = math.min(math.floor(borderInnerHeight * style.capRatio + 0.5), math.floor(borderInnerWidth * 0.5))
+	parts.Border.L:ClearAllPoints()
+	parts.Border.M:ClearAllPoints()
+	parts.Border.R:ClearAllPoints()
+	parts.Border.L:SetPoint("TOPLEFT", frame, "TOPLEFT", borderInset, -borderInset)
+	parts.Border.L:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", borderInset, borderInset)
+	parts.Border.L:SetWidth(borderCapWidth)
+	parts.Border.R:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -borderInset, -borderInset)
+	parts.Border.R:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -borderInset, borderInset)
+	parts.Border.R:SetWidth(borderCapWidth)
+	parts.Border.M:SetPoint("TOPLEFT", parts.Border.L, "TOPRIGHT")
+	parts.Border.M:SetPoint("BOTTOMRIGHT", parts.Border.R, "BOTTOMLEFT")
+end
+
+function lib.EnsureTextureStyleParts(frame, style)
+	local parts = frame._LibSettingsDesignerTextureStyleParts
+	if not parts then
+		local fill = {
+			L = frame:CreateTexture(nil, style.fillLayer, nil, style.fillSubLevel),
+			M = frame:CreateTexture(nil, style.fillLayer, nil, style.fillSubLevel),
+			R = frame:CreateTexture(nil, style.fillLayer, nil, style.fillSubLevel),
+		}
+		local border = {
+			L = frame:CreateTexture(nil, style.borderLayer, nil, style.borderSubLevel),
+			M = frame:CreateTexture(nil, style.borderLayer, nil, style.borderSubLevel),
+			R = frame:CreateTexture(nil, style.borderLayer, nil, style.borderSubLevel),
+		}
+		fill.Parts = { fill.L, fill.M, fill.R }
+		border.Parts = { border.L, border.M, border.R }
+		parts = { Fill = fill, Border = border }
+		frame._LibSettingsDesignerTextureStyleParts = parts
+	end
+	for _, texture in ipairs(parts.Fill.Parts) do
+		texture:SetTexture(style.texture)
+		if texture.SetDrawLayer then
+			texture:SetDrawLayer(style.fillLayer, style.fillSubLevel)
+		end
+		texture:SetShown(true)
+	end
+	for _, texture in ipairs(parts.Border.Parts) do
+		texture:SetTexture(style.texture)
+		if texture.SetDrawLayer then
+			texture:SetDrawLayer(style.borderLayer, style.borderSubLevel)
+		end
+		texture:SetShown(true)
+	end
+	parts.Fill.L:SetTexCoord(0.00, 0.25, 0, 1)
+	parts.Fill.M:SetTexCoord(0.25, 0.75, 0, 1)
+	parts.Fill.R:SetTexCoord(0.75, 1.00, 0, 1)
+	parts.Border.L:SetTexCoord(0.00, 0.25, 0, 1)
+	parts.Border.M:SetTexCoord(0.25, 0.75, 0, 1)
+	parts.Border.R:SetTexCoord(0.75, 1.00, 0, 1)
+	return parts
+end
+
+function lib.ApplyTextureStyle(frame, bg, border, styleOrKey)
+	if not (frame and frame.CreateTexture) then
+		return
+	end
+	local key = type(styleOrKey) == "string" and styleOrKey or frame._LibSettingsDesignerBorderStyleKey or "default"
+	local style = lib.ThemeTextures and lib.ThemeTextures[key]
+	if not style then
+		lib.HideTextureStyle(frame)
+		return
+	end
+	local parts = lib.EnsureTextureStyleParts(frame, style)
+	local fillAlpha = style.fillAlpha or style.alpha
+	local borderAlpha = style.borderAlpha or style.alpha
+	for _, texture in ipairs(parts.Fill.Parts) do
+		texture:SetVertexColor(bg[1], bg[2], bg[3], (bg[4] or 1) * fillAlpha)
+	end
+	for _, texture in ipairs(parts.Border.Parts) do
+		texture:SetVertexColor(border[1], border[2], border[3], (border[4] or 1) * borderAlpha)
+	end
+	if style.replaceBackdrop then
+		if frame.SetBackdropColor then
+			frame:SetBackdropColor(0, 0, 0, 0)
+		end
+		if frame.SetBackdropBorderColor then
+			frame:SetBackdropBorderColor(0, 0, 0, 0)
+		end
+		if frame.SetBorderColor then
+			frame:SetBorderColor({ 0, 0, 0, 0 })
+		end
+	end
+	lib.LayoutTextureStyle(frame, parts, style)
+	if frame.HookScript and not frame._LibSettingsDesignerTextureStyleLayoutHooked then
+		frame._LibSettingsDesignerTextureStyleLayoutHooked = true
+		frame:HookScript("OnSizeChanged", function(self)
+			local currentKey = self._LibSettingsDesignerBorderStyleKey or "default"
+			local currentStyle = lib.ThemeTextures and lib.ThemeTextures[currentKey]
+			if currentStyle and self._LibSettingsDesignerTextureStyleParts then
+				lib.LayoutTextureStyle(self, self._LibSettingsDesignerTextureStyleParts, currentStyle)
+			end
+		end)
+	end
+end
+
+function lib.ApplyShapeColorTexture(frame, r, g, b, a)
+	if not (frame and frame.CreateTexture) then
+		return false
+	end
+	local style = lib.ThemeTextures and lib.ThemeTextures.swatch
+	if not style then
+		if frame.Texture and frame.Texture.SetAlpha then
+			frame.Texture:SetAlpha(1)
+		end
+		if frame._LibSettingsDesignerColorTextureParts then
+			lib.SetTextureStyleShown(frame._LibSettingsDesignerColorTextureParts, false)
+		end
+		return false
+	end
+	local parts = frame._LibSettingsDesignerColorTextureParts
+	if not parts then
+		local fill = {
+			L = frame:CreateTexture(nil, "OVERLAY", nil, 2),
+			M = frame:CreateTexture(nil, "OVERLAY", nil, 2),
+			R = frame:CreateTexture(nil, "OVERLAY", nil, 2),
+		}
+		local border = {
+			L = frame:CreateTexture(nil, "OVERLAY", nil, 1),
+			M = frame:CreateTexture(nil, "OVERLAY", nil, 1),
+			R = frame:CreateTexture(nil, "OVERLAY", nil, 1),
+		}
+		fill.Parts = { fill.L, fill.M, fill.R }
+		border.Parts = { border.L, border.M, border.R }
+		parts = { Fill = fill, Border = border }
+		frame._LibSettingsDesignerColorTextureParts = parts
+	end
+	for _, texture in ipairs(parts.Fill.Parts) do
+		texture:SetTexture(style.texture)
+		texture:SetShown(true)
+		texture:SetVertexColor(r or 1, g or 1, b or 1, a or 1)
+	end
+	for _, texture in ipairs(parts.Border.Parts) do
+		texture:SetTexture(style.texture)
+		texture:SetShown(false)
+	end
+	parts.Fill.L:SetTexCoord(0.00, 0.25, 0, 1)
+	parts.Fill.M:SetTexCoord(0.25, 0.75, 0, 1)
+	parts.Fill.R:SetTexCoord(0.75, 1.00, 0, 1)
+	parts.Border.L:SetTexCoord(0.00, 0.25, 0, 1)
+	parts.Border.M:SetTexCoord(0.25, 0.75, 0, 1)
+	parts.Border.R:SetTexCoord(0.75, 1.00, 0, 1)
+	local colorStyle = {
+		inset = tonumber(style.colorInset) or ((tonumber(style.inset) or 1) + 3),
+		borderInset = tonumber(style.colorInset) or ((tonumber(style.inset) or 1) + 3),
+		capRatio = tonumber(style.capRatio) or 0.5,
+	}
+	lib.LayoutTextureStyle(frame, parts, colorStyle)
+	if frame.Texture and frame.Texture.SetAlpha then
+		frame.Texture:SetAlpha(0)
+	end
+	return true
 end
 
 local function applyBackdrop(frame, bg, border, styleOrKey)
@@ -1145,6 +1453,7 @@ local function applyBackdrop(frame, bg, border, styleOrKey)
 				region:SetVertexColor(border[1], border[2], border[3], border[4])
 			end
 		end
+		lib.ApplyTextureStyle(frame, bg, border, styleOrKey)
 		return
 	end
 	frame._LibSettingsDesignerBorderStyleKey = type(styleOrKey) == "string" and styleOrKey or frame._LibSettingsDesignerBorderStyleKey
@@ -1152,6 +1461,7 @@ local function applyBackdrop(frame, bg, border, styleOrKey)
 	applyBackdropDefinition(frame, styleOrKey or frame._LibSettingsDesignerBorderStyleKey or frame._LibSettingsDesignerBorderStyle or "default")
 	frame:SetBackdropColor(bg[1], bg[2], bg[3], bg[4])
 	frame:SetBackdropBorderColor(border[1], border[2], border[3], border[4])
+	lib.ApplyTextureStyle(frame, bg, border, styleOrKey)
 end
 
 local function getAssetRoot(app)
@@ -1226,6 +1536,26 @@ end
 
 local function applyWindowBorder(frame, app)
 	if not frame then
+		return
+	end
+	if not lib.ReadAppWindowBorder(app) then
+		if frame.WindowBorder then
+			for _, texture in pairs(frame.WindowBorder) do
+				if texture and texture.SetShown then
+					texture:SetShown(false)
+				end
+			end
+		end
+		setBasicFrameBorderAlpha(frame, 0)
+		return
+	end
+	if frame.WindowBorder then
+		for _, texture in pairs(frame.WindowBorder) do
+			if texture and texture.SetShown then
+				texture:SetShown(true)
+			end
+		end
+		setBasicFrameBorderAlpha(frame, 0)
 		return
 	end
 	local config = resolveWindowBorderConfig(app)
@@ -1485,6 +1815,7 @@ local function setFrameBackdrop(frame, bg, border, styleOrKey)
 	if frame and frame.SetBorderColor then
 		frame:SetBorderColor(border)
 	end
+	lib.ApplyTextureStyle(frame, bg, border, styleOrKey)
 end
 
 local function setTextColor(fontString, color)
@@ -3288,6 +3619,7 @@ local function refreshControlRow(app, control, row)
 		local ok, r, g, b, a = pcall(control.getColor, key)
 		if ok then
 			row.swatch.Texture:SetColorTexture(r or 1, g or 1, b or 1, a or 1)
+			lib.ApplyShapeColorTexture(row.swatch, r, g, b, a)
 			if row.hexText then
 				row.hexText.Text:SetText(
 					string.format(
@@ -7615,6 +7947,7 @@ local function createFrame(app)
 	local frame = CreateFrame("Frame", name, UIParent, "BackdropTemplate")
 	lib.ApplyThemeColors(app)
 	lib.ApplyThemeBorders(app)
+	lib.ApplyThemeTextures(app)
 	local storedWidth, storedHeight = lib.GetStoredFrameSize(app)
 	local savedWidth = math.max(PAGE_LAYOUT.windowMinWidth, storedWidth or WINDOW_WIDTH)
 	local savedHeight = math.max(PAGE_LAYOUT.windowMinHeight, storedHeight or WINDOW_HEIGHT)
@@ -8044,6 +8377,7 @@ local function refreshFrameTheme(frame, app)
 	end
 	lib.ApplyThemeColors(app)
 	lib.ApplyThemeBorders(app)
+	lib.ApplyThemeTextures(app)
 	if frame.bg and frame.bg.SetColorTexture then
 		frame.bg:SetColorTexture(
 			lib.ThemeColors.frameBg[1],
@@ -8152,6 +8486,7 @@ function lib:Open(appOrID, pageID, focusControlID)
 	end
 	lib.ApplyThemeColors(app)
 	lib.ApplyThemeBorders(app)
+	lib.ApplyThemeTextures(app)
 	local frame = frames[app.id]
 	if not frame then
 		frame = createFrame(app)
