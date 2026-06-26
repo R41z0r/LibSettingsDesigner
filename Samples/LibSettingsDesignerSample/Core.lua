@@ -54,15 +54,21 @@ local function copyDefaults(source, target)
 	return target
 end
 
+local profileInitialized = false
+
 function addon.GetDB()
 	LibSettingsDesignerSampleDB = LibSettingsDesignerSampleDB or {}
-	LibSettingsDesignerSampleDB.profile = copyDefaults(DEFAULT_PROFILE, LibSettingsDesignerSampleDB.profile)
+	if not profileInitialized or type(LibSettingsDesignerSampleDB.profile) ~= "table" then
+		LibSettingsDesignerSampleDB.profile = copyDefaults(DEFAULT_PROFILE, LibSettingsDesignerSampleDB.profile)
+		profileInitialized = true
+	end
 	return LibSettingsDesignerSampleDB.profile
 end
 
 function addon.ResetProfile()
 	LibSettingsDesignerSampleDB = LibSettingsDesignerSampleDB or {}
 	LibSettingsDesignerSampleDB.profile = copyDefaults(DEFAULT_PROFILE, {})
+	profileInitialized = true
 end
 
 function addon.Print(message)

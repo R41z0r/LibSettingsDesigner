@@ -875,9 +875,21 @@ function lib.CopyThemeInset(insets)
 	}
 end
 
+function lib.BuildThemeBackdrop(style)
+	return {
+		bgFile = style.bgFile,
+		edgeFile = style.edgeFile ~= false and style.edgeFile or nil,
+		tile = style.tile,
+		tileSize = style.tileSize,
+		edgeSize = style.edgeSize,
+		insets = style.insets,
+	}
+end
+
 function lib.CopyThemeBorder(style)
+	local border
 	if style == false then
-		return {
+		border = {
 			bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
 			edgeFile = false,
 			tile = false,
@@ -885,18 +897,20 @@ function lib.CopyThemeBorder(style)
 			edgeSize = 0,
 			insets = { left = 0, right = 0, top = 0, bottom = 0 },
 		}
-	end
-	if type(style) ~= "table" then
+	elseif type(style) == "table" then
+		border = {
+			bgFile = style.bgFile or style.backgroundFile or "Interface\\Tooltips\\UI-Tooltip-Background",
+			edgeFile = style.edgeFile ~= false and (style.edgeFile or style.borderFile or style.file or "Interface\\Tooltips\\UI-Tooltip-Border") or false,
+			tile = style.tile ~= false,
+			tileSize = tonumber(style.tileSize) or 16,
+			edgeSize = tonumber(style.edgeSize) or tonumber(style.size) or 12,
+			insets = lib.CopyThemeInset(style.insets),
+		}
+	else
 		return nil
 	end
-	return {
-		bgFile = style.bgFile or style.backgroundFile or "Interface\\Tooltips\\UI-Tooltip-Background",
-		edgeFile = style.edgeFile ~= false and (style.edgeFile or style.borderFile or style.file or "Interface\\Tooltips\\UI-Tooltip-Border") or false,
-		tile = style.tile ~= false,
-		tileSize = tonumber(style.tileSize) or 16,
-		edgeSize = tonumber(style.edgeSize) or tonumber(style.size) or 12,
-		insets = lib.CopyThemeInset(style.insets),
-	}
+	border.backdrop = lib.BuildThemeBackdrop(border)
+	return border
 end
 
 lib.DEFAULT_BORDER_STYLE = lib.CopyThemeBorder({
@@ -1226,14 +1240,12 @@ local function applyBackdropDefinition(frame, styleOrKey)
 		return
 	end
 	local style = getThemeBorder(styleOrKey)
-	frame:SetBackdrop({
-		bgFile = style.bgFile,
-		edgeFile = style.edgeFile ~= false and style.edgeFile or nil,
-		tile = style.tile,
-		tileSize = style.tileSize,
-		edgeSize = style.edgeSize,
-		insets = lib.CopyThemeInset(style.insets),
-	})
+	style.backdrop = style.backdrop or lib.BuildThemeBackdrop(style)
+	if frame._LibSettingsDesignerBackdropDefinition == style.backdrop then
+		return
+	end
+	frame:SetBackdrop(style.backdrop)
+	frame._LibSettingsDesignerBackdropDefinition = style.backdrop
 end
 
 function lib.SetTextureStyleShown(parts, shown)
@@ -1262,6 +1274,23 @@ function lib.LayoutTextureStyle(frame, parts, style)
 	local width = (frame.GetWidth and frame:GetWidth()) or 120
 	local height = (frame.GetHeight and frame:GetHeight()) or 22
 	local inset = tonumber(style.inset) or 1
+	local borderInset = style.borderInset
+	if borderInset == nil then
+		borderInset = math.max(0, inset - 1)
+	end
+	if parts.LayoutWidth == width
+		and parts.LayoutHeight == height
+		and parts.LayoutInset == inset
+		and parts.LayoutBorderInset == borderInset
+		and parts.LayoutCapRatio == style.capRatio
+	then
+		return
+	end
+	parts.LayoutWidth = width
+	parts.LayoutHeight = height
+	parts.LayoutInset = inset
+	parts.LayoutBorderInset = borderInset
+	parts.LayoutCapRatio = style.capRatio
 	local innerWidth = math.max(1, width - inset * 2)
 	local innerHeight = math.max(1, height - inset * 2)
 	local capWidth = math.min(math.floor(innerHeight * style.capRatio + 0.5), math.floor(innerWidth * 0.5))
@@ -1277,10 +1306,6 @@ function lib.LayoutTextureStyle(frame, parts, style)
 	parts.Fill.M:SetPoint("TOPLEFT", parts.Fill.L, "TOPRIGHT")
 	parts.Fill.M:SetPoint("BOTTOMRIGHT", parts.Fill.R, "BOTTOMLEFT")
 
-	local borderInset = style.borderInset
-	if borderInset == nil then
-		borderInset = math.max(0, inset - 1)
-	end
 	local borderInnerWidth = math.max(1, width - borderInset * 2)
 	local borderInnerHeight = math.max(1, height - borderInset * 2)
 	local borderCapWidth = math.min(math.floor(borderInnerHeight * style.capRatio + 0.5), math.floor(borderInnerWidth * 0.5))
@@ -1315,26 +1340,43 @@ function lib.EnsureTextureStyleParts(frame, style)
 		parts = { Fill = fill, Border = border }
 		frame._LibSettingsDesignerTextureStyleParts = parts
 	end
+	local styleChanged = parts.StyleTexture ~= style.texture
+		or parts.StyleFillLayer ~= style.fillLayer
+		or parts.StyleFillSubLevel ~= style.fillSubLevel
+		or parts.StyleBorderLayer ~= style.borderLayer
+		or parts.StyleBorderSubLevel ~= style.borderSubLevel
 	for _, texture in ipairs(parts.Fill.Parts) do
-		texture:SetTexture(style.texture)
-		if texture.SetDrawLayer then
-			texture:SetDrawLayer(style.fillLayer, style.fillSubLevel)
+		if styleChanged then
+			texture:SetTexture(style.texture)
+			if texture.SetDrawLayer then
+				texture:SetDrawLayer(style.fillLayer, style.fillSubLevel)
+			end
 		end
 		texture:SetShown(true)
 	end
 	for _, texture in ipairs(parts.Border.Parts) do
-		texture:SetTexture(style.texture)
-		if texture.SetDrawLayer then
-			texture:SetDrawLayer(style.borderLayer, style.borderSubLevel)
+		if styleChanged then
+			texture:SetTexture(style.texture)
+			if texture.SetDrawLayer then
+				texture:SetDrawLayer(style.borderLayer, style.borderSubLevel)
+			end
 		end
 		texture:SetShown(true)
 	end
-	parts.Fill.L:SetTexCoord(0.00, 0.25, 0, 1)
-	parts.Fill.M:SetTexCoord(0.25, 0.75, 0, 1)
-	parts.Fill.R:SetTexCoord(0.75, 1.00, 0, 1)
-	parts.Border.L:SetTexCoord(0.00, 0.25, 0, 1)
-	parts.Border.M:SetTexCoord(0.25, 0.75, 0, 1)
-	parts.Border.R:SetTexCoord(0.75, 1.00, 0, 1)
+	if styleChanged then
+		parts.Fill.L:SetTexCoord(0.00, 0.25, 0, 1)
+		parts.Fill.M:SetTexCoord(0.25, 0.75, 0, 1)
+		parts.Fill.R:SetTexCoord(0.75, 1.00, 0, 1)
+		parts.Border.L:SetTexCoord(0.00, 0.25, 0, 1)
+		parts.Border.M:SetTexCoord(0.25, 0.75, 0, 1)
+		parts.Border.R:SetTexCoord(0.75, 1.00, 0, 1)
+		parts.StyleTexture = style.texture
+		parts.StyleFillLayer = style.fillLayer
+		parts.StyleFillSubLevel = style.fillSubLevel
+		parts.StyleBorderLayer = style.borderLayer
+		parts.StyleBorderSubLevel = style.borderSubLevel
+		parts.LayoutWidth = nil
+	end
 	return parts
 end
 
