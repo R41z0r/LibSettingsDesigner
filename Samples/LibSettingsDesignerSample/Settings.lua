@@ -189,6 +189,34 @@ local SAMPLE_THEME_COLORS = {
 		topbarText = { 0.00, 0.78, 1.00, 1 },
 		topbarBorder = { 0.00, 0.58, 0.78, 0.72 },
 	},
+	superellipse = {
+		background = { 0.014, 0.016, 0.022, 0.98 },
+		overlay = { 0.00, 0.78, 1.00, 1 },
+		panel = { 0.018, 0.021, 0.030, 0.94 },
+		content = { 0.016, 0.018, 0.026, 0.94 },
+		sidebar = { 0.014, 0.018, 0.024, 0.96 },
+		card = { 0.025, 0.028, 0.038, 0.95 },
+		cardHover = { 0.030, 0.095, 0.120, 0.98 },
+		cardBorder = { 0.10, 0.32, 0.40, 0.70 },
+		cardHoverBorder = { 0.00, 0.78, 1.00, 0.92 },
+		row = { 0.024, 0.027, 0.036, 0.94 },
+		rowHover = { 0.030, 0.088, 0.112, 0.98 },
+		rowBorder = { 0.10, 0.28, 0.36, 0.62 },
+		rowHoverBorder = { 0.00, 0.72, 0.94, 0.86 },
+		button = { 0.024, 0.030, 0.040, 0.95 },
+		buttonHover = { 0.000, 0.120, 0.158, 0.98 },
+		buttonBorder = { 0.08, 0.34, 0.42, 0.72 },
+		buttonHoverBorder = { 0.00, 0.82, 1.00, 0.94 },
+		search = { 0.030, 0.032, 0.042, 0.96 },
+		searchBorder = { 0.00, 0.62, 0.82, 0.90 },
+		selected = { 0.000, 0.145, 0.175, 0.82 },
+		accent = { 0.00, 0.78, 1.00, 1 },
+		text = { 0.88, 0.94, 0.98, 1 },
+		mutedText = { 0.68, 0.74, 0.80, 1 },
+		subtleText = { 0.45, 0.52, 0.58, 1 },
+		topbarText = { 0.00, 0.78, 1.00, 1 },
+		topbarBorder = { 0.00, 0.62, 0.82, 0.76 },
+	},
 	ember = {
 		background = { 0.034, 0.024, 0.020, 0.98 },
 		overlay = { 0.92, 0.50, 0.32, 1 },
@@ -202,6 +230,9 @@ local SAMPLE_THEME_COLORS = {
 		topbarBorder = { 0.72, 0.36, 0.16, 0.72 },
 	},
 }
+
+-- Superellipse texture source credit: Mapkov2 (GitHub).
+local SUPERELLIPSE_TEXTURE = "Interface\\AddOns\\LibSettingsDesignerSample\\libs\\LibSettingsDesigner\\Assets\\LibSettingsDesigner_Superellipse.tga"
 
 local SAMPLE_THEME_BORDERS = {
 	gold = {
@@ -283,6 +314,9 @@ local SAMPLE_THEME_BORDERS = {
 			insets = { left = 2, right = 2, top = 2, bottom = 2 },
 		},
 	},
+	superellipse = {
+		default = false,
+	},
 	ember = {
 		default = {
 			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
@@ -313,6 +347,68 @@ local SAMPLE_THEME_BORDERS = {
 			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
 			edgeSize = 11,
 			insets = { left = 2, right = 2, top = 2, bottom = 2 },
+		},
+	},
+}
+
+local SAMPLE_THEME_TEXTURES = {
+	superellipse = {
+		topbar = {
+			texture = SUPERELLIPSE_TEXTURE,
+			inset = 1,
+			replaceBackdrop = true,
+			fillAlpha = 0.40,
+			borderAlpha = 0.95,
+		},
+		button = {
+			texture = SUPERELLIPSE_TEXTURE,
+			inset = 2,
+			replaceBackdrop = true,
+			fillAlpha = 0.56,
+			borderAlpha = 1,
+		},
+		topbarButton = {
+			texture = SUPERELLIPSE_TEXTURE,
+			inset = 2,
+			replaceBackdrop = true,
+			fillAlpha = 0.56,
+			borderAlpha = 1,
+		},
+		search = {
+			texture = SUPERELLIPSE_TEXTURE,
+			inset = 2,
+			replaceBackdrop = true,
+			fillAlpha = 0.42,
+			borderAlpha = 0.92,
+		},
+		toggle = {
+			texture = SUPERELLIPSE_TEXTURE,
+			inset = 1,
+			replaceBackdrop = true,
+			fillAlpha = 0.50,
+			borderAlpha = 1,
+		},
+		toggleKnob = {
+			texture = SUPERELLIPSE_TEXTURE,
+			inset = 1,
+			replaceBackdrop = true,
+			fillAlpha = 0.55,
+			borderAlpha = 1,
+		},
+		swatch = {
+			texture = SUPERELLIPSE_TEXTURE,
+			inset = 1,
+			colorInset = 4,
+			replaceBackdrop = true,
+			fillAlpha = 0.35,
+			borderAlpha = 0.95,
+		},
+		reorderItem = {
+			texture = SUPERELLIPSE_TEXTURE,
+			inset = 1,
+			replaceBackdrop = true,
+			fillAlpha = 0.24,
+			borderAlpha = 0.75,
 		},
 	},
 }
@@ -351,6 +447,15 @@ local function getSampleCloseButton()
 	}
 end
 
+local function getSampleThemeTextures()
+	local preset = DB().themePreset or "gold"
+	return SAMPLE_THEME_TEXTURES[preset]
+end
+
+local function getSampleWindowBorder()
+	return (DB().themePreset or "gold") ~= "superellipse"
+end
+
 local function applySampleThemePreset(preset)
 	DB().themePreset = SAMPLE_THEME_COLORS[preset] and preset or "gold"
 	addon.Print(("Theme preset applied: %s."):format(DB().themePreset))
@@ -377,6 +482,8 @@ app = Config:RegisterAddOn(addonName, {
 	colors = getSampleThemeColors,
 	borders = getSampleThemeBorders,
 	closeButton = getSampleCloseButton,
+	themeTextures = getSampleThemeTextures,
+	windowBorder = getSampleWindowBorder,
 	db = DB,
 	locale = addon.L,
 	version = function()
@@ -825,6 +932,19 @@ app:RegisterControl("visuals.theme", {
 	onClick = function() applySampleThemePreset("atomic") end,
 	parentCheck = function() return DB().enabled == true and DB().visualsEnabled == true end,
 	order = 250,
+})
+
+app:RegisterControl("visuals.theme", {
+	id = "themePresetSuperellipse",
+	groupID = "colors",
+	groupTitle = "Colors",
+	type = "button",
+	label = "Apply Superellipse Theme",
+	description = "Switches the sample app to a dark cyan preset with superellipse-style shape textures.",
+	buttonText = "Superellipse",
+	onClick = function() applySampleThemePreset("superellipse") end,
+	parentCheck = function() return DB().enabled == true and DB().visualsEnabled == true end,
+	order = 260,
 })
 
 app:RegisterPage({

@@ -4,6 +4,7 @@
 - [Overview](#overview)
 - [Recommended Pattern](#recommended-pattern)
 - [Example](#example)
+- [Superellipse Texture Layers](#superellipse-texture-layers)
 - [Border Keys](#border-keys)
 - [Rules](#rules)
 
@@ -106,6 +107,63 @@ local app = Config:RegisterAddOn(addonName, {
 })
 ```
 
+## [Superellipse Texture Layers][Top]
+
+Use `borders` only for valid WoW BackdropTemplate edge assets. Shape textures
+such as `LibSettingsDesigner_Superellipse.tga` are not backdrop edge files; use
+`themeTextures`, `textureBorders`, or `shapeTextures` to draw them as 3-slice
+texture overlays instead.
+
+The bundled `LibSettingsDesigner_Superellipse.tga` texture is credited to
+Mapkov2 on GitHub.
+
+```lua
+local assetRoot = "Interface\\AddOns\\MyAddon\\libs\\LibSettingsDesigner\\Assets\\"
+
+local app = Config:RegisterAddOn(addonName, {
+  title = "My Addon",
+  borders = {
+    default = false,
+    button = {
+      edgeFile = false,
+    },
+  },
+  themeTextures = {
+    button = {
+      texture = assetRoot .. "LibSettingsDesigner_Superellipse.tga",
+      inset = 2,
+      replaceBackdrop = true,
+      fillAlpha = 0.56,
+      borderAlpha = 1,
+    },
+    search = {
+      texture = assetRoot .. "LibSettingsDesigner_Superellipse.tga",
+      inset = 2,
+      replaceBackdrop = true,
+      fillAlpha = 0.42,
+      borderAlpha = 0.92,
+    },
+    swatch = {
+      texture = assetRoot .. "LibSettingsDesigner_Superellipse.tga",
+      inset = 1,
+      colorInset = 4,
+      replaceBackdrop = true,
+    },
+  },
+  windowBorder = false,
+})
+```
+
+Texture styles use the same keys as border styles. They are optional overlays:
+missing keys keep the normal backdrop only, so host addons can limit the effect
+to buttons, search boxes, toggles, swatches, or any other supported key.
+Set a border key to `false` when the texture layer should be the only visible
+edge for that zone. Set `windowBorder = false` to hide the separate outer
+window art frame.
+Set `replaceBackdrop = true` when the shape texture should replace the normal
+rectangular backdrop fill. `colorInset` controls the inset for shaped color
+swatch fills.
+
 ## [Border Keys][Top]
 
 Direct keys:
@@ -155,6 +213,13 @@ detail -> detailSection
 - Keep `colors` and `borders` separate.
 - Use `colors` for RGBA values.
 - Use `borders` for backdrop assets, edge size, tile settings, and insets.
+- Set a `borders` key to `false` to remove that backdrop border entirely.
+- Use `themeTextures` for non-backdrop shape textures such as superellipse
+  overlays.
+- Use `replaceBackdrop = true` when a shape overlay should not show the normal
+  rectangular backdrop behind it.
+- Set `windowBorder = false` when the host theme should not show the packaged
+  outer panel art frame.
 - Use addon's own media paths for custom assets.
 - Override only what the addon needs; defaults remain for missing keys.
 

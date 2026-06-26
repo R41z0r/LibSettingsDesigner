@@ -45,6 +45,8 @@ Config:RegisterAddOn(addonID, opts)
 | `locale` | table | Host addon locale table. |
 | `colors` / `colorTable` / `themeColors` | table/function | Optional global UI theme color overrides. Missing keys keep defaults. |
 | `borders` / `themeBorders` / `borderAssets` | table/function | Optional global UI border asset overrides. Missing keys keep defaults. Use `window` / `windowBorder` for the decorative outer frame. |
+| `textures` / `themeTextures` / `textureBorders` / `shapeTextures` | table/function | Optional 3-slice texture overlays for non-backdrop shape art. Missing keys keep normal backdrops only. |
+| `windowBorder` / `windowBorderArt` / `panelBorderArt` | boolean/function | Set to `false` to hide the packaged outer window art frame. |
 | `density` | string/function | Initial density, usually `"compact"` or `"comfortable"`. |
 | `getDensity(app)` / `setDensity(density, app)` | function | Read/write the user's selected density. |
 | `showDensityButton` / `showDensityButton(app)` | boolean/function | Controls whether users can switch density; only `false` hides the button. |

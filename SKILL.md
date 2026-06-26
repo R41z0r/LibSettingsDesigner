@@ -347,6 +347,8 @@ ConfigUI:Open("MyAddon", "general.core")
 | `locale` | Host addon locale table. |
 | `colors` / `colorTable` / `themeColors` | Optional global UI theme color overrides; missing keys keep defaults. |
 | `borders` / `themeBorders` / `borderAssets` | Optional global UI border asset overrides; missing keys keep defaults. Use `window` / `windowBorder` for the decorative outer frame. |
+| `textures` / `themeTextures` / `textureBorders` / `shapeTextures` | Optional 3-slice texture overlays for non-backdrop shape art. |
+| `windowBorder` / `windowBorderArt` / `panelBorderArt` | Set to `false` to hide the packaged outer window art frame. |
 | `density` | Initial density, `"compact"` or `"comfortable"`, string or function. |
 | `getDensity(app)` / `setDensity(density, app)` | Persist the user's selected density. |
 | `showDensityButton` / `showDensityButton(app)` | Whether users can switch density; only `false` hides the button. |
@@ -464,6 +466,16 @@ slice textures such as `PanelBorder_tl.tga` and supports `prefix`, `suffix`,
 Dynamic border themes may provide
 `borders = function(app) return borderTable end`. Detailed border keys and
 aliases are documented in `docs/Examples/Theme-Borders.md`.
+
+Use `borders.default = false` when a theme should suppress normal backdrop
+borders. Use `themeTextures`, `textureBorders`, or `shapeTextures` for
+non-backdrop shape art such as a superellipse texture. Texture styles use the
+same keys as border styles and may set `replaceBackdrop = true` when the shape
+should replace the normal rectangular backdrop fill.
+
+Use `windowBorder = false` when a host theme should hide the packaged outer
+window art frame. Detailed shape texture examples are documented in
+`docs/Examples/Theme-Borders.md`.
 
 ## Blizzard Settings Bridge
 

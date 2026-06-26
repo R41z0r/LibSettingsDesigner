@@ -4,6 +4,8 @@
 
 - Added an Atomic sample theme preset with dark panels and cyan accents.
 - Added a sample category tab view that remembers the last selected tab page.
+- Added a Superellipse sample theme preset with dark cyan colors, shape texture overlays, and optional borderless window styling.
+- Reduced repeated backdrop, shape texture, and sample defaults work in the settings UI.
 - Kept all supported Retail and Classic Interface versions in the main TOC Interface list.
 - Updated sample addon Interface metadata for Retail and Classic game flavors.
 - Set the packaged sample addon's TOC version from the generated release tag.
