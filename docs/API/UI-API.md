@@ -13,6 +13,7 @@
 - [Size, Lock, and Density Persistence](#size-lock-and-density-persistence)
 - [Topbar Configuration](#topbar-configuration)
 - [Category Page Tabs](#category-page-tabs)
+- [Flexible Page Layouts](#flexible-page-layouts)
 - [Side Panel Subnavigation](#side-panel-subnavigation)
 - [Refresh Rules](#refresh-rules)
 - [Examples](#examples)
@@ -327,6 +328,69 @@ page. Pages can set `tabTitle` for a shorter label or `tabHidden = true` /
 | `height` / `tabHeight` | Tab hit-area height. |
 | `textOffsetY` / `tabTextOffsetY` | Vertical text offset inside the tab. |
 | `underlineHeight` / `tabUnderlineHeight` | Active underline thickness. |
+| `panel` / `background` / `backdrop` | Optional semi-transparent tab-strip background. Use `true` or a table with `bg` / `bgColor`, `border` / `borderColor`, and optional `texture`, `textureAlpha`, `textureBlendMode`, `textureColor`, `textureInsets`. |
+
+Tab panel and tab state colors use the global theme keys `tabPanel`,
+`tabPanelBorder`, `tab`, `tabHover`, `tabSelected`, `tabText`,
+`tabSelectedText`, and `tabUnderline`.
+
+## [Flexible Page Layouts][Top]
+
+Normal settings pages render with a right-side info panel by default. Disable
+that panel when a page needs more horizontal room:
+
+```lua
+app:RegisterPage({
+  id = "nameplates.general",
+  category = "nameplates",
+  title = "Nameplates",
+  sidePanel = false,
+  groupColumns = 2,
+})
+```
+
+`sidePanel = false`, `rightPanel = false`, or `showSidePanel = false` gives the
+page the full content width. With that space, `groupColumns`, `columns`, or
+`layoutColumns` can render groups side by side. A group can set `column = 1` or
+`column = 2` to pin itself, otherwise groups flow into the shorter column.
+
+Groups can also split their own controls:
+
+```lua
+app:RegisterGroup("nameplates.general", {
+  id = "visibility",
+  title = "Visibility",
+  columns = 2,
+})
+```
+
+Controls inside such a group may set `column = 1` or `column = 2`; otherwise
+they flow into the shorter control column. This is useful for compact mixed
+panels such as toggles on the left and sliders/dropdowns on the right.
+
+For per-setting tools, add row actions:
+
+```lua
+app:RegisterControl("nameplates.general", {
+  id = "plateWidth",
+  key = "plateWidth",
+  type = "slider",
+  label = "Plate width",
+  min = 80,
+  max = 260,
+  default = 180,
+  actions = {
+    {
+      id = "plateWidthTools",
+      icon = "Interface\\Icons\\INV_Misc_Gear_01",
+      tooltip = "Plate width tools",
+      menu = {
+        { text = "Reset width", onClick = function() MyAddon.ResetPlateWidth() end },
+      },
+    },
+  },
+})
+```
 
 ## [Side Panel Subnavigation][Top]
 

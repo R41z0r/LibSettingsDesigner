@@ -134,6 +134,9 @@ local SAMPLE_THEME_COLORS = {
 		button = { 0.082, 0.072, 0.052, 0.94 },
 		buttonHover = { 0.160, 0.120, 0.060, 0.98 },
 		searchBorder = { 0.55, 0.44, 0.24, 0.90 },
+		tabPanel = { 0.040, 0.046, 0.052, 0.60 },
+		tabPanelBorder = { 0.62, 0.52, 0.30, 0.46 },
+		tabSelected = { 0.22, 0.15, 0.05, 0.34 },
 		accent = { 1.00, 0.82, 0.36, 1 },
 	},
 	midnight = {
@@ -146,6 +149,9 @@ local SAMPLE_THEME_COLORS = {
 		button = { 0.035, 0.045, 0.060, 0.94 },
 		buttonHover = { 0.075, 0.100, 0.135, 0.98 },
 		searchBorder = { 0.30, 0.48, 0.72, 0.90 },
+		tabPanel = { 0.020, 0.028, 0.038, 0.70 },
+		tabPanelBorder = { 0.24, 0.42, 0.62, 0.56 },
+		tabSelected = { 0.040, 0.135, 0.200, 0.46 },
 		accent = { 0.42, 0.72, 1.00, 1 },
 		topbarText = { 0.70, 0.86, 1.00, 1 },
 	},
@@ -182,6 +188,10 @@ local SAMPLE_THEME_COLORS = {
 		search = { 0.010, 0.012, 0.018, 0.98 },
 		searchBorder = { 0.00, 0.62, 0.82, 0.88 },
 		selected = { 0.000, 0.145, 0.175, 0.78 },
+		tabPanel = { 0.000, 0.030, 0.040, 0.62 },
+		tabPanelBorder = { 0.00, 0.62, 0.82, 0.56 },
+		tabSelected = { 0.000, 0.190, 0.225, 0.42 },
+		tabHover = { 0.000, 0.135, 0.175, 0.32 },
 		accent = { 0.00, 0.78, 1.00, 1 },
 		text = { 0.88, 0.94, 0.98, 1 },
 		mutedText = { 0.68, 0.74, 0.80, 1 },
@@ -210,6 +220,9 @@ local SAMPLE_THEME_COLORS = {
 		search = { 0.030, 0.032, 0.042, 0.96 },
 		searchBorder = { 0.00, 0.62, 0.82, 0.90 },
 		selected = { 0.000, 0.145, 0.175, 0.82 },
+		tabPanel = { 0.012, 0.022, 0.030, 0.66 },
+		tabPanelBorder = { 0.00, 0.54, 0.72, 0.58 },
+		tabSelected = { 0.000, 0.165, 0.205, 0.44 },
 		accent = { 0.00, 0.78, 1.00, 1 },
 		text = { 0.88, 0.94, 0.98, 1 },
 		mutedText = { 0.68, 0.74, 0.80, 1 },
@@ -476,6 +489,12 @@ app = Config:RegisterAddOn(addonName, {
 	assetRoot = "Interface\\AddOns\\LibSettingsDesignerSample\\libs\\LibSettingsDesigner\\Assets\\",
 	density = "compact",
 	showDensityButton = true,
+	sidebar = {
+		rowHeight = 34,
+		dashboardHeight = 38,
+		sectionHeight = 24,
+		iconSize = 16,
+	},
 	subnav = {
 		enabled = true,
 	},
@@ -637,14 +656,36 @@ app = Config:RegisterAddOn(addonName, {
 	end,
 })
 
-app:RegisterCategory({ id = "general", title = "General", iconAtlas = "communities-icon-chat", order = 100 })
-app:RegisterCategory({ id = "visuals", title = "Visuals", iconAtlas = "transmog-icon-revert", order = 200 })
+app:RegisterCategory({
+	id = "general",
+	title = "General",
+	iconAtlas = "communities-icon-chat",
+	sidebarSection = "Core",
+	order = 100,
+})
+app:RegisterCategory({
+	id = "visuals",
+	title = "Visuals",
+	iconAtlas = "transmog-icon-revert",
+	sidebarSection = "Core",
+	order = 200,
+})
 app:RegisterCategory({
 	id = "advanced",
 	title = "Advanced",
 	iconAtlas = "Professions-Icon-Quality-Tier5",
+	sidebarSection = "Tools",
 	tabView = {
 		enabled = true,
+		panel = {
+			bg = { 0.000, 0.025, 0.030, 0.38 },
+			border = { 0.00, 0.58, 0.72, 0.45 },
+			texture = "Interface\\AddOns\\LibSettingsDesignerSample\\Media\\Glows\\teal_horizontal_glow",
+			textureAlpha = 0.82,
+			textureBlendMode = "ADD",
+			textureColor = { 0.62, 1.00, 0.92, 1 },
+			textureInsets = { left = 0, right = 0, top = 1, bottom = 1 },
+		},
 		defaultPageID = "advanced.editor-showcase",
 		remember = true,
 		font = "GameFontHighlight",
@@ -656,7 +697,13 @@ app:RegisterCategory({
 	},
 	order = 300,
 })
-app:RegisterCategory({ id = "help", title = "Help", iconAtlas = "QuestNormal", order = 900 })
+app:RegisterCategory({
+	id = "help",
+	title = "Help",
+	iconAtlas = "QuestNormal",
+	sidebarSection = "Support",
+	order = 900,
+})
 
 app:RegisterPage({
 	id = "general.behavior",
@@ -771,10 +818,12 @@ app:RegisterPage({
 	iconAtlas = "transmog-icon-revert",
 	mainToggleID = "visualsEnabled",
 	newTagID = "visuals.theme",
+	sidePanel = false,
+	groupColumns = 2,
 	onOpen = markSamplePageSeen,
 	order = 100,
 })
-app:RegisterGroup("visuals.theme", { id = "layout", title = "Layout", order = 100 })
+app:RegisterGroup("visuals.theme", { id = "layout", title = "Layout", columns = 2, order = 100 })
 app:RegisterGroup("visuals.theme", { id = "colors", title = "Colors", order = 200 })
 
 app:RegisterControl("visuals.theme", {
@@ -804,6 +853,31 @@ app:RegisterControl("visuals.theme", {
 	step = 0.05,
 	default = 1,
 	formatter = function(value) return string.format("%.0f%%", (tonumber(value) or 1) * 100) end,
+	actions = {
+		{
+			id = "scaleTools",
+			icon = "Interface\\Icons\\INV_Misc_Gear_01",
+			tooltip = "Scale tools",
+			menu = {
+				{
+					text = "Set 100%",
+					refreshOnClick = true,
+					onClick = function()
+						DB().scale = 1
+						addon.RefreshPreview()
+					end,
+				},
+				{
+					text = "Set 125%",
+					refreshOnClick = true,
+					onClick = function()
+						DB().scale = 1.25
+						addon.RefreshPreview()
+					end,
+				},
+			},
+		},
+	},
 	setValue = function(value)
 		DB().scale = tonumber(value) or 1
 		addon.RefreshPreview()
@@ -965,6 +1039,9 @@ app:RegisterPage({
 	title = "Editor Extensions",
 	description = "Order-only lists, row actions, entry toggles, dynamic colors, and custom-hosted content.",
 	iconKey = "movementinput",
+	sidePanel = false,
+	groupColumns = 2,
+	groupColumnGap = 14,
 	searchEntries = {
 		{ id = "custom.builder", label = "Custom Builder", keywords = { "custom", "builder", "hosted", "editor" }, focusID = "builder" },
 		{ id = "ordered.visibility", label = "Ordered Visibility List", keywords = { "ordered", "visible", "columns" } },
@@ -972,8 +1049,8 @@ app:RegisterPage({
 	onOpen = markSamplePageSeen,
 	order = 120,
 })
-app:RegisterGroup("advanced.editor-showcase", { id = "columns", title = "Ordered Columns", order = 100 })
-app:RegisterGroup("advanced.editor-showcase", { id = "groups", title = "Dynamic Groups", order = 200 })
+app:RegisterGroup("advanced.editor-showcase", { id = "columns", title = "Ordered Columns", column = 1, order = 100 })
+app:RegisterGroup("advanced.editor-showcase", { id = "groups", title = "Dynamic Groups", column = 2, order = 200 })
 
 app:RegisterControl("advanced.shortcuts", {
 	id = "shortcutsEnabled",

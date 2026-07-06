@@ -62,6 +62,8 @@ local MY_COLORS = {
   panelBorder = { 0.45, 0.36, 0.22, 0.60 },
   row = { 0.05, 0.055, 0.060, 0.50 },
   rowHover = { 0.13, 0.10, 0.055, 0.62 },
+  tabPanel = { 0.04, 0.046, 0.052, 0.60 },
+  tabSelected = { 0.22, 0.15, 0.05, 0.34 },
   card = { 0.06, 0.064, 0.070, 0.92 },
   cardHover = { 0.13, 0.10, 0.055, 0.96 },
   button = { 0.08, 0.07, 0.05, 0.94 },
@@ -86,8 +88,12 @@ Semantic keys:
 | `overlay` | Background material tint. |
 | `panel` / `content` | Content panel background. |
 | `sidebar` | Sidebar panel background. |
+| `sidebarSection` | Sidebar section heading text. |
 | `card`, `cardHover`, `cardBorder`, `cardHoverBorder` | Cards and card hover state. |
 | `row`, `rowBorder`, `rowHover`, `rowHoverBorder` | Setting rows and hover state. |
+| `tabPanel`, `tabPanelBorder` | Optional category tab-strip background and border. |
+| `tab`, `tabHover`, `tabSelected` | Category tab background states. |
+| `tabText`, `tabSelectedText`, `tabUnderline` | Category tab label and underline colors. |
 | `button`, `buttonBorder`, `buttonHover`, `buttonHoverBorder` | Standard flat buttons. |
 | `search`, `searchBorder` | Search box shell. |
 | `selected` | Selected button/card state. |
@@ -106,7 +112,9 @@ rowHoverBorder, rowSeparator, selectedBg, sidebarBg, frameBg, overlayTint,
 buttonBg, buttonBorder, buttonHoverBg, buttonHoverBorder, buttonTopbarBg,
 buttonTopbarBorder, buttonTopbarHoverBg, searchBg, searchBorder,
 disabledControlBg, disabledControlBorder, disabledRowBg, disabledRowBorder,
-textMain, textMuted, textSubtle, textDisabled, topbarAccent, success
+sidebarSectionText, tabPanelBg, tabPanelBorder, tabBg, tabHoverBg,
+tabSelectedBg, tabText, tabSelectedText, tabUnderline, textMain, textMuted,
+textSubtle, textDisabled, topbarAccent, success
 ```
 
 ## [Rules][Top]

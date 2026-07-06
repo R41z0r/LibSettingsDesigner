@@ -20,6 +20,9 @@ through `RegisterLegacyControl`.
 | `id` | string | Stable group id. |
 | `title` | string | Display heading. |
 | `order` | number | Sort order. |
+| `columns` / `controlColumns` | number/function | Optional number of control columns inside the group. |
+| `column` / `layoutColumn` | number/string | Optional page column when the page uses `groupColumns`. |
+| `columnGap` / `controlColumnGap` | number/function | Optional gap between control columns. |
 
 ## [Example][Top]
 
@@ -27,6 +30,7 @@ through `RegisterLegacyControl`.
 app:RegisterGroup("interface.action-bars", {
   id = "visibility",
   title = "Visibility",
+  columns = 2,
   order = 200,
 })
 
@@ -34,11 +38,16 @@ app:RegisterControl("interface.action-bars", {
   id = "fadeOut",
   key = "fadeOut",
   groupID = "visibility",
+  column = 1,
   type = "toggle",
   label = "Fade out",
   default = false,
 })
 ```
+
+When `columns = 2`, controls without an explicit `column` flow into the shorter
+column. Use `column = 1` / `column = 2` when a mixed panel should keep toggles
+and sliders in predictable lanes.
 
 [//]: # (Links)
 [Top]: #Top

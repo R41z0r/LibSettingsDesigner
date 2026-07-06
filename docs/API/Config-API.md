@@ -111,8 +111,10 @@ and `setDensity` when that choice should persist in SavedVariables. Set
 | `density` | string/function | Initial density, `"compact"` or `"comfortable"`. |
 | `getDensity(app)` / `setDensity(density, app)` | function | Read/write the user's selected density. |
 | `showDensityButton` / `showDensityButton(app)` | boolean/function | Whether users can switch density; only `false` hides the button. |
+| `sidebar` / `sidebarLayout` / `navigation` | table | Optional sidebar sizing, such as `rowHeight`, `dashboardHeight`, `sectionHeight`, and `iconSize`. |
 | `topbar` / `header` / `topBar` | table | Configures built-in topbar controls and custom action buttons. |
 | `closeButton` / `windowCloseButton` / `close` | table/function | Optional window close-button style and placement override. Missing values keep the built-in close texture and position. |
+| `sidePanel` / `rightPanel` / `detailPanel` | table/boolean/function | Global default for the right page info panel. Set `false` to use full-width pages unless a page overrides it. |
 | `subnav` / `subnavigation` | table/boolean/function | Global opt-in for right-panel group links. |
 | `showSubnav` / `showSubnavigation` | boolean/function | Global show gate for optional right-panel group links. |
 | `getSelectedCategoryPage(categoryID, app, category)` | function | Optional persisted page resolver for category tab views. |
@@ -174,6 +176,9 @@ app:RegisterCategory({
 Required: `id`.
 
 Common fields: `title`, `order`, `icon`, `iconAtlas`, `iconKey`.
+Use `sidebarSection`, `navSection`, or `section` to insert a small heading in
+the left navigation before this category. Use `sidebarSectionTitle` /
+`sectionTitle` when the section id and displayed heading should differ.
 
 Set `tabView = { enabled = true }` on a category when clicking the sidebar
 category should open one of that category's pages directly and show sibling
@@ -214,8 +219,12 @@ Tab-strip styling can be customized per category through `tabView` fields:
 `font` / `tabFont` / `fontObject`, `gap` / `spacing` / `tabGap` /
 `tabSpacing`, `paddingX` / `padX` / `tabPaddingX`, `minWidth` /
 `tabMinWidth`, `maxWidth` / `tabMaxWidth`, `height` / `tabHeight`,
-`textOffsetY` / `tabTextOffsetY`, and `underlineHeight` /
-`tabUnderlineHeight`.
+`textOffsetY` / `tabTextOffsetY`, `underlineHeight` /
+`tabUnderlineHeight`, and `panel` / `background` / `backdrop`. Set
+`panel = true` to draw a semi-transparent tab-strip background, or provide a
+table with `bg` / `bgColor` and `border` / `borderColor`. Panel tables can also
+set `texture`, `textureAlpha`, `textureBlendMode`, `textureColor`, and
+`textureInsets` for packaged glow or divider art behind the tab buttons.
 
 ### `app:RegisterPage(data)`
 
@@ -244,9 +253,15 @@ When a page belongs to a tab-view category, `tabTitle` can provide a shorter tab
 label than the page title. Use `tabHidden = true` or `hideTab = true` when a
 page should stay addressable but not appear in that category's tab strip.
 
-Normal settings pages with more than one visible group can show optional
-right-panel group links when the wide side-panel layout is active. The default is
-off for compatibility. Set `showSubnav = true`, `showSubnavigation = true`, or
+Normal settings pages use the right-side page info panel by default. Set
+`sidePanel = false`, `rightPanel = false`, or `showSidePanel = false` on a page
+when the page should use the full content width. Full-width pages can set
+`groupColumns = 2`, `columns = 2`, or `layoutColumns = 2` to render group
+sections side by side. Use `groupColumnGap` / `columnGap` to tune the gap.
+
+Pages with more than one visible group can show optional right-panel group
+links when the wide side-panel layout is active. The default is off for
+compatibility. Set `showSubnav = true`, `showSubnavigation = true`, or
 `subnav = { enabled = true }` on a page to show them. Set the same fields in app
 options to define the global default.
 
@@ -280,9 +295,20 @@ groupID = "visibility"
 `modernGroup` is a wrapper/legacy alias and should be mapped through
 `RegisterLegacyControl` or host wrapper code before direct registration.
 
+Groups can set `columns` / `controlColumns` to place controls in multiple
+columns inside the group. When the page itself uses `groupColumns`, a group can
+set `column` / `layoutColumn` to pin itself to a page column. Use `columnGap` /
+`controlColumnGap` to tune spacing.
+
 ### `app:RegisterControl(pageID, data)`
 
 Registers a settings row/control inside a page.
+
+Controls can set `actions`, `settingActions`, or `controlActions` to render
+small right-aligned action buttons inside the row. An action may provide
+`label`, `icon`, `iconAtlas`, `iconKey`, `tooltip`, `onClick`, or a `menu` /
+`menuItems` / `entries` table. Use this for generic per-setting tools such as a
+gear menu; keep feature-specific behavior in host-addon callbacks.
 
 ```lua
 app:RegisterControl("interface.action-bars", {

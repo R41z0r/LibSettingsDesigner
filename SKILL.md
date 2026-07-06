@@ -352,8 +352,10 @@ ConfigUI:Open("MyAddon", "general.core")
 | `density` | Initial density, `"compact"` or `"comfortable"`, string or function. |
 | `getDensity(app)` / `setDensity(density, app)` | Persist the user's selected density. |
 | `showDensityButton` / `showDensityButton(app)` | Whether users can switch density; only `false` hides the button. |
+| `sidebar` / `sidebarLayout` / `navigation` | Optional sidebar row/header sizing, such as `rowHeight`, `dashboardHeight`, `sectionHeight`, and `iconSize`. |
 | `topbar` / `header` / `topBar` | Configures built-in topbar controls and custom action buttons. |
 | `closeButton` / `windowCloseButton` / `close` | Optional window close-button style and placement override. Missing values keep the built-in close texture and position. |
+| `sidePanel` / `rightPanel` / `detailPanel` | Global default for the right page info panel. Set `false` to use full-width pages unless a page overrides it. |
 | `subnav` / `subnavigation` | Global opt-in for right-panel group links. |
 | `showSubnav` / `showSubnavigation` | Global show gate for optional right-panel group links. |
 | `getSelectedCategoryPage` / `setSelectedCategoryPage` | Optional persistence callbacks for category tab views. |
@@ -412,9 +414,11 @@ Common semantic keys:
 
 ```text
 background, overlay, panel, content, sidebar, card, cardHover, cardBorder,
-cardHoverBorder, row, rowBorder, rowHover, rowHoverBorder, button,
-buttonBorder, buttonHover, buttonHoverBorder, search, searchBorder, selected,
-text, mutedText, subtleText, disabledText, accent, topbarText
+cardHoverBorder, row, rowBorder, rowHover, rowHoverBorder, tabPanel,
+tabPanelBorder, tab, tabHover, tabSelected, tabText, tabSelectedText,
+tabUnderline, button, buttonBorder, buttonHover, buttonHoverBorder, search,
+searchBorder, selected, text, mutedText, subtleText, disabledText, accent,
+topbarText
 ```
 
 For precise one-off overrides, use direct detail keys such as `topbarBg`,
@@ -515,9 +519,9 @@ Canonical direct fields:
 
 | Object | Canonical fields |
 | :----- | :--------------- |
-| Category | `id`, `title`, `description`, `order`, `icon`, `iconAtlas`, `iconKey`, `tabView`, `pageTabs`, `tabs`, `tabbedPages`, `defaultPageID`, `rememberSelectedPage` |
-| Page | `id`, `category`, `title`, `description`, `descriptionKey`, `order`, `icon`, `iconAtlas`, `iconKey`, `mainToggleID`, `tabTitle`, `tabHidden`, `pageKey`, `newTagID`, `onOpen`, `layout`, `type`, `content`, `blocks`, `infoBlocks`, `searchEntries`, `getHeight`, `render`, `refresh`, `release`, `getSettingCount`, `getCustomizedCount` |
-| Group | `id`, `title`, `order` |
+| Category | `id`, `title`, `description`, `order`, `icon`, `iconAtlas`, `iconKey`, `tabView`, `pageTabs`, `tabs`, `tabbedPages`, `defaultPageID`, `rememberSelectedPage`, `sidebarSection`, `sectionTitle` |
+| Page | `id`, `category`, `title`, `description`, `descriptionKey`, `order`, `icon`, `iconAtlas`, `iconKey`, `mainToggleID`, `tabTitle`, `tabHidden`, `pageKey`, `newTagID`, `sidePanel`, `showSidePanel`, `groupColumns`, `columnGap`, `onOpen`, `layout`, `type`, `content`, `blocks`, `infoBlocks`, `searchEntries`, `getHeight`, `render`, `refresh`, `release`, `getSettingCount`, `getCustomizedCount` |
+| Group | `id`, `title`, `order`, `columns`, `column`, `columnGap` |
 | Control | `id`, `key`, `type`, `label`, `description`, `default`, `dbDefault`, `getValue`, `setValue`, `getSelection`, `setSelection`, `setting`, `parentCheck`, `isEnabled`, visibility fields, search fields |
 
 Legacy aliases are mapped by `RegisterLegacyCategory`,
@@ -560,9 +564,10 @@ Common category fields:
 | `icon` | Texture path. |
 | `iconAtlas` | Blizzard atlas name. |
 | `iconKey` | Lookup key in app icon maps. |
-| `tabView` / `pageTabs` / `tabs` / `tabbedPages` | Enables horizontal page tabs for a category. `tabView` tables can also set `font`, `gap`, `paddingX`, `minWidth`, `maxWidth`, `height`, `textOffsetY`, and `underlineHeight`. |
+| `tabView` / `pageTabs` / `tabs` / `tabbedPages` | Enables horizontal page tabs for a category. `tabView` tables can also set `font`, `gap`, `paddingX`, `minWidth`, `maxWidth`, `height`, `textOffsetY`, `underlineHeight`, and optional `panel` background colors or packaged texture art. |
 | `defaultPageID` / `defaultPage` / `pageID` | Initial page for category tab view. |
 | `rememberSelectedPage` / `rememberTab` | Remember the last selected tab page. |
+| `sidebarSection` / `navSection` / `section` | Optional left-sidebar section heading before this category. |
 
 Common page fields:
 
@@ -577,6 +582,9 @@ Common page fields:
 | `mainToggleID` | Control id used as the page's primary feature toggle. |
 | `tabTitle` | Optional shorter label when the page is shown as a category tab. |
 | `tabHidden` / `hideTab` | Hide this page from category tab strips. |
+| `sidePanel` / `rightPanel` / `detailPanel` | Page-level right info-panel control. Set `false` for full-width content. |
+| `showSidePanel` / `showRightPanel` | Page-level show gate for the right info panel. |
+| `groupColumns` / `columns` / `layoutColumns` | Number of group-section columns for full-width pages. |
 | `subnav` / `subnavigation` | Page-level opt-in for right-panel group links. |
 | `showSubnav` / `showSubnavigation` | Page-level show gate for optional right-panel group links. |
 | `pageKey` | Stable alternate page/tag key for wrappers and new badges. |
@@ -605,6 +613,8 @@ Common fields:
 | `setValue` | Explicit writer. |
 | `setting` | Existing settings object with `GetValue`/`SetValue`/default methods. |
 | `groupID` | Direct group assignment. |
+| `column` / `layoutColumn` / `columnIndex` | Control column inside a multi-column group. |
+| `actions` / `settingActions` / `controlActions` | Optional small row action buttons or menus. |
 | `isEnabled` / `parentCheck` | Disabled-state gates. |
 | `visible` / `isVisible` / `visibleWhen` | Visibility show gates. |
 | `hidden` / `hiddenWhen` | Visibility hide gates. |

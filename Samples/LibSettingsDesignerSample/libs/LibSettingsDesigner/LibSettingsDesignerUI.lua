@@ -739,6 +739,15 @@ lib.DEFAULT_COLORS = lib.CopyThemeColorMap({
 	rowSeparator = ROW_SEPARATOR,
 	selectedBg = SELECTED_BG,
 	sidebarBg = SIDEBAR_BG,
+	sidebarSectionText = { 0.82, 0.68, 0.42, 0.92 },
+	tabPanelBg = { 0.035, 0.040, 0.045, 0.58 },
+	tabPanelBorder = { 0.58, 0.50, 0.34, 0.42 },
+	tabBg = { 0.060, 0.054, 0.040, 0.00 },
+	tabHoverBg = { 0.150, 0.115, 0.055, 0.14 },
+	tabSelectedBg = { 0.150, 0.115, 0.055, 0.20 },
+	tabText = TEXT.muted,
+	tabSelectedText = TEXT.gold,
+	tabUnderline = TEXT.gold,
 	frameBg = { 0.035, 0.038, 0.043, 0.96 },
 	overlayTint = { 0.72, 0.78, 0.84, 1.00 },
 	buttonBg = { 0.070, 0.065, 0.055, 0.92 },
@@ -772,6 +781,7 @@ lib.COLOR_ALIASES = {
 	topbarBorder = "topbarBorder",
 	content = "contentBg",
 	sidebar = "sidebarBg",
+	sidebarSection = "sidebarSectionText",
 	card = "cardBg",
 	cardHover = "cardBgHover",
 	cardBorder = "cardBorder",
@@ -787,6 +797,14 @@ lib.COLOR_ALIASES = {
 	search = "searchBg",
 	searchBorder = "searchBorder",
 	selected = "selectedBg",
+	tabPanel = "tabPanelBg",
+	tabPanelBorder = "tabPanelBorder",
+	tab = "tabBg",
+	tabHover = "tabHoverBg",
+	tabSelected = "tabSelectedBg",
+	tabText = "tabText",
+	tabSelectedText = "tabSelectedText",
+	tabUnderline = "tabUnderline",
 	text = "textMain",
 	mutedText = "textMuted",
 	subtleText = "textSubtle",
@@ -2025,6 +2043,7 @@ local function applyHoverState(frame, normalBg, hoverBg, normalBorder, hoverBord
 end
 
 local getControlType
+local makeFlatButton
 
 local function styleInlineSettingRow(row)
 	applyBackdrop(row, ROW_BG, ROW_BORDER, "row")
@@ -2523,6 +2542,76 @@ function lib.ShouldShowDensityButton(app)
 	return not (opts and opts.showDensityButton == false)
 end
 
+function lib._Internal.resolveOptionValue(value, ...)
+	if type(value) == "function" then
+		local ok, result = pcall(value, ...)
+		value = ok and result or nil
+	end
+	return value
+end
+
+function lib._Internal.getSidebarOptions(app)
+	local opts = app and app.opts
+	local sidebar = opts and (opts.sidebar or opts.sidebarLayout or opts.navigation)
+	return type(sidebar) == "table" and sidebar or {}
+end
+
+function lib._Internal.resolveSidebarNumber(app, key, fallback)
+	local sidebar = lib._Internal.getSidebarOptions(app)
+	local value = lib._Internal.resolveOptionValue(sidebar[key], app, sidebar)
+	value = tonumber(value)
+	if value then
+		return value
+	end
+	return fallback
+end
+
+function lib._Internal.getSidebarRowHeight(app, category)
+	local value = category and (category.sidebarHeight or category.rowHeight or category.navHeight)
+	value = lib._Internal.resolveOptionValue(value, app, category)
+	value = tonumber(value)
+	if value then
+		return math.max(24, value)
+	end
+	return math.max(24, lib._Internal.resolveSidebarNumber(app, "rowHeight", 44))
+end
+
+function lib._Internal.getSidebarIconSize(app)
+	return math.max(12, lib._Internal.resolveSidebarNumber(app, "iconSize", 22))
+end
+
+function lib._Internal.getSidebarSectionHeight(app)
+	return math.max(18, lib._Internal.resolveSidebarNumber(app, "sectionHeight", 26))
+end
+
+function lib._Internal.getCategorySidebarSection(app, category)
+	if not category then
+		return nil, nil
+	end
+	local section = category.sidebarSection
+	if section == nil then section = category.navSection end
+	if section == nil then section = category.section end
+	section = lib._Internal.resolveOptionValue(section, app, category)
+	local sectionID
+	local title
+	if type(section) == "table" then
+		sectionID = section.id or section.key or section.title or section.label
+		title = section.title or section.label or section.text or sectionID
+	elseif section ~= nil and section ~= false then
+		sectionID = tostring(section)
+		title = sectionID
+	end
+	local explicitTitle = lib._Internal.resolveOptionValue(category.sidebarSectionTitle or category.sectionTitle, app, category)
+	if explicitTitle ~= nil and explicitTitle ~= false then
+		title = tostring(explicitTitle)
+		sectionID = sectionID or title
+	end
+	if not sectionID or sectionID == "" then
+		return nil, nil
+	end
+	return tostring(sectionID), lib.NormalizeTextValue(title or sectionID)
+end
+
 function lib.UpdateDensityButton(frame, state)
 	if not frame or not frame.DensityButton then
 		return
@@ -2722,6 +2811,243 @@ local function topbarActionHasMenu(action)
 			or type(action.menuItems) == "table"
 			or type(action.entries) == "table"
 	)
+end
+
+function lib._Internal.getControlActions(app, control, state)
+	local actions = control and (control.actions or control.settingActions or control.controlActions)
+	if type(actions) == "function" then
+		local ok, result = pcall(actions, app, control, state)
+		actions = ok and result or nil
+	end
+	if type(actions) ~= "table" then
+		return {}
+	end
+	if actions.id or actions.label or actions.text or actions.title or actions.icon or actions.iconKey
+		or actions.onClick or actions.menu or actions.menuItems or actions.entries then
+		return { actions }
+	end
+	return actions
+end
+
+function lib._Internal.isControlActionVisible(action, app, control, state)
+	if type(action) ~= "table" then
+		return false
+	end
+	if action.hidden == true or action.visible == false then
+		return false
+	end
+	local visible = action.isVisible or action.visibleWhen or action.visible
+	if type(visible) == "function" then
+		local ok, result = pcall(visible, app, control, action, state)
+		return ok and result ~= false
+	end
+	return true
+end
+
+function lib._Internal.isControlActionEnabled(action, app, control, state)
+	local enabled = action.isEnabled or action.enabledWhen or action.enabled
+	if type(enabled) == "function" then
+		local ok, result = pcall(enabled, app, control, action, state)
+		return not ok or result ~= false
+	end
+	return enabled ~= false and action.disabled ~= true
+end
+
+function lib._Internal.getControlActionText(action, app, control, state)
+	local text = action.label or action.text or action.title or action.id or ""
+	if type(text) == "function" then
+		local ok, result = pcall(text, app, control, action, state)
+		text = ok and result or ""
+	end
+	return lib.NormalizeTextValue(text)
+end
+
+function lib._Internal.getControlActionTooltip(action, app, control, state)
+	local tooltip = action.tooltip or action.description or action.desc
+	if type(tooltip) == "function" then
+		local ok, result = pcall(tooltip, app, control, action, state)
+		tooltip = ok and result or nil
+	end
+	return tooltip
+end
+
+function lib._Internal.getControlActionIcon(app, action)
+	if action.icon then
+		return action.icon, action.iconAtlas == true
+	end
+	if action.iconAtlas then
+		return action.iconAtlas, true
+	end
+	if action.iconKey then
+		return getAppIconTexture(app, action.iconKey), false
+	end
+	return getAppIconTexture(app, "advanced"), false
+end
+
+function lib._Internal.controlActionHasMenu(action)
+	return type(action) == "table" and (
+		type(action.menu) == "function"
+			or type(action.buildMenu) == "function"
+			or type(action.setupMenu) == "function"
+			or type(action.menu) == "table"
+			or type(action.menuItems) == "table"
+			or type(action.entries) == "table"
+	)
+end
+
+function lib._Internal.addControlMenuEntry(rootDescription, entry, app, control, action, state)
+	if type(entry) ~= "table" then
+		return
+	end
+	if entry.hidden == true or entry.visible == false then
+		return
+	end
+	local visible = entry.isVisible or entry.visibleWhen or entry.visible
+	if type(visible) == "function" then
+		local ok, result = pcall(visible, app, control, action, state, entry)
+		if not ok or result == false then
+			return
+		end
+	end
+	if entry.divider and rootDescription.CreateDivider then
+		rootDescription:CreateDivider()
+		return
+	end
+	local function refreshAfterClick()
+		if entry.refreshOnClick or action.refreshOnClick or control.refreshOnChange then
+			if state and state.RenderContent then
+				state:RenderContent()
+			else
+				lib.RefreshVisibleRows(state)
+			end
+		else
+			lib.RefreshVisibleRows(state)
+		end
+	end
+	local text = lib.NormalizeTextValue(entry.label or entry.text or entry.title or entry.id)
+	local children = entry.children or entry.entries or entry.menu
+	if type(children) == "table" and rootDescription.CreateButton then
+		local childRoot = rootDescription:CreateButton(text)
+		for _, child in ipairs(children) do
+			lib._Internal.addControlMenuEntry(childRoot, child, app, control, action, state)
+		end
+		return
+	end
+	if entry.checked ~= nil or entry.isSelected or entry.setSelected then
+		local isSelected = function()
+			if type(entry.isSelected) == "function" then
+				local ok, result = pcall(entry.isSelected, app, control, action, state, entry)
+				return ok and result == true
+			end
+			if type(entry.checked) == "function" then
+				local ok, result = pcall(entry.checked, app, control, action, state, entry)
+				return ok and result == true
+			end
+			return entry.checked == true
+		end
+		local setSelected = function()
+			if type(entry.setSelected) == "function" then
+				pcall(entry.setSelected, app, control, action, state, entry)
+			elseif type(entry.onClick) == "function" then
+				pcall(entry.onClick, app, control, action, state, entry)
+			end
+			refreshAfterClick()
+		end
+		if rootDescription.CreateCheckbox then
+			rootDescription:CreateCheckbox(text, isSelected, setSelected)
+		end
+	elseif rootDescription.CreateButton then
+		rootDescription:CreateButton(text, function()
+			if type(entry.onClick) == "function" then
+				pcall(entry.onClick, app, control, action, state, entry)
+			end
+			refreshAfterClick()
+		end)
+	end
+end
+
+function lib._Internal.openControlActionMenu(button, action, app, control, state)
+	if not MenuUtil or type(MenuUtil.CreateContextMenu) ~= "function" then
+		return
+	end
+	MenuUtil.CreateContextMenu(button, function(owner, rootDescription)
+		if type(action.menu) == "function" then
+			pcall(action.menu, rootDescription, owner, app, control, action, state)
+		elseif type(action.buildMenu) == "function" then
+			pcall(action.buildMenu, rootDescription, owner, app, control, action, state)
+		elseif type(action.setupMenu) == "function" then
+			pcall(action.setupMenu, rootDescription, owner, app, control, action, state)
+		else
+			local entries = action.menu or action.menuItems or action.entries
+			if type(entries) == "table" then
+				for _, entry in ipairs(entries) do
+					lib._Internal.addControlMenuEntry(rootDescription, entry, app, control, action, state)
+				end
+			end
+		end
+	end)
+end
+
+function lib._Internal.addControlActionButtons(row, app, control, state, actions)
+	local visibleActions = {}
+	for _, action in ipairs(actions or {}) do
+		if lib._Internal.isControlActionVisible(action, app, control, state) then
+			visibleActions[#visibleActions + 1] = action
+		end
+	end
+	if #visibleActions == 0 then
+		return 0
+	end
+	local cursorRight = 12
+	row.controlActionButtons = row.controlActionButtons or {}
+	for _, action in ipairs(visibleActions) do
+		local label = lib._Internal.getControlActionText(action, app, control, state)
+		local icon, isAtlas = lib._Internal.getControlActionIcon(app, action)
+		local iconOnly = action.iconOnly ~= false
+		local width = tonumber(action.width) or (iconOnly and 26 or math.max(54, math.min(120, (#label * 7) + 28)))
+		local button = makeFlatButton(row, iconOnly and "" or label, width, 24, icon, isAtlas)
+		button:SetPoint("TOPRIGHT", row, "TOPRIGHT", -cursorRight, -10)
+		button._eqolControlAction = action
+		button._eqolControl = control
+		button._eqolState = state
+		button._eqolDisabled = not lib._Internal.isControlActionEnabled(action, app, control, state)
+		button:SetScript("OnEnter", function(self)
+			if self._eqolOnEnter then self:_eqolOnEnter() end
+			local tooltip = lib._Internal.getControlActionTooltip(action, app, control, state)
+			if tooltip and _G.GameTooltip then
+				_G.GameTooltip:SetOwner(self, "ANCHOR_TOP")
+				_G.GameTooltip:SetText(label ~= "" and label or (control.label or control.id or ""))
+				_G.GameTooltip:AddLine(tooltip, 1, 1, 1, true)
+				_G.GameTooltip:Show()
+			end
+		end)
+		button:SetScript("OnLeave", function(self)
+			if self._eqolOnLeave then self:_eqolOnLeave() end
+			if _G.GameTooltip then
+				_G.GameTooltip:Hide()
+			end
+		end)
+		button:SetScript("OnClick", function(self)
+			if self._eqolDisabled or not app:IsControlEnabled(control) then
+				return
+			end
+			if lib._Internal.controlActionHasMenu(action) then
+				lib._Internal.openControlActionMenu(self, action, app, control, state)
+			elseif type(action.onClick) == "function" then
+				pcall(action.onClick, app, control, action, state, self)
+				if action.refreshOnClick or control.refreshOnChange then
+					if state and state.RenderContent then
+						state:RenderContent()
+					end
+				else
+					lib.RefreshVisibleRows(state)
+				end
+			end
+		end)
+		row.controlActionButtons[#row.controlActionButtons + 1] = button
+		cursorRight = cursorRight + width + 6
+	end
+	return cursorRight
 end
 
 function lib.RefreshTopbar(frame, state)
@@ -3507,7 +3833,7 @@ function lib.NormalizeTextValue(text, fallback)
 	return fallback or ""
 end
 
-local function makeFlatButton(parent, text, width, height, iconSource, iconIsAtlas)
+function makeFlatButton(parent, text, width, height, iconSource, iconIsAtlas)
 	local button = CreateFrame("Button", nil, parent, "BackdropTemplate")
 	button:SetSize(width or 120, height or 26)
 	button._eqolOwner = parent
@@ -3656,6 +3982,24 @@ local function refreshControlRow(app, control, row)
 			end
 		end
 	end
+	for _, button in ipairs(row.controlActionButtons or {}) do
+		local action = button._eqolControlAction
+		local actionEnabled = lib._Internal.isControlActionEnabled(action, app, control, row._state)
+		button._eqolDisabled = (not enabled) or (not actionEnabled)
+		if button.SetEnabled then
+			button:SetEnabled(enabled and actionEnabled)
+		elseif enabled and actionEnabled and button.Enable then
+			button:Enable()
+		elseif button.Disable then
+			button:Disable()
+		end
+		if button.EnableMouse then
+			button:EnableMouse(enabled and actionEnabled)
+		end
+		if button._eqolApplyVisual then
+			button._eqolApplyVisual(button)
+		end
+	end
 	if row.swatch and type(control.getColor) == "function" then
 		local key = control.key or control.id
 		local ok, r, g, b, a = pcall(control.getColor, key)
@@ -3776,7 +4120,12 @@ local function updateContentMetrics(state)
 	local usableShellWidth = math.max(1, math.floor(shellWidth > 0 and shellWidth or fallbackWidth))
 	local query = state.frame.SearchBox and state.frame.SearchBox:GetText() or ""
 	local useSearchView = query ~= ""
+	local page = state.view == "page" and state.app and state.app:GetPage(state.selectedPageID) or nil
+	local category = page and state.app and state.app.categoriesByID[page.category or ""] or nil
 	local useSidePanel = state.view == "page" and not useSearchView
+		and lib._Internal.shouldUsePageSidePanel and lib._Internal.shouldUsePageSidePanel(state, page)
+	local useFixedHeader = state.view == "page" and not useSearchView
+		and lib._Internal.shouldUsePageFixedHeader and lib._Internal.shouldUsePageFixedHeader(state, page, category)
 	local useContentGutter = useSearchView or state.view == "category" or state.view == "dashboard"
 	local useDetachedScrollbar = useSidePanel or useContentGutter
 	local pageRightWidth = 0
@@ -3794,6 +4143,7 @@ local function updateContentMetrics(state)
 		leftScrollWidth = math.max(PAGE_LEFT_WIDTH_MIN, leftOuterWidth - PAGE_LAYOUT.scrollbarGutter)
 	end
 	state.sidePanelMode = useSidePanel and "right" or nil
+	state.pageFixedHeader = useFixedHeader == true
 	state.pageRightWidth = pageRightWidth
 	state.pageGap = useSidePanel and PAGE_GAP or 0
 	state.pageLeftOuterWidth = leftOuterWidth
@@ -3803,7 +4153,7 @@ local function updateContentMetrics(state)
 		state.frame.Scroll:ClearAllPoints()
 		local scrollTopOffset = PAGE_LAYOUT.contentPad
 		local scrollBottomOffset = PAGE_LAYOUT.contentPad
-		if state.view == "page" and useSidePanel then
+		if state.view == "page" and useFixedHeader then
 			scrollTopOffset = PAGE_LAYOUT.contentPad
 				+ PAGE_LAYOUT.detailNavHeight
 				+ PAGE_LAYOUT.detailNavGap
@@ -5674,7 +6024,7 @@ function lib.AddReorderListWidget(row, app, control, opts)
 	refreshRows()
 end
 
-local function addSettingRow(state, control, pathText, parent, yOffset, width)
+local function addSettingRow(state, control, pathText, parent, yOffset, width, xOffset)
 	local app = state.app
 	local L = getLocale(app)
 	local _ = pathText
@@ -5686,7 +6036,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 	local row
 	if parent then
 		row = CreateFrame("Frame", nil, parent, "BackdropTemplate")
-		snapPoint(row, "TOPLEFT", parent, "TOPLEFT", 12, yOffset or -42)
+		snapPoint(row, "TOPLEFT", parent, "TOPLEFT", xOffset or 12, yOffset or -42)
 		snapSize(row, rowWidth, rowHeight)
 		if parent._LibSettingsDesignerContentY then
 			row._LibSettingsDesignerContentY = parent._LibSettingsDesignerContentY + (yOffset or -42)
@@ -5699,6 +6049,10 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 	state.controlRows = state.controlRows or {}
 	state.controlRows[#state.controlRows + 1] = { row = row, control = control }
 	styleInlineSettingRow(row)
+	local actionReserveWidth = lib._Internal.addControlActionButtons(row, app, control, state, lib._Internal.getControlActions(app, control, state))
+	local function rightInset(value)
+		return -((tonumber(value) or 0) + actionReserveWidth)
+	end
 
 	local textLeft = 16
 	if control.icon or control.iconAtlas then
@@ -5734,21 +6088,23 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 		if compact then
 			title:ClearAllPoints()
 			title:SetPoint("LEFT", row, "LEFT", textLeft, 0)
-			title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and -154 or -88, 0)
+			title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and rightInset(154) or rightInset(88), 0)
 			title:SetHeight(20)
 		else
-			title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and -154 or -88, 0)
+			title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and rightInset(154) or rightInset(88), 0)
 			desc:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -5)
-			desc:SetPoint("RIGHT", row, "RIGHT", -88, 0)
+			desc:SetPoint("RIGHT", row, "RIGHT", rightInset(88), 0)
 			desc:SetHeight(30)
 		end
-		addToggleWidget(row, app, control)
+		addToggleWidget(row, app, control, {
+			point = { "RIGHT", row, "RIGHT", rightInset(16), 0 },
+		})
 	elseif layoutType == "stacked" then
 		local valueWidth = controlType == "slider" and 96 or 0
 		if valueWidth > 0 then
-			title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and -178 or -(valueWidth + 18), 0)
+			title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and rightInset(178) or rightInset(valueWidth + 18), 0)
 		else
-			title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and -154 or -18, 0)
+			title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and rightInset(154) or rightInset(18), 0)
 		end
 
 		local controlWidth = getFieldControlWidth(rowWidth)
@@ -5762,7 +6118,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 				desc:Hide()
 			end
 			local valueText = createText(row, FONT_TEXT, "", TEXT.gold, "RIGHT")
-			valueText:SetPoint("TOPRIGHT", row, "TOPRIGHT", -18, -12)
+			valueText:SetPoint("TOPRIGHT", row, "TOPRIGHT", rightInset(18), -12)
 			valueText:SetSize(valueWidth, 20)
 			local hasRangeLabels = control.min ~= nil or control.max ~= nil
 			local labelWidth = hasRangeLabels and lib.GetSliderScaleLabelWidth(control) or 0
@@ -5817,14 +6173,14 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 				},
 			})
 		elseif controlType == "checkboxdropdown" then
-			title:SetPoint("RIGHT", row, "RIGHT", -88, 0)
+			title:SetPoint("RIGHT", row, "RIGHT", rightInset(88), 0)
 			if not compact then
 				desc:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
 				desc:SetPoint("RIGHT", row, "RIGHT", -18, 0)
 				desc:SetHeight(32)
 			end
 			addToggleWidget(row, app, control, {
-				point = { "TOPRIGHT", row, "TOPRIGHT", -16, -12 },
+				point = { "TOPRIGHT", row, "TOPRIGHT", rightInset(16), -12 },
 			})
 			local controlPoint = { "BOTTOMLEFT", row, "BOTTOMLEFT", FIELD_CONTROL_LEFT, compact and 8 or 15 }
 			addDropdownWidget(row, app, control, {
@@ -5872,7 +6228,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 			})
 		end
 	elseif controlType == "colorpalette" then
-		title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and -154 or -18, 0)
+		title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and rightInset(154) or rightInset(18), 0)
 		desc.Text:SetText(control.description or "")
 		desc:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
 		desc:SetPoint("RIGHT", row, "RIGHT", -18, 0)
@@ -5886,7 +6242,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 			},
 		})
 	elseif controlType == "reorderlist" then
-		title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and -154 or -18, 0)
+		title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and rightInset(154) or rightInset(18), 0)
 		if not compact then
 			desc.Text:SetText(control.description or "")
 			desc:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
@@ -5897,7 +6253,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 			startY = control.description and control.description ~= "" and -68 or -48,
 		})
 	elseif controlType == "custom" then
-		title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and -154 or -18, 0)
+		title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and rightInset(154) or rightInset(18), 0)
 		desc.Text:SetText(control.description or "")
 		desc:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
 		desc:SetPoint("RIGHT", row, "RIGHT", -18, 0)
@@ -5909,7 +6265,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 		container._LibSettingsDesignerControl = control
 		lib.RenderCustomOwner(state, container, control, "control:" .. tostring(control.id or control.key))
 	elseif controlType == "button" then
-		title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and -154 or -18, 0)
+		title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and rightInset(154) or rightInset(18), 0)
 		if not compact then
 			desc.Text:SetText(control.description or "")
 			desc:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
@@ -5933,7 +6289,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 			end
 		end)
 	else
-		title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and -154 or -18, 0)
+		title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and rightInset(154) or rightInset(18), 0)
 		if not compact then
 			desc:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
 			desc:SetPoint("RIGHT", row, "RIGHT", -18, 0)
@@ -5951,7 +6307,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width)
 
 	if hasNewBadge then
 		local newBadge = lib.CreateNewBadge(row)
-		newBadge:SetPoint("TOPRIGHT", row, "TOPRIGHT", -118, -8)
+		newBadge:SetPoint("TOPRIGHT", row, "TOPRIGHT", rightInset(118), -8)
 	end
 
 	refreshControlRow(app, control, row)
@@ -6391,6 +6747,10 @@ function lib._Internal.collectPageGroups(app, page, mainToggle)
 			order = group.order,
 			controls = {},
 			collapsed = group.collapsed,
+			column = group.column or group.layoutColumn,
+			columnSpan = group.columnSpan or group.span,
+			columns = group.columns or group.controlColumns or group.controlsColumns,
+			columnGap = group.columnGap or group.controlColumnGap,
 		}
 		groups[#groups + 1] = entry
 		groupsByID[group.id] = entry
@@ -6405,6 +6765,9 @@ function lib._Internal.collectPageGroups(app, page, mainToggle)
 					title = control.groupTitle or (L["configCenterTitle"] or "Settings"),
 					order = 100000,
 					controls = {},
+					column = control.groupColumn or control.groupLayoutColumn,
+					columns = control.groupColumns or control.groupControlColumns,
+					columnGap = control.groupColumnGap,
 				}
 				groups[#groups + 1] = entry
 				groupsByID[groupID] = entry
@@ -6636,6 +6999,58 @@ function lib._Internal.addPageTabs(state, header, category, selectedPage, startX
 	tabPaddingX = math.max(0, tabPaddingX)
 	tabHeight = math.max(18, tabHeight)
 	underlineHeight = math.max(1, underlineHeight)
+	local panelConfig = config.panel or config.background or config.backdrop
+	if panelConfig ~= false and panelConfig ~= nil then
+		local panelBg = lib.ThemeColors.tabPanelBg or { 0.035, 0.040, 0.045, 0.58 }
+		local panelBorder = lib.ThemeColors.tabPanelBorder or { 0.58, 0.50, 0.34, 0.42 }
+		local panelTable = type(panelConfig) == "table" and panelConfig or nil
+		if type(panelConfig) == "table" then
+			panelBg = lib.CopyThemeColor(panelConfig.bg or panelConfig.bgColor or panelConfig.background or panelConfig.color) or panelBg
+			panelBorder = lib.CopyThemeColor(panelConfig.border or panelConfig.borderColor) or panelBorder
+		end
+		applyBackdrop(header, panelBg, panelBorder, "detailColumn")
+		local panelTexture = panelTable and (panelTable.texture or panelTable.texturePath or panelTable.file or panelTable.glow or panelTable.glowTexture)
+			or config.panelTexture or config.tabPanelTexture or config.backgroundTexture or config.glowTexture
+		if type(panelConfig) == "string" then
+			panelTexture = panelConfig
+		end
+		panelTexture = lib._Internal.resolveOptionValue(panelTexture, state.app, category, config)
+		if type(panelTexture) == "string" and panelTexture ~= "" then
+			local texture = header.TabPanelTexture
+			if not texture then
+				texture = header:CreateTexture(nil, "BORDER", nil, 0)
+				header.TabPanelTexture = texture
+			end
+			texture:ClearAllPoints()
+			local inset = panelTable and (panelTable.textureInset or panelTable.glowInset or panelTable.inset)
+			local insets = panelTable and (panelTable.textureInsets or panelTable.glowInsets or panelTable.insets)
+			local left = tonumber(inset) or 0
+			local right = left
+			local top = left
+			local bottom = left
+			if type(insets) == "table" then
+				left = tonumber(insets.left or insets[1]) or left
+				right = tonumber(insets.right or insets[2]) or right
+				top = tonumber(insets.top or insets[3]) or top
+				bottom = tonumber(insets.bottom or insets[4]) or bottom
+			end
+			texture:SetPoint("TOPLEFT", header, "TOPLEFT", left, -top)
+			texture:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", -right, bottom)
+			texture:SetTexture(panelTexture)
+			local textureColor = panelTable and lib.CopyThemeColor(panelTable.textureColor or panelTable.glowColor or panelTable.vertexColor)
+			if textureColor then
+				texture:SetVertexColor(textureColor[1], textureColor[2], textureColor[3], 1)
+			else
+				texture:SetVertexColor(1, 1, 1, 1)
+			end
+			local textureAlpha = panelTable and (panelTable.textureAlpha or panelTable.glowAlpha or panelTable.alpha)
+				or config.panelTextureAlpha or config.tabPanelTextureAlpha or config.glowAlpha
+			textureAlpha = lib._Internal.resolveOptionValue(textureAlpha, state.app, category, config)
+			texture:SetAlpha(tonumber(textureAlpha) or (textureColor and textureColor[4]) or 1)
+			texture:SetBlendMode(panelTable and (panelTable.blendMode or panelTable.textureBlendMode or panelTable.glowBlendMode) or config.panelTextureBlendMode or "ADD")
+			texture:Show()
+		end
+	end
 	local labels = {}
 	local textWidths = {}
 	local widths = {}
@@ -6672,13 +7087,16 @@ function lib._Internal.addPageTabs(state, header, category, selectedPage, startX
 		button.Highlight = button:CreateTexture(nil, "BACKGROUND")
 		button.Highlight:SetPoint("TOPLEFT", button, "TOPLEFT", 0, -2)
 		button.Highlight:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 0, 3)
-		button.Highlight:SetColorTexture(SELECTED_BG[1], SELECTED_BG[2], SELECTED_BG[3], selected and 0.20 or 0)
+		local tabBg = selected and (lib.ThemeColors.tabSelectedBg or { 0.150, 0.115, 0.055, 0.20 })
+			or (lib.ThemeColors.tabBg or { 0.060, 0.054, 0.040, 0.00 })
+		button.Highlight:SetColorTexture(tabBg[1], tabBg[2], tabBg[3], tabBg[4] or 0)
 		button.Underline = button:CreateTexture(nil, "ARTWORK")
 		button.Underline:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", tabPaddingX, 0)
 		button.Underline:SetWidth(math.max(16, math.min(tabWidth - (tabPaddingX * 2), textWidths[index] or tabWidth)))
 		button.Underline:SetHeight(underlineHeight)
-		button.Underline:SetColorTexture(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], selected and 1 or 0)
-		button.Text = createText(button, tabFont, labels[index], selected and TEXT.gold or TEXT.muted)
+		local underlineColor = lib.ThemeColors.tabUnderline or TEXT.gold
+		button.Underline:SetColorTexture(underlineColor[1], underlineColor[2], underlineColor[3], selected and (underlineColor[4] or 1) or 0)
+		button.Text = createText(button, tabFont, labels[index], selected and (lib.ThemeColors.tabSelectedText or TEXT.gold) or (lib.ThemeColors.tabText or TEXT.muted))
 		button.Text:SetPoint("LEFT", button, "LEFT", tabPaddingX, tabTextOffsetY)
 		button.Text:SetPoint("RIGHT", button, "RIGHT", -tabPaddingX, tabTextOffsetY)
 		button.Text:SetHeight(math.max(1, tabHeight - underlineHeight - 3))
@@ -6688,15 +7106,19 @@ function lib._Internal.addPageTabs(state, header, category, selectedPage, startX
 		end
 		button:SetScript("OnEnter", function(self)
 			if self.Highlight then
-				self.Highlight:SetColorTexture(SELECTED_BG[1], SELECTED_BG[2], SELECTED_BG[3], selected and 0.26 or 0.14)
+				local hoverBg = selected and (lib.ThemeColors.tabSelectedBg or { 0.150, 0.115, 0.055, 0.20 })
+					or (lib.ThemeColors.tabHoverBg or { 0.150, 0.115, 0.055, 0.14 })
+				self.Highlight:SetColorTexture(hoverBg[1], hoverBg[2], hoverBg[3], selected and math.max(hoverBg[4] or 0.20, 0.26) or (hoverBg[4] or 0.14))
 			end
 			setTextColor(self.Text and self.Text.Text, TEXT.main)
 		end)
 		button:SetScript("OnLeave", function(self)
 			if self.Highlight then
-				self.Highlight:SetColorTexture(SELECTED_BG[1], SELECTED_BG[2], SELECTED_BG[3], selected and 0.20 or 0)
+				local normalBg = selected and (lib.ThemeColors.tabSelectedBg or { 0.150, 0.115, 0.055, 0.20 })
+					or (lib.ThemeColors.tabBg or { 0.060, 0.054, 0.040, 0.00 })
+				self.Highlight:SetColorTexture(normalBg[1], normalBg[2], normalBg[3], normalBg[4] or 0)
 			end
-			setTextColor(self.Text and self.Text.Text, selected and TEXT.gold or TEXT.muted)
+			setTextColor(self.Text and self.Text.Text, selected and (lib.ThemeColors.tabSelectedText or TEXT.gold) or (lib.ThemeColors.tabText or TEXT.muted))
 		end)
 		button:SetScript("OnClick", function()
 			state:SetPage(page.id)
@@ -6707,7 +7129,7 @@ function lib._Internal.addPageTabs(state, header, category, selectedPage, startX
 end
 
 function lib._Internal.addPageFixedHeader(state, category, pagePath, page)
-	if state.sidePanelMode ~= "right" or not state.frame.ContentShell then
+	if not state.frame.ContentShell then
 		return nil
 	end
 	local header = trackFrame(state.fixedFrames, CreateFrame("Frame", nil, state.frame.ContentShell, "BackdropTemplate"))
@@ -6773,6 +7195,58 @@ function lib._Internal.resolvePagePanelOption(app, page, key, alternateKey, ...)
 		value = ok and result or nil
 	end
 	return value
+end
+
+function lib._Internal.resolvePagePanelConfig(app, page)
+	local value = page and (page.sidePanel or page.rightPanel or page.detailPanel)
+	if value == nil and app and app.opts then
+		value = app.opts.sidePanel or app.opts.rightPanel or app.opts.detailPanel
+	end
+	value = lib._Internal.resolveOptionValue(value, app, page)
+	if type(value) == "table" then
+		local enabled = value.enabled
+		if enabled == nil then enabled = value.show end
+		if enabled == nil then enabled = value.visible end
+		enabled = lib._Internal.resolveOptionValue(enabled, app, page, value)
+		if enabled == false then
+			return nil, false
+		end
+		return value, true
+	end
+	if value == false then
+		return nil, false
+	end
+	return nil, true
+end
+
+function lib._Internal.shouldUsePageSidePanel(state, page)
+	if not (state and page) then
+		return false
+	end
+	local app = state.app
+	local _, enabled = lib._Internal.resolvePagePanelConfig(app, page)
+	local visible = lib._Internal.resolvePagePanelOption(app, page, "showSidePanel", "showRightPanel", state)
+	if visible == nil then
+		visible = lib._Internal.resolvePagePanelOption(app, page, "showDetailPanel", nil, state)
+	end
+	if visible ~= nil then
+		return visible == true
+	end
+	return enabled ~= false
+end
+
+function lib._Internal.shouldUsePageFixedHeader(state, page, category)
+	if not (state and page) then
+		return false
+	end
+	if lib._Internal.shouldUsePageSidePanel(state, page) then
+		return true
+	end
+	if category and lib._Internal.isCategoryTabViewEnabled(state.app, category) then
+		return true
+	end
+	local value = lib._Internal.resolvePagePanelOption(state.app, page, "fixedHeader", "stickyHeader", state)
+	return value == true
 end
 
 function lib._Internal.shouldShowPageSubnav(state, page, groups)
@@ -6894,18 +7368,112 @@ function lib._Internal.addPageSidePanel(state, page, category, groups)
 	return panel
 end
 
-function lib._Internal.addGroupSection(state, group, pagePath)
-	local collapsed = state.collapsedGroups and state.collapsedGroups[group.id] == true
-	local controlsHeight = 0
-	local customizedCount = lib.GetGroupCustomizedCount(state.app, group)
-	if not collapsed then
-		for _, control in ipairs(group.controls) do
-			controlsHeight = controlsHeight + getSettingRowHeight(control, state)
+function lib._Internal.resolveLayoutNumber(value, fallback, ...)
+	value = lib._Internal.resolveOptionValue(value, ...)
+	value = tonumber(value)
+	if value then
+		return value
+	end
+	return fallback
+end
+
+function lib._Internal.clampColumnCount(value, maxColumns)
+	value = math.floor(tonumber(value) or 1)
+	maxColumns = math.floor(tonumber(maxColumns) or 2)
+	return math.max(1, math.min(maxColumns, value))
+end
+
+function lib._Internal.getColumnIndex(value, columnCount)
+	value = lib._Internal.resolveOptionValue(value)
+	if value == "left" or value == "first" then
+		return 1
+	end
+	if value == "right" or value == "second" then
+		return math.min(2, columnCount)
+	end
+	local index = tonumber(value)
+	if index then
+		index = math.floor(index)
+		if index >= 1 and index <= columnCount then
+			return index
 		end
 	end
-	local rowGap = collapsed and 0 or math.max(#group.controls - 1, 0) * 2
-	local height = collapsed and 40 or (46 + controlsHeight + rowGap + 14)
-	local section = createPageLeftFrame(state, height)
+	return nil
+end
+
+function lib._Internal.getShortestColumn(columnHeights, columnCount)
+	local bestColumn = 1
+	local bestHeight = columnHeights[1] or 0
+	for column = 2, columnCount do
+		local height = columnHeights[column] or 0
+		if height < bestHeight then
+			bestColumn = column
+			bestHeight = height
+		end
+	end
+	return bestColumn
+end
+
+function lib._Internal.getGroupControlLayout(state, group, width)
+	local requestedColumns = lib._Internal.resolveLayoutNumber(group and group.columns, 1, state and state.app, group, state)
+	local columnCount = lib._Internal.clampColumnCount(requestedColumns, 3)
+	width = tonumber(width) or state.pageSectionWidth or state.pageLeftWidth or 420
+	if width < 520 then
+		columnCount = 1
+	end
+	local columnGap = math.max(0, lib._Internal.resolveLayoutNumber(group and group.columnGap, 10, state and state.app, group, state))
+	local innerWidth = math.max(1, width - 24)
+	local columnWidth = math.floor((innerWidth - ((columnCount - 1) * columnGap)) / columnCount)
+	columnWidth = math.max(160, columnWidth)
+	local columnHeights = {}
+	for column = 1, columnCount do
+		columnHeights[column] = 0
+	end
+	local entries = {}
+	for _, control in ipairs((group and group.controls) or {}) do
+		local column = lib._Internal.getColumnIndex(control.column or control.layoutColumn or control.columnIndex, columnCount)
+			or lib._Internal.getShortestColumn(columnHeights, columnCount)
+		local rowHeight = getSettingRowHeight(control, state)
+		entries[#entries + 1] = {
+			control = control,
+			column = column,
+			y = -(46 + columnHeights[column]),
+			height = rowHeight,
+		}
+		columnHeights[column] = columnHeights[column] + rowHeight + 2
+	end
+	local controlsHeight = 0
+	for column = 1, columnCount do
+		controlsHeight = math.max(controlsHeight, math.max(0, (columnHeights[column] or 0) - 2))
+	end
+	return {
+		columnCount = columnCount,
+		columnGap = columnGap,
+		columnWidth = columnWidth,
+		controlsHeight = controlsHeight,
+		entries = entries,
+	}
+end
+
+function lib._Internal.addGroupSection(state, group, pagePath, layout)
+	local collapsed = state.collapsedGroups and state.collapsedGroups[group.id] == true
+	local customizedCount = lib.GetGroupCustomizedCount(state.app, group)
+	local sectionWidth = layout and tonumber(layout.width) or (state.pageSectionWidth or state.pageLeftWidth or 420)
+	local controlLayout = lib._Internal.getGroupControlLayout(state, group, sectionWidth)
+	local controlsHeight = 0
+	if not collapsed then
+		controlsHeight = controlLayout.controlsHeight
+	end
+	local height = collapsed and 40 or (46 + controlsHeight + 14)
+	local section
+	if layout and layout.x and layout.y then
+		section = trackFrame(state.contentFrames, CreateFrame("Frame", nil, state.content, "BackdropTemplate"))
+		section._LibSettingsDesignerContentY = layout.y
+		snapPoint(section, "TOPLEFT", state.content, "TOPLEFT", layout.x, layout.y)
+		snapSize(section, sectionWidth, height)
+	else
+		section = createPageLeftFrame(state, height)
+	end
 	applyBackdrop(section, DETAIL_SECTION_BG, DETAIL_COLORS.sectionBorder, "detailSection")
 	createPixelBorder(section, DETAIL_COLORS.sectionBorder)
 
@@ -6945,19 +7513,83 @@ function lib._Internal.addGroupSection(state, group, pagePath)
 	headerLine:SetShown(not collapsed)
 
 	if not collapsed then
-		local y = -46
-		for index, control in ipairs(group.controls) do
-			local rowHeight = getSettingRowHeight(control, state)
-			local rowWidth = (state.pageSectionWidth or state.pageLeftWidth or 420) - 24
-			local row = addSettingRow(state, control, pagePath, section, y, rowWidth)
-			if index == #group.controls and row.Separator then
+		local columnWidth = controlLayout.columnWidth
+		local columnGap = controlLayout.columnGap
+		for index, entry in ipairs(controlLayout.entries) do
+			local x = 12 + ((entry.column or 1) - 1) * (columnWidth + columnGap)
+			local row = addSettingRow(state, entry.control, pagePath, section, entry.y, columnWidth, x)
+			if index == #controlLayout.entries and row.Separator then
 				row.Separator:Hide()
 			end
-			y = y - rowHeight - 2
 		end
 	end
-	state.y = state.y - 12
-	return section
+	if not (layout and layout.noAdvance) then
+		state.y = state.y - 12
+	end
+	return section, height
+end
+
+function lib._Internal.getPageGroupColumnCount(state, page)
+	local value = page and (page.groupColumns or page.columns or page.layoutColumns)
+	if value == nil and type(page and page.layout) == "table" then
+		value = page.layout.groupColumns or page.layout.columns
+	end
+	value = lib._Internal.resolveLayoutNumber(value, 1, state and state.app, page, state)
+	local columnCount = lib._Internal.clampColumnCount(value, 3)
+	if state and state.sidePanelMode == "right" then
+		return 1
+	end
+	local width = state and (state.pageSectionWidth or state.pageLeftWidth or state.contentWidth) or 0
+	if width < 760 then
+		return 1
+	end
+	return columnCount
+end
+
+function lib._Internal.getPageGroupColumnGap(state, page)
+	local value = page and (page.groupColumnGap or page.columnGap)
+	if value == nil and type(page and page.layout) == "table" then
+		value = page.layout.groupColumnGap or page.layout.columnGap
+	end
+	return math.max(0, lib._Internal.resolveLayoutNumber(value, PAGE_GAP, state and state.app, page, state))
+end
+
+function lib._Internal.renderPageGroupsInColumns(state, page, groups, pagePath, columnCount)
+	local fullWidth = state.pageSectionWidth or state.pageLeftWidth or 420
+	local columnGap = lib._Internal.getPageGroupColumnGap(state, page)
+	local columnWidth = math.floor((fullWidth - ((columnCount - 1) * columnGap)) / columnCount)
+	columnWidth = math.max(260, columnWidth)
+	local columnY = {}
+	for column = 1, columnCount do
+		columnY[column] = state.y
+	end
+	for _, group in ipairs(groups) do
+		local column = lib._Internal.getColumnIndex(group.column, columnCount)
+		if not column then
+			column = 1
+			local highestY = columnY[1] or state.y
+			for index = 2, columnCount do
+				local y = columnY[index] or state.y
+				if y > highestY then
+					column = index
+					highestY = y
+				end
+			end
+		end
+		local x = PAGE_LAYOUT.columnInset + ((column - 1) * (columnWidth + columnGap))
+		local _, height = lib._Internal.addGroupSection(state, group, pagePath, {
+			x = x,
+			y = columnY[column],
+			width = columnWidth,
+			noAdvance = true,
+		})
+		columnY[column] = columnY[column] - height - 12
+	end
+	local minY = columnY[1] or state.y
+	for column = 2, columnCount do
+		minY = math.min(minY, columnY[column] or minY)
+	end
+	state.y = minY
 end
 
 function lib.GetInfoPageCommandText(entry)
@@ -7454,6 +8086,8 @@ function lib._Internal.renderPage(state, pageID)
 		lib._Internal.addPageFixedHeader(state, category, pagePath, page)
 		lib._Internal.addContentScrollbarRail(state)
 		lib._Internal.addPageSidePanel(state, page, category, groups)
+	elseif state.pageFixedHeader then
+		lib._Internal.addPageFixedHeader(state, category, pagePath, page)
 	end
 
 	local header = createPageLeftFrame(state, 74)
@@ -7475,8 +8109,13 @@ function lib._Internal.renderPage(state, pageID)
 		emptyText:SetPoint("TOPLEFT", empty, "TOPLEFT", 14, -14)
 		emptyText:SetPoint("BOTTOMRIGHT", empty, "BOTTOMRIGHT", -14, 14)
 	else
-		for _, group in ipairs(groups) do
-			lib._Internal.addGroupSection(state, group, pagePath)
+		local groupColumns = lib._Internal.getPageGroupColumnCount(state, page)
+		if groupColumns > 1 then
+			lib._Internal.renderPageGroupsInColumns(state, page, groups, pagePath, groupColumns)
+		else
+			for _, group in ipairs(groups) do
+				lib._Internal.addGroupSection(state, group, pagePath)
+			end
 		end
 	end
 	if state.sidePanelMode == "right" then
@@ -7645,23 +8284,50 @@ function StateMixin:RefreshSidebarSelection()
 	end
 end
 
+function lib._Internal.addSidebarSectionHeader(state, title)
+	local height = lib._Internal.getSidebarSectionHeight(state.app)
+	local header = createSidebarFrame(state, height)
+	header:EnableMouse(false)
+	header.Text = header:CreateFontString(nil, "OVERLAY", FONT_MUTED)
+	header.Text:SetPoint("LEFT", header, "LEFT", 12, 0)
+	header.Text:SetPoint("RIGHT", header, "RIGHT", -12, 0)
+	header.Text:SetJustifyH("LEFT")
+	header.Text:SetJustifyV("MIDDLE")
+	header.Text:SetText(title or "")
+	setTextColor(header.Text, lib.ThemeColors.sidebarSectionText or { 0.82, 0.68, 0.42, 0.92 })
+	header.Line = header:CreateTexture(nil, "ARTWORK")
+	preparePixelTexture(header.Line)
+	header.Line:SetColorTexture(PANEL_BORDER[1], PANEL_BORDER[2], PANEL_BORDER[3], 0.26)
+	header.Line:SetPoint("LEFT", header.Text, "RIGHT", 10, 0)
+	header.Line:SetPoint("RIGHT", header, "RIGHT", -8, 0)
+	header.Line:SetHeight(getPixelSize(header))
+	return header
+end
+
 function StateMixin:RenderSidebar()
 	clearSidebar(self)
 	self.sidebarRows = {}
 	local frame = self.frame
 	local L = getLocale(self.app)
+	local dashboardHeight = math.max(24, lib._Internal.resolveSidebarNumber(self.app, "dashboardHeight", lib._Internal.getSidebarRowHeight(self.app)))
+	local iconSize = lib._Internal.getSidebarIconSize(self.app)
+	local iconOffsetX = lib._Internal.resolveSidebarNumber(self.app, "iconOffsetX", 12)
+	local textGap = lib._Internal.resolveSidebarNumber(self.app, "textGap", 10)
+	if frame.SidebarScroll then
+		frame.SidebarScroll._LibSettingsDesignerScrollStep = lib._Internal.getSidebarRowHeight(self.app)
+	end
 
-	local dashboard = createSidebarFrame(self, 44)
+	local dashboard = createSidebarFrame(self, dashboardHeight)
 	applyBackdrop(dashboard, SIDEBAR_BG, { 0.42, 0.34, 0.20, 0.16 }, "sidebar")
 	dashboard.Accent = dashboard:CreateTexture(nil, "OVERLAY")
 	dashboard.Accent:SetColorTexture(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.85)
 	dashboard.Accent:SetPoint("TOPLEFT", dashboard, "TOPLEFT", 0, -6)
 	dashboard.Accent:SetPoint("BOTTOMLEFT", dashboard, "BOTTOMLEFT", 0, 6)
 	dashboard.Accent:SetWidth(2)
-	dashboard.Icon = createIcon(dashboard, getAppIconTexture(self.app, "dashboard"), 22, false)
-	dashboard.Icon:SetPoint("LEFT", dashboard, "LEFT", 12, 0)
+	dashboard.Icon = createIcon(dashboard, getAppIconTexture(self.app, "dashboard"), iconSize, false)
+	dashboard.Icon:SetPoint("LEFT", dashboard, "LEFT", iconOffsetX, 0)
 	dashboard.Text = dashboard:CreateFontString(nil, "OVERLAY", FONT_TEXT)
-	dashboard.Text:SetPoint("LEFT", dashboard.Icon, "RIGHT", 10, 0)
+	dashboard.Text:SetPoint("LEFT", dashboard.Icon, "RIGHT", textGap, 0)
 	dashboard.Text:SetPoint("RIGHT", dashboard, "RIGHT", -12, 0)
 	dashboard.Text:SetJustifyH("LEFT")
 	dashboard.Text:SetText((self.app.opts and self.app.opts.dashboardTitle) or L["configCenterDashboard"] or "Dashboard")
@@ -7684,10 +8350,16 @@ function StateMixin:RenderSidebar()
 	end)
 	self.sidebarRows.dashboard = dashboard
 
+	local lastSectionID
 	for _, category in ipairs(self.app:GetCategories()) do
 		if category.hidden ~= true and category.visible ~= false then
+			local sectionID, sectionTitle = lib._Internal.getCategorySidebarSection(self.app, category)
+			if sectionID and sectionID ~= lastSectionID then
+				lib._Internal.addSidebarSectionHeader(self, sectionTitle)
+				lastSectionID = sectionID
+			end
 			local isNewCategory = lib.IsCategoryNew(self.app, category.id)
-			local row = createSidebarFrame(self, 44)
+			local row = createSidebarFrame(self, lib._Internal.getSidebarRowHeight(self.app, category))
 			applyBackdrop(row, SIDEBAR_BG, { 0.42, 0.34, 0.20, 0.16 }, "sidebar")
 			row.Accent = row:CreateTexture(nil, "OVERLAY")
 			row.Accent:SetColorTexture(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.85)
@@ -7695,10 +8367,10 @@ function StateMixin:RenderSidebar()
 			row.Accent:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 0, 6)
 			row.Accent:SetWidth(2)
 			local iconSource, iconIsAtlas = resolveCategoryIcon(self.app, category)
-			row.Icon = createIcon(row, iconSource, 22, iconIsAtlas)
-			row.Icon:SetPoint("LEFT", row, "LEFT", 12, 0)
+			row.Icon = createIcon(row, iconSource, iconSize, iconIsAtlas)
+			row.Icon:SetPoint("LEFT", row, "LEFT", iconOffsetX, 0)
 			row.Text = row:CreateFontString(nil, "OVERLAY", FONT_TEXT)
-			row.Text:SetPoint("LEFT", row.Icon, "RIGHT", 10, 0)
+			row.Text:SetPoint("LEFT", row.Icon, "RIGHT", textGap, 0)
 			row.Text:SetPoint("RIGHT", row, "RIGHT", isNewCategory and -64 or -12, 0)
 			row.Text:SetJustifyH("LEFT")
 			row.Text:SetText(category.title or category.id)

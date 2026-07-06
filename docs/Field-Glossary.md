@@ -50,8 +50,10 @@ Config:RegisterAddOn(addonID, opts)
 | `density` | string/function | Initial density, usually `"compact"` or `"comfortable"`. |
 | `getDensity(app)` / `setDensity(density, app)` | function | Read/write the user's selected density. |
 | `showDensityButton` / `showDensityButton(app)` | boolean/function | Controls whether users can switch density; only `false` hides the button. |
+| `sidebar` / `sidebarLayout` / `navigation` | table | Optional sidebar sizing such as `rowHeight`, `dashboardHeight`, `sectionHeight`, and `iconSize`. |
 | `topbar` / `header` / `topBar` | table | Configures built-in topbar controls and custom action buttons. |
 | `closeButton` / `windowCloseButton` / `close` | table/function | Optional window close-button style and placement override. Missing values keep the built-in close texture and position. |
+| `sidePanel` / `rightPanel` / `detailPanel` | table/boolean/function | Global default for the right page info panel. Set `false` for full-width pages unless a page overrides it. |
 | `subnav` / `subnavigation` | table/boolean/function | Global opt-in for right-panel group links. |
 | `showSubnav` / `showSubnavigation` | boolean/function | Global show gate for optional right-panel group links. |
 | `getSelectedCategoryPage(categoryID, app, category)` | function | Optional persisted page resolver for category tab views. |
@@ -110,10 +112,12 @@ app:RegisterCategory(data)
 | `icon` | string | Texture path. |
 | `iconAtlas` | string | Blizzard atlas name. |
 | `iconKey` | string | Lookup key in app icon maps. |
-| `tabView` | table/boolean/function | Enables horizontal page tabs for this category. Table values can also set tab font, gap, padding, width, height, text offset, and underline height. |
+| `tabView` | table/boolean/function | Enables horizontal page tabs for this category. Table values can also set tab font, gap, padding, width, height, text offset, underline height, and a `panel` table with backdrop colors or a packaged background texture. |
 | `pageTabs` / `tabs` / `tabbedPages` | boolean/function | Simple aliases for `tabView`. |
 | `defaultPageID` / `defaultPage` / `pageID` | string | Initial page for category tab view. |
 | `rememberSelectedPage` / `rememberTab` | boolean | Remember last selected tab page for this category. |
+| `sidebarSection` / `navSection` / `section` | string/table/function | Optional left-sidebar section heading before this category. |
+| `sidebarSectionTitle` / `sectionTitle` | string/function | Display label when it differs from the section id. |
 
 ## [Page Fields][Top]
 
@@ -135,6 +139,10 @@ app:RegisterPage(data)
 | `tabHidden` / `hideTab` | boolean | Hide this page from category tab strips. |
 | `subnav` / `subnavigation` | table/boolean/function | Page-level opt-in for right-panel group links. |
 | `showSubnav` / `showSubnavigation` | boolean/function | Page-level show gate for optional right-panel group links. |
+| `sidePanel` / `rightPanel` / `detailPanel` | table/boolean/function | Page-level right info-panel control. Set `false` to use full-width content. |
+| `showSidePanel` / `showRightPanel` | boolean/function | Page-level show gate for the right info panel. |
+| `groupColumns` / `columns` / `layoutColumns` | number/function | Number of group-section columns for full-width pages. |
+| `groupColumnGap` / `columnGap` | number/function | Gap between page group columns. |
 | `newTagID` | string | New badge tag for the page. |
 | `onOpen` | function | Called as `onOpen(page, app, state)` when the page opens. |
 | `order` | number | Sort order. |
@@ -164,6 +172,9 @@ app:RegisterGroup(pageID, data)
 | `id` | string | Stable group id. |
 | `title` | string | Group heading. |
 | `order` | number | Sort order. |
+| `columns` / `controlColumns` / `controlsColumns` | number/function | Number of control columns inside this group. |
+| `column` / `layoutColumn` | number/string | Page column for this group when the page uses group columns. |
+| `columnGap` / `controlColumnGap` | number/function | Gap between control columns. |
 
 Direct controls join a group with `groupID`. `modernGroup` is a wrapper/legacy
 alias and must be mapped before or through `RegisterLegacyControl`.
@@ -191,6 +202,8 @@ app:RegisterControl(pageID, data)
 | `refreshOnChange` | boolean | Re-render visible content after a value changes. |
 | `requiresReload` / `reloadRequired` / `requiresUIReload` | boolean | Mark the app as reload-pending after a successful value write. |
 | `reloadReason` | string | Optional reason text shown in the reload button tooltip. |
+| `actions` / `settingActions` / `controlActions` | table/function | Optional right-aligned row action buttons or menus. |
+| `column` / `layoutColumn` / `columnIndex` | number/string | Control column inside a multi-column group. |
 
 Direct `RegisterControl` calls should use canonical fields. Legacy aliases such
 as `var`, `text`, `name`, `desc`, `get`, and `set` are mapped by
@@ -275,7 +288,7 @@ app:RegisterControl("interface.names", {
 | Element | Key fields | Reference |
 | :------ | :--------- | :-------- |
 | Toggle | `default`, `getValue`, `setValue`, `parentCheck`, `requiresReload` | [Toggle](Elements/Toggle.md) |
-| Slider | `min`, `max`, `step`, `formatter`, `suffix` | [Slider](Elements/Slider.md) |
+| Slider | `min`, `max`, `step`, `formatter`, `suffix`, `actions` | [Slider](Elements/Slider.md) |
 | Dropdown | `list`, `options`, `orderList`, `listFunc`, `optionfunc`, `menuHeight` | [Dropdown](Elements/Dropdown.md) |
 | MultiDropdown | `getSelection`, `setSelection`, `isSelectedFunc`, `setSelectedFunc` | [MultiDropdown](Elements/MultiDropdown.md) |
 | Input | `numeric`, `min`, `max`, `maxChars`, `multiline`, `readOnly` | [Input](Elements/Input.md) |

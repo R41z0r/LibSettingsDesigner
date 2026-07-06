@@ -26,6 +26,10 @@ inside a category.
 | `tabTitle` | string | Optional shorter label when rendered in a category tab strip. |
 | `tabHidden` / `hideTab` | boolean | Hide this page from category tab strips. |
 | `newTagID` | string | New badge tag. |
+| `sidePanel` / `rightPanel` / `detailPanel` | table/boolean/function | Controls the right info panel. Set `false` for full-width content. |
+| `showSidePanel` / `showRightPanel` | boolean/function | Show gate for the right info panel. |
+| `groupColumns` / `columns` / `layoutColumns` | number/function | Number of side-by-side group columns for full-width pages. |
+| `groupColumnGap` / `columnGap` | number/function | Gap between page group columns. |
 | `layout` | string | Use `"info"` for static content pages. |
 | `content` | table | Info page content. |
 | `blocks` / `infoBlocks` | table | Alternate info content tables. `blocks` alone does not select info-page rendering. |
@@ -43,9 +47,15 @@ app:RegisterPage({
   description = "Configure action bar behavior.",
   iconKey = "actionbar",
   mainToggleID = "actionBarsEnabled",
+  sidePanel = false,
+  groupColumns = 2,
   order = 100,
 })
 ```
+
+`sidePanel = false` removes the right page info panel so the page can use the
+full content width. `groupColumns = 2` then places registered groups side by
+side when the frame is wide enough.
 
 ## [Info Page][Top]
 

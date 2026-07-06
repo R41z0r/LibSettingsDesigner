@@ -6,6 +6,7 @@
 - [Fields](#fields)
 - [Example](#example)
 - [Formatting](#formatting)
+- [Row Actions](#row-actions)
 
 </details>
 
@@ -27,6 +28,7 @@ A slider stores a numeric value in a bounded range.
 | `formatter` | function | Display formatter. |
 | `suffix` | string | Suffix for display text. |
 | `valueFormatter` | function | Alternate value formatter. |
+| `actions` / `settingActions` | table/function | Optional small row action buttons or menus. |
 
 ## [Example][Top]
 
@@ -49,6 +51,24 @@ app:RegisterControl("interface.bars", {
 formatter = function(value)
   return string.format("%.0f%%", (tonumber(value) or 1) * 100)
 end
+```
+
+## [Row Actions][Top]
+
+Use `actions` when a slider needs a compact per-setting tool menu:
+
+```lua
+actions = {
+  {
+    id = "scaleTools",
+    icon = "Interface\\Icons\\INV_Misc_Gear_01",
+    tooltip = "Scale tools",
+    menu = {
+      { text = "Set 100%", onClick = function() MyAddon.SetScale(1) end },
+      { text = "Set 125%", onClick = function() MyAddon.SetScale(1.25) end },
+    },
+  },
+}
 ```
 
 [//]: # (Links)
