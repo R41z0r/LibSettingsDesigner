@@ -680,6 +680,7 @@ local DETAIL_COLORS = {
 	sectionHeaderBg = { 0.095, 0.085, 0.060, 0.94 },
 }
 local ROW_BG = { 0.060, 0.068, 0.074, 0.46 }
+local MATRIX_ROW_BG = { 0, 0, 0, 0.20 }
 local ROW_BORDER = { 0.54, 0.46, 0.30, 0.24 }
 local ROW_HOVER_BG = { 0.125, 0.100, 0.055, 0.60 }
 local ROW_HOVER_BORDER = { 0.95, 0.73, 0.32, 0.58 }
@@ -1402,6 +1403,10 @@ function lib.ApplyTextureStyle(frame, bg, border, styleOrKey)
 	if not (frame and frame.CreateTexture) then
 		return
 	end
+	if styleOrKey == false then
+		lib.HideTextureStyle(frame)
+		return
+	end
 	local key = type(styleOrKey) == "string" and styleOrKey or frame._LibSettingsDesignerBorderStyleKey or "default"
 	local style = lib.ThemeTextures and lib.ThemeTextures[key]
 	if not style then
@@ -1867,6 +1872,11 @@ local function setBackdropBorderColor(frame, color)
 end
 
 local function setFrameBackdrop(frame, bg, border, styleOrKey)
+	if styleOrKey == false then
+		frame._LibSettingsDesignerBorderStyleKey = nil
+		frame._LibSettingsDesignerBorderStyle = nil
+		lib.HideTextureStyle(frame)
+	end
 	if styleOrKey or frame._LibSettingsDesignerBorderStyleKey or frame._LibSettingsDesignerBorderStyle then
 		applyBackdropDefinition(frame, styleOrKey or frame._LibSettingsDesignerBorderStyleKey or frame._LibSettingsDesignerBorderStyle)
 	end
@@ -2047,7 +2057,9 @@ local makeFlatButton
 
 local function styleInlineSettingRow(row)
 	local matrixRows = lib._Internal.shouldUseMatrixRows(row and row._state)
-	applyBackdrop(row, ROW_BG, matrixRows and { 0, 0, 0, 0 } or ROW_BORDER, "row")
+	local matrixBorder = { 0, 0, 0, 0 }
+	local rowBg = matrixRows and MATRIX_ROW_BG or ROW_BG
+	applyBackdrop(row, rowBg, matrixRows and matrixBorder or ROW_BORDER, matrixRows and false or "row")
 	if not matrixRows then
 		createPixelBorder(row, ROW_BORDER)
 	end
@@ -2056,17 +2068,22 @@ local function styleInlineSettingRow(row)
 		if self._eqolDisabled then
 			return
 		end
-		setFrameBackdrop(self, matrixRows and ROW_BG or ROW_HOVER_BG, matrixRows and { 0, 0, 0, 0 } or ROW_HOVER_BORDER)
-		if self.SetBorderColor then self:SetBorderColor(matrixRows and { 0, 0, 0, 0 } or ROW_HOVER_BORDER) end
+		if matrixRows then
+			setFrameBackdrop(self, MATRIX_ROW_BG, matrixBorder, false)
+			if self.SetBorderColor then self:SetBorderColor(matrixBorder) end
+			return
+		end
+		setFrameBackdrop(self, ROW_HOVER_BG, ROW_HOVER_BORDER)
+		if self.SetBorderColor then self:SetBorderColor(ROW_HOVER_BORDER) end
 	end)
 	row:SetScript("OnLeave", function(self)
 		if self._eqolDisabled then
-			setFrameBackdrop(self, DISABLED_ROW_BG, matrixRows and { 0, 0, 0, 0 } or DISABLED_ROW_BORDER)
-			if self.SetBorderColor then self:SetBorderColor(matrixRows and { 0, 0, 0, 0 } or DISABLED_ROW_BORDER) end
+			setFrameBackdrop(self, DISABLED_ROW_BG, matrixRows and matrixBorder or DISABLED_ROW_BORDER, matrixRows and false or nil)
+			if self.SetBorderColor then self:SetBorderColor(matrixRows and matrixBorder or DISABLED_ROW_BORDER) end
 			return
 		end
-		setFrameBackdrop(self, ROW_BG, matrixRows and { 0, 0, 0, 0 } or ROW_BORDER)
-		if self.SetBorderColor then self:SetBorderColor(matrixRows and { 0, 0, 0, 0 } or ROW_BORDER) end
+		setFrameBackdrop(self, rowBg, matrixRows and matrixBorder or ROW_BORDER, matrixRows and false or nil)
+		if self.SetBorderColor then self:SetBorderColor(matrixRows and matrixBorder or ROW_BORDER) end
 	end)
 	row.Separator = row:CreateTexture(nil, "BACKGROUND")
 	preparePixelTexture(row.Separator)
@@ -2329,6 +2346,28 @@ local function createSidebarFrame(state, height)
 	return frame
 end
 
+local function createSidebarFixedFrame(state, height, y)
+	local parent = state and state.frame and state.frame.SidebarFixed
+	if not parent then
+		return nil
+	end
+	local frame = trackFrame(state.sidebarFrames, CreateFrame("Button", nil, parent, "BackdropTemplate"))
+	frame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, y)
+	frame:SetPoint("TOPRIGHT", parent, "TOPRIGHT", 0, y)
+	frame:SetHeight(height)
+	return frame
+end
+
+function lib._Internal.setSidebarRowBackdrop(row, selected, hovered)
+	if selected then
+		setFrameBackdrop(row, { 0.08, 0.58, 0.56, 0.58 }, { 0, 0, 0, 0 }, "sidebar")
+	elseif hovered then
+		setFrameBackdrop(row, { 0.18, 0.50, 0.50, 0.50 }, { 0, 0, 0, 0 }, "sidebar")
+	else
+		setFrameBackdrop(row, { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, "sidebar")
+	end
+end
+
 local function getLibLocale()
 	local locale = _G.GetLocale and _G.GetLocale() or "enUS"
 	return lib.LOCALES[locale] or lib.LOCALES.enUS
@@ -2574,6 +2613,86 @@ function lib._Internal.getSidebarOptions(app)
 	return type(sidebar) == "table" and sidebar or {}
 end
 
+function lib._Internal.applySidebarShellBackground(frame, app)
+	if not frame then
+		return
+	end
+	local sidebar = lib._Internal.getSidebarOptions(app)
+	local texturePath = sidebar.backgroundTexture or sidebar.backgroundFile or sidebar.bgFile or sidebar.texture
+	texturePath = lib._Internal.resolveOptionValue(texturePath, app, sidebar, frame)
+	if type(texturePath) ~= "string" or texturePath == "" then
+		if frame.SidebarBackgroundTexture then
+			frame.SidebarBackgroundTexture:Hide()
+		end
+		setFrameBackdrop(frame, SIDEBAR_BG, PANEL_BORDER, "sidebar")
+		return
+	end
+
+	setFrameBackdrop(frame, { 0, 0, 0, 0 }, PANEL_BORDER, "sidebar")
+	if not frame.SidebarBackgroundTexture then
+		frame.SidebarBackgroundTexture = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
+		frame.SidebarBackgroundTexture:SetAllPoints(frame)
+	end
+	frame.SidebarBackgroundTexture:SetTexture(texturePath)
+	frame.SidebarBackgroundTexture:SetAlpha(tonumber(sidebar.backgroundAlpha or sidebar.textureAlpha or sidebar.alpha) or 1)
+	frame.SidebarBackgroundTexture:Show()
+end
+
+function lib._Internal.getContentShellOptions(app)
+	local opts = app and app.opts
+	local content = opts and (opts.content or opts.contentShell or opts.mainContent)
+	return type(content) == "table" and content or {}
+end
+
+function lib._Internal.applyContentShellBackground(frame, app)
+	if not frame then
+		return
+	end
+	local content = lib._Internal.getContentShellOptions(app)
+	local texturePath = content.backgroundTexture or content.backgroundFile or content.bgFile or content.texture
+	texturePath = lib._Internal.resolveOptionValue(texturePath, app, content, frame)
+	if type(texturePath) ~= "string" or texturePath == "" then
+		if frame.ContentBackgroundTexture then
+			frame.ContentBackgroundTexture:Hide()
+		end
+		setFrameBackdrop(frame, CONTENT_BG, PANEL_BORDER, "content")
+		return
+	end
+
+	setFrameBackdrop(frame, { 0, 0, 0, 0 }, PANEL_BORDER, "content")
+	if not frame.ContentBackgroundTexture then
+		frame.ContentBackgroundTexture = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
+		frame.ContentBackgroundTexture:SetAllPoints(frame)
+	end
+	frame.ContentBackgroundTexture:SetTexture(texturePath)
+	frame.ContentBackgroundTexture:SetAlpha(tonumber(content.backgroundAlpha or content.textureAlpha or content.alpha) or 1)
+	frame.ContentBackgroundTexture:Show()
+end
+
+function lib._Internal.applyFrameBackground(frame, app)
+	if not (frame and frame.bg) then
+		return
+	end
+	local opts = app and app.opts or {}
+	local texturePath = opts.backgroundTexture or opts.backgroundFile or opts.frameBackgroundTexture or opts.frameBgFile
+	texturePath = lib._Internal.resolveOptionValue(texturePath, app, opts, frame)
+	if type(texturePath) == "string" and texturePath ~= "" then
+		frame.bg:SetTexture(texturePath)
+		frame.bg:SetAlpha(tonumber(opts.backgroundAlpha or opts.frameBackgroundAlpha or opts.bgAlpha) or 1)
+		if frame.bg.SetVertexColor then
+			frame.bg:SetVertexColor(1, 1, 1, 1)
+		end
+	elseif frame.bg.SetColorTexture then
+		frame.bg:SetColorTexture(
+			lib.ThemeColors.frameBg[1],
+			lib.ThemeColors.frameBg[2],
+			lib.ThemeColors.frameBg[3],
+			lib.ThemeColors.frameBg[4]
+		)
+		frame.bg:SetAlpha(1)
+	end
+end
+
 function lib._Internal.resolveSidebarNumber(app, key, fallback)
 	local sidebar = lib._Internal.getSidebarOptions(app)
 	local value = lib._Internal.resolveOptionValue(sidebar[key], app, sidebar)
@@ -2607,6 +2726,15 @@ function lib._Internal.shouldUseFeatureSidebar(app)
 	local value = sidebar.featureNavigation
 	if value == nil then value = sidebar.featureSidebar end
 	if value == nil then value = sidebar.pages end
+	value = lib._Internal.resolveOptionValue(value, app, sidebar)
+	return value == true
+end
+
+function lib._Internal.shouldUseSidebarSearch(app)
+	local sidebar = lib._Internal.getSidebarOptions(app)
+	local value = sidebar.search
+	if value == nil then value = sidebar.searchBox end
+	if value == nil then value = sidebar.fixedSearch end
 	value = lib._Internal.resolveOptionValue(value, app, sidebar)
 	return value == true
 end
@@ -3169,7 +3297,7 @@ function lib.RefreshTopbar(frame, state)
 		rightOffset = -12
 	end
 	if frame.SearchShell then
-		frame.SearchShell:SetShown(resolveTopbarOption(app, "showSearch", true) ~= false)
+		frame.SearchShell:SetShown(lib._Internal.shouldUseSidebarSearch(app) or resolveTopbarOption(app, "showSearch", true) ~= false)
 	end
 	if frame.ResetButton then
 		frame.ResetButton:SetShown(resolveTopbarOption(app, "showDefaults", true) ~= false)
@@ -3183,7 +3311,9 @@ function lib.RefreshTopbar(frame, state)
 	placeRight(frame.ResetButton)
 	placeRight(frame.DensityButton)
 	placeRight(frame.LockButton)
-	placeRight(frame.SearchShell)
+	if not lib._Internal.shouldUseSidebarSearch(app) then
+		placeRight(frame.SearchShell)
+	end
 	local rightButtons = frame.TopbarActionButtons
 	for index, action in ipairs(getTopbarActions(app, "right")) do
 		local button = rightButtons[index]
@@ -3908,14 +4038,16 @@ end
 
 local function refreshControlRow(app, control, row)
 	local enabled = app:IsControlEnabled(control)
+	local matrixRows = lib._Internal.shouldUseMatrixRows(row and row._state)
+	local matrixBorder = { 0, 0, 0, 0 }
 	row._eqolDisabled = not enabled
 	row:SetAlpha(enabled and 1 or 0.54)
 	if enabled then
-		setFrameBackdrop(row, ROW_BG, ROW_BORDER)
-		if row.SetBorderColor then row:SetBorderColor(ROW_BORDER) end
+		setFrameBackdrop(row, matrixRows and MATRIX_ROW_BG or ROW_BG, matrixRows and matrixBorder or ROW_BORDER, matrixRows and false or nil)
+		if row.SetBorderColor then row:SetBorderColor(matrixRows and matrixBorder or ROW_BORDER) end
 	else
-		setFrameBackdrop(row, DISABLED_ROW_BG, DISABLED_ROW_BORDER)
-		if row.SetBorderColor then row:SetBorderColor(DISABLED_ROW_BORDER) end
+		setFrameBackdrop(row, DISABLED_ROW_BG, matrixRows and matrixBorder or DISABLED_ROW_BORDER, matrixRows and false or nil)
+		if row.SetBorderColor then row:SetBorderColor(matrixRows and matrixBorder or DISABLED_ROW_BORDER) end
 	end
 	if row.check then
 		row.check._eqolDisabled = not enabled
@@ -4266,12 +4398,32 @@ local function skinScrollFrame(scrollFrame)
 	if scrollBar then
 		up = up or scrollBar.ScrollUpButton or scrollBar.Back
 		down = down or scrollBar.ScrollDownButton or scrollBar.Forward
-		if scrollBar.SetAlpha then scrollBar:SetAlpha(0.72) end
-		local thumb = scrollBar.GetThumbTexture and scrollBar:GetThumbTexture()
-		if thumb and thumb.SetAlpha then thumb:SetAlpha(0.90) end
+		if scrollBar.SetAlpha then scrollBar:SetAlpha(1) end
+		if scrollBar.SetWidth then scrollBar:SetWidth(10) end
 		for _, key in ipairs({ "Track", "Background", "BG", "Middle", "Top", "Bottom" }) do
 			local region = scrollBar[key]
-			if region and region.SetAlpha then region:SetAlpha(0.24) end
+			if region and region.SetAlpha then region:SetAlpha(0) end
+		end
+		if not scrollBar.LibSettingsDesignerChannel then
+			scrollBar.LibSettingsDesignerChannel = scrollBar:CreateTexture(nil, "BACKGROUND", nil, -1)
+			scrollBar.LibSettingsDesignerChannel:SetPoint("TOP", scrollBar, "TOP", 0, 0)
+			scrollBar.LibSettingsDesignerChannel:SetPoint("BOTTOM", scrollBar, "BOTTOM", 0, 0)
+			scrollBar.LibSettingsDesignerChannel:SetWidth(6)
+			scrollBar.LibSettingsDesignerTrack = scrollBar:CreateTexture(nil, "BACKGROUND")
+			scrollBar.LibSettingsDesignerTrack:SetPoint("TOP", scrollBar, "TOP", 0, -2)
+			scrollBar.LibSettingsDesignerTrack:SetPoint("BOTTOM", scrollBar, "BOTTOM", 0, 2)
+			scrollBar.LibSettingsDesignerTrack:SetWidth(1)
+			local modernThumb = scrollBar:CreateTexture(nil, "ARTWORK")
+			modernThumb:SetSize(6, 24)
+			scrollBar.LibSettingsDesignerThumb = modernThumb
+			if scrollBar.SetThumbTexture then
+				scrollBar:SetThumbTexture(modernThumb)
+			end
+		end
+		scrollBar.LibSettingsDesignerChannel:SetColorTexture(0, 0, 0, 0.30)
+		scrollBar.LibSettingsDesignerTrack:SetColorTexture(1, 1, 1, 0.20)
+		if scrollBar.LibSettingsDesignerThumb then
+			scrollBar.LibSettingsDesignerThumb:SetColorTexture(0.85, 0.90, 1, 0.50)
 		end
 	end
 	buttons[1] = up
@@ -4294,6 +4446,16 @@ local function skinScrollFrame(scrollFrame)
 	end
 	if scrollFrame.EnableMouseWheel then
 		scrollFrame:EnableMouseWheel(true)
+	end
+	if scrollBar then
+		scrollBar:SetScript("OnEnter", function(self)
+			if self.LibSettingsDesignerTrack then self.LibSettingsDesignerTrack:SetColorTexture(1, 1, 1, 0.32) end
+			if self.LibSettingsDesignerThumb then self.LibSettingsDesignerThumb:SetColorTexture(0.92, 0.95, 1, 0.72) end
+		end)
+		scrollBar:SetScript("OnLeave", function(self)
+			if self.LibSettingsDesignerTrack then self.LibSettingsDesignerTrack:SetColorTexture(1, 1, 1, 0.20) end
+			if self.LibSettingsDesignerThumb then self.LibSettingsDesignerThumb:SetColorTexture(0.85, 0.90, 1, 0.50) end
+		end)
 	end
 	scrollFrame:SetScript("OnMouseWheel", function(self, delta)
 		local range = self.GetVerticalScrollRange and self:GetVerticalScrollRange() or 0
@@ -5350,28 +5512,28 @@ local function addToggleWidget(row, app, control, opts)
 	opts = opts or {}
 	local switch = CreateFrame("Button", nil, row, "BackdropTemplate")
 	switch._eqolOwner = row
-	switch:SetSize(48, 24)
+	switch:SetSize(52, 22)
 	if opts.point then
 		switch:SetPoint(opts.point[1], opts.point[2], opts.point[3], opts.point[4], opts.point[5])
 	else
 		switch:SetPoint("RIGHT", row, "RIGHT", -16, 0)
 	end
-	applyBackdrop(switch, { 0.050, 0.046, 0.038, 0.95 }, CARD_BORDER, "toggle")
+	applyBackdrop(switch, { 0.030, 0.036, 0.038, 0.94 }, { 0.28, 0.34, 0.32, 0.62 }, "toggle")
 
 	switch.Knob = CreateFrame("Frame", nil, switch, "BackdropTemplate")
-	switch.Knob:SetSize(18, 18)
-	applyBackdrop(switch.Knob, { 0.62, 0.58, 0.49, 1.00 }, { 0.92, 0.82, 0.58, 0.80 }, "toggleKnob")
+	switch.Knob:SetSize(16, 16)
+	applyBackdrop(switch.Knob, { 0.34, 0.38, 0.34, 1.00 }, { 0.58, 0.62, 0.52, 0.80 }, "toggleKnob")
 
 	function switch:SetChecked(checked)
 		self.checked = checked == true
 		self.Knob:ClearAllPoints()
 		if self.checked then
-			setFrameBackdrop(self, { 0.105, 0.205, 0.095, 0.96 }, { GREEN[1], GREEN[2], GREEN[3], 0.70 })
-			setFrameBackdrop(self.Knob, { 0.78, 0.92, 0.66, 1.00 }, { GREEN[1], GREEN[2], GREEN[3], 0.85 })
+			setFrameBackdrop(self, { 0.020, 0.520, 0.380, 0.94 }, { 0.08, 0.88, 0.66, 0.76 })
+			setFrameBackdrop(self.Knob, { 0.92, 1.00, 0.92, 1.00 }, { 0.76, 1.00, 0.80, 0.90 })
 			self.Knob:SetPoint("RIGHT", self, "RIGHT", -3, 0)
 		else
-			setFrameBackdrop(self, { 0.050, 0.046, 0.038, 0.95 }, CARD_BORDER)
-			setFrameBackdrop(self.Knob, { 0.62, 0.58, 0.49, 1.00 }, { 0.92, 0.82, 0.58, 0.80 })
+			setFrameBackdrop(self, { 0.030, 0.036, 0.038, 0.94 }, { 0.28, 0.34, 0.32, 0.62 })
+			setFrameBackdrop(self.Knob, { 0.34, 0.38, 0.34, 1.00 }, { 0.58, 0.62, 0.52, 0.80 })
 			self.Knob:SetPoint("LEFT", self, "LEFT", 3, 0)
 		end
 	end
@@ -5385,7 +5547,7 @@ local function addToggleWidget(row, app, control, opts)
 			setFrameBackdrop(self, DISABLED_CONTROL_BG, DISABLED_CONTROL_BORDER)
 			return
 		end
-		setBackdropBorderColor(self, CARD_BORDER_HOVER)
+		setBackdropBorderColor(self, self.checked and { 0.25, 1.00, 0.78, 0.86 } or { 0.62, 0.66, 0.54, 0.74 })
 	end
 	switch._eqolOnLeave = function(self)
 		if self._eqolDisabled then
@@ -6144,6 +6306,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 		title:SetPoint("LEFT", row, "LEFT", textLeft, 0)
 		title:SetPoint("RIGHT", row, "LEFT", matrixSplitX - 10, 0)
 		title:SetHeight(20)
+		title.Text:SetJustifyV("MIDDLE")
 		desc:Hide()
 	end
 
@@ -6153,6 +6316,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 			title:SetPoint("LEFT", row, "LEFT", textLeft, 0)
 			title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and rightInset(154) or rightInset(88), 0)
 			title:SetHeight(20)
+			title.Text:SetJustifyV("MIDDLE")
 		else
 			title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and rightInset(154) or rightInset(88), 0)
 			desc:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -5)
@@ -7272,7 +7436,13 @@ function lib._Internal.addSectionTabs(state, page, groups)
 	end
 
 	local header = createPageLeftFrame(state, 38)
-	applyBackdrop(header, lib.ThemeColors.tabPanelBg or { 0.035, 0.040, 0.045, 0.58 }, lib.ThemeColors.tabPanelBorder or { 0.58, 0.50, 0.34, 0.42 }, "tabPanel")
+	applyBackdrop(header, { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, "tabPanel")
+	local bottomLine = header:CreateTexture(nil, "ARTWORK")
+	preparePixelTexture(bottomLine)
+	bottomLine:SetColorTexture(ROW_SEPARATOR[1], ROW_SEPARATOR[2], ROW_SEPARATOR[3], 0.42)
+	bottomLine:SetPoint("BOTTOMLEFT", header, "BOTTOMLEFT", 0, 0)
+	bottomLine:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", 0, 0)
+	bottomLine:SetHeight(getPixelSize(header))
 	local availableWidth = state.pageSectionWidth or state.pageLeftWidth or 420
 	local gap = 8
 	local minWidth = 82
@@ -7737,7 +7907,8 @@ function lib._Internal.getGroupControlLayout(state, group, width)
 end
 
 function lib._Internal.addGroupSection(state, group, pagePath, layout)
-	local collapsed = state.collapsedGroups and state.collapsedGroups[group.id] == true
+	local matrixRows = lib._Internal.shouldUseMatrixRows(state)
+	local collapsed = (not matrixRows) and state.collapsedGroups and state.collapsedGroups[group.id] == true
 	local customizedCount = lib.GetGroupCustomizedCount(state.app, group)
 	local sectionWidth = layout and tonumber(layout.width) or (state.pageSectionWidth or state.pageLeftWidth or 420)
 	local controlLayout = lib._Internal.getGroupControlLayout(state, group, sectionWidth)
@@ -7755,27 +7926,27 @@ function lib._Internal.addGroupSection(state, group, pagePath, layout)
 	else
 		section = createPageLeftFrame(state, height)
 	end
-	if lib._Internal.shouldUseMatrixRows(state) then
-		applyBackdrop(section, DETAIL_SECTION_BG, { 0, 0, 0, 0 }, "detailSection")
+	if matrixRows then
+		applyBackdrop(section, { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, "detailSection")
 	else
 		applyBackdrop(section, DETAIL_SECTION_BG, DETAIL_COLORS.sectionBorder, "detailSection")
 		createPixelBorder(section, DETAIL_COLORS.sectionBorder)
 	end
 
-	local header = CreateFrame("Button", nil, section, "BackdropTemplate")
+	local header = CreateFrame(matrixRows and "Frame" or "Button", nil, section, "BackdropTemplate")
 	header:SetPoint("TOPLEFT", section, "TOPLEFT", 0, 0)
 	header:SetPoint("TOPRIGHT", section, "TOPRIGHT", 0, 0)
 	header:SetHeight(40)
-	applyBackdrop(header, DETAIL_COLORS.sectionHeaderBg, { 0, 0, 0, 0 }, "detailSection")
+	applyBackdrop(header, matrixRows and { 0, 0, 0, 0 } or DETAIL_COLORS.sectionHeaderBg, { 0, 0, 0, 0 }, "detailSection")
 	header.Text = header:CreateFontString(nil, "OVERLAY", FONT_HEADER)
 	header.Text:SetPoint("LEFT", header, "LEFT", 14, 0)
-	header.Text:SetPoint("RIGHT", header, "RIGHT", customizedCount > 0 and -78 or -34, 0)
+	header.Text:SetPoint("RIGHT", header, "RIGHT", customizedCount > 0 and (matrixRows and -58 or -78) or (matrixRows and -14 or -34), 0)
 	header.Text:SetJustifyH("LEFT")
 	header.Text:SetText(group.title or group.id)
 	setTextColor(header.Text, TEXT.main)
 	local width = math.max(30, (#tostring(customizedCount) * 9) + 18)
 	local chip = addStatusChip(header, tostring(customizedCount), TEXT.gold, width)
-	chip:SetPoint("RIGHT", header, "RIGHT", -36, 0)
+	chip:SetPoint("RIGHT", header, "RIGHT", matrixRows and -14 or -36, 0)
 	chip:SetShown(customizedCount > 0)
 	state.groupCountHeaders = state.groupCountHeaders or {}
 	state.groupCountHeaders[#state.groupCountHeaders + 1] = {
@@ -7783,19 +7954,21 @@ function lib._Internal.addGroupSection(state, group, pagePath, layout)
 		chip = chip,
 		group = group,
 	}
-	header.Chevron = createCollapseArrow(header, state.app, 12, collapsed)
-	header.Chevron:SetPoint("RIGHT", header, "RIGHT", -14, 0)
-	header:SetScript("OnClick", function()
-		state.collapsedGroups[group.id] = not collapsed
-		state:RenderContent()
-	end)
+	if not matrixRows then
+		header.Chevron = createCollapseArrow(header, state.app, 12, collapsed)
+		header.Chevron:SetPoint("RIGHT", header, "RIGHT", -14, 0)
+		header:SetScript("OnClick", function()
+			state.collapsedGroups[group.id] = not collapsed
+			state:RenderContent()
+		end)
+	end
 	local headerLine = header:CreateTexture(nil, "OVERLAY")
 	preparePixelTexture(headerLine)
 	headerLine:SetColorTexture(ROW_SEPARATOR[1], ROW_SEPARATOR[2], ROW_SEPARATOR[3], 0.42)
 	headerLine:SetPoint("BOTTOMLEFT", header, "BOTTOMLEFT", 0, 0)
 	headerLine:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", 0, 0)
 	headerLine:SetHeight(getPixelSize(header))
-	headerLine:SetShown(not collapsed)
+	headerLine:SetShown((not matrixRows) and not collapsed)
 
 	if not collapsed then
 		local columnWidth = controlLayout.columnWidth
@@ -8688,7 +8861,7 @@ function StateMixin:RefreshSidebarSelection()
 			selected = self.selectedCategoryID == row.categoryID and self.view ~= "dashboard"
 		end
 		row.selected = selected
-		setFrameBackdrop(row, selected and SELECTED_BG or SIDEBAR_BG, selected and CARD_BORDER_HOVER or { 0.42, 0.34, 0.20, 0.16 })
+		lib._Internal.setSidebarRowBackdrop(row, selected, false)
 		setTextColor(row.Text, selected and TEXT.gold or TEXT.main)
 		if row.Accent then row.Accent:SetShown(selected) end
 	end
@@ -8727,8 +8900,9 @@ function StateMixin:RenderSidebar()
 		frame.SidebarScroll._LibSettingsDesignerScrollStep = lib._Internal.getSidebarRowHeight(self.app)
 	end
 
-	local dashboard = createSidebarFrame(self, dashboardHeight)
-	applyBackdrop(dashboard, SIDEBAR_BG, { 0.42, 0.34, 0.20, 0.16 }, "sidebar")
+	local sidebarSearch = lib._Internal.shouldUseSidebarSearch(self.app)
+	local dashboard = sidebarSearch and createSidebarFixedFrame(self, dashboardHeight, 0) or createSidebarFrame(self, dashboardHeight)
+	lib._Internal.setSidebarRowBackdrop(dashboard, false, false)
 	dashboard.Accent = dashboard:CreateTexture(nil, "OVERLAY")
 	dashboard.Accent:SetColorTexture(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.85)
 	dashboard.Accent:SetPoint("TOPLEFT", dashboard, "TOPLEFT", 0, -6)
@@ -8744,15 +8918,11 @@ function StateMixin:RenderSidebar()
 	dashboard.view = "dashboard"
 	dashboard:SetScript("OnEnter", function(row)
 		if not row.selected then
-			setFrameBackdrop(row, { 0.105, 0.082, 0.045, 0.72 }, { 0.85, 0.62, 0.25, 0.52 })
+			lib._Internal.setSidebarRowBackdrop(row, false, true)
 		end
 	end)
 	dashboard:SetScript("OnLeave", function(row)
-		setFrameBackdrop(
-			row,
-			row.selected and SELECTED_BG or SIDEBAR_BG,
-			row.selected and CARD_BORDER_HOVER or { 0.42, 0.34, 0.20, 0.16 }
-		)
+		lib._Internal.setSidebarRowBackdrop(row, row.selected, false)
 	end)
 	dashboard:SetScript("OnClick", function()
 		frame.SearchBox:SetText("")
@@ -8760,40 +8930,38 @@ function StateMixin:RenderSidebar()
 	end)
 	self.sidebarRows.dashboard = dashboard
 
-	local search = createSidebarFrame(self, dashboardHeight)
-	applyBackdrop(search, SIDEBAR_BG, { 0.42, 0.34, 0.20, 0.16 }, "sidebar")
-	search.Accent = search:CreateTexture(nil, "OVERLAY")
-	search.Accent:SetColorTexture(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.85)
-	search.Accent:SetPoint("TOPLEFT", search, "TOPLEFT", 0, -6)
-	search.Accent:SetPoint("BOTTOMLEFT", search, "BOTTOMLEFT", 0, 6)
-	search.Accent:SetWidth(2)
-	search.Icon = createIcon(search, "Interface\\Common\\UI-Searchbox-Icon", iconSize, false)
-	search.Icon:SetPoint("LEFT", search, "LEFT", iconOffsetX, 0)
-	search.Text = search:CreateFontString(nil, "OVERLAY", FONT_TEXT)
-	search.Text:SetPoint("LEFT", search.Icon, "RIGHT", textGap, 0)
-	search.Text:SetPoint("RIGHT", search, "RIGHT", -12, 0)
-	search.Text:SetJustifyH("LEFT")
-	search.Text:SetText(_G.SEARCH or L["configCenterSearchPlaceholder"] or "Search settings")
-	search.view = "search"
-	search:SetScript("OnEnter", function(row)
-		if not row.selected then
-			setFrameBackdrop(row, { 0.105, 0.082, 0.045, 0.72 }, { 0.85, 0.62, 0.25, 0.52 })
-		end
-	end)
-	search:SetScript("OnLeave", function(row)
-		setFrameBackdrop(
-			row,
-			row.selected and SELECTED_BG or SIDEBAR_BG,
-			row.selected and CARD_BORDER_HOVER or { 0.42, 0.34, 0.20, 0.16 }
-		)
-	end)
-	search:SetScript("OnClick", function()
-		self:SetSearch()
-		if frame.SearchBox then
-			frame.SearchBox:SetFocus()
-		end
-	end)
-	self.sidebarRows.search = search
+	if not sidebarSearch then
+		local search = createSidebarFrame(self, dashboardHeight)
+		lib._Internal.setSidebarRowBackdrop(search, false, false)
+		search.Accent = search:CreateTexture(nil, "OVERLAY")
+		search.Accent:SetColorTexture(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.85)
+		search.Accent:SetPoint("TOPLEFT", search, "TOPLEFT", 0, -6)
+		search.Accent:SetPoint("BOTTOMLEFT", search, "BOTTOMLEFT", 0, 6)
+		search.Accent:SetWidth(2)
+		search.Icon = createIcon(search, "Interface\\Common\\UI-Searchbox-Icon", iconSize, false)
+		search.Icon:SetPoint("LEFT", search, "LEFT", iconOffsetX, 0)
+		search.Text = search:CreateFontString(nil, "OVERLAY", FONT_TEXT)
+		search.Text:SetPoint("LEFT", search.Icon, "RIGHT", textGap, 0)
+		search.Text:SetPoint("RIGHT", search, "RIGHT", -12, 0)
+		search.Text:SetJustifyH("LEFT")
+		search.Text:SetText(_G.SEARCH or L["configCenterSearchPlaceholder"] or "Search settings")
+		search.view = "search"
+		search:SetScript("OnEnter", function(row)
+			if not row.selected then
+				lib._Internal.setSidebarRowBackdrop(row, false, true)
+			end
+		end)
+		search:SetScript("OnLeave", function(row)
+			lib._Internal.setSidebarRowBackdrop(row, row.selected, false)
+		end)
+		search:SetScript("OnClick", function()
+			self:SetSearch()
+			if frame.SearchBox then
+				frame.SearchBox:SetFocus()
+			end
+		end)
+		self.sidebarRows.search = search
+	end
 
 	local featureSidebar = lib._Internal.shouldUseFeatureSidebar(self.app)
 	local lastSectionID
@@ -8819,7 +8987,7 @@ function StateMixin:RenderSidebar()
 					if page.sidebarHidden ~= true and page.hideSidebar ~= true then
 						local isNewPage = lib.IsPageOrChildNew(self.app, page)
 						local row = createSidebarFrame(self, lib._Internal.resolveSidebarNumber(self.app, "pageRowHeight", 36))
-						applyBackdrop(row, SIDEBAR_BG, { 0.42, 0.34, 0.20, 0.16 }, "sidebar")
+						lib._Internal.setSidebarRowBackdrop(row, false, false)
 						row.Accent = row:CreateTexture(nil, "OVERLAY")
 						row.Accent:SetColorTexture(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.85)
 						row.Accent:SetPoint("TOPLEFT", row, "TOPLEFT", 0, -6)
@@ -8840,15 +9008,11 @@ function StateMixin:RenderSidebar()
 						row.pageID = page.id
 						row:SetScript("OnEnter", function(sidebarRow)
 							if not sidebarRow.selected then
-								setFrameBackdrop(sidebarRow, { 0.105, 0.082, 0.045, 0.72 }, { 0.85, 0.62, 0.25, 0.52 })
+								lib._Internal.setSidebarRowBackdrop(sidebarRow, false, true)
 							end
 						end)
 						row:SetScript("OnLeave", function(sidebarRow)
-							setFrameBackdrop(
-								sidebarRow,
-								sidebarRow.selected and SELECTED_BG or SIDEBAR_BG,
-								sidebarRow.selected and CARD_BORDER_HOVER or { 0.42, 0.34, 0.20, 0.16 }
-							)
+							lib._Internal.setSidebarRowBackdrop(sidebarRow, sidebarRow.selected, false)
 						end)
 						row:SetScript("OnClick", function()
 							frame.SearchBox:SetText("")
@@ -8860,7 +9024,7 @@ function StateMixin:RenderSidebar()
 			else
 			local isNewCategory = lib.IsCategoryNew(self.app, category.id)
 			local row = createSidebarFrame(self, lib._Internal.getSidebarRowHeight(self.app, category))
-			applyBackdrop(row, SIDEBAR_BG, { 0.42, 0.34, 0.20, 0.16 }, "sidebar")
+			lib._Internal.setSidebarRowBackdrop(row, false, false)
 			row.Accent = row:CreateTexture(nil, "OVERLAY")
 			row.Accent:SetColorTexture(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.85)
 			row.Accent:SetPoint("TOPLEFT", row, "TOPLEFT", 0, -6)
@@ -8881,15 +9045,11 @@ function StateMixin:RenderSidebar()
 			row.categoryID = category.id
 			row:SetScript("OnEnter", function(sidebarRow)
 				if not sidebarRow.selected then
-					setFrameBackdrop(sidebarRow, { 0.105, 0.082, 0.045, 0.72 }, { 0.85, 0.62, 0.25, 0.52 })
+					lib._Internal.setSidebarRowBackdrop(sidebarRow, false, true)
 				end
 			end)
 			row:SetScript("OnLeave", function(sidebarRow)
-				setFrameBackdrop(
-					sidebarRow,
-					sidebarRow.selected and SELECTED_BG or SIDEBAR_BG,
-					sidebarRow.selected and CARD_BORDER_HOVER or { 0.42, 0.34, 0.20, 0.16 }
-				)
+				lib._Internal.setSidebarRowBackdrop(sidebarRow, sidebarRow.selected, false)
 			end)
 			row:SetScript("OnClick", function()
 				frame.SearchBox:SetText("")
@@ -9212,12 +9372,7 @@ local function createFrame(app)
 	frame.bg = frame:CreateTexture(nil, "BACKGROUND", nil, -2)
 	frame.bg:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -8)
 	frame.bg:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 10)
-	frame.bg:SetColorTexture(
-		lib.ThemeColors.frameBg[1],
-		lib.ThemeColors.frameBg[2],
-		lib.ThemeColors.frameBg[3],
-		lib.ThemeColors.frameBg[4]
-	)
+	lib._Internal.applyFrameBackground(frame, app)
 	frame.MaterialOverlay = frame:CreateTexture(nil, "BACKGROUND", nil, -1)
 	frame.MaterialOverlay:SetPoint("TOPLEFT", frame.bg, "TOPLEFT", 0, 0)
 	frame.MaterialOverlay:SetPoint("BOTTOMRIGHT", frame.bg, "BOTTOMRIGHT", 0, 0)
@@ -9458,10 +9613,23 @@ local function createFrame(app)
 	frame.SidebarShell:SetPoint("TOPLEFT", frame, "TOPLEFT", outerInsetLeft, -contentTop)
 	frame.SidebarShell:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", outerInsetLeft, outerInsetY)
 	frame.SidebarShell:SetWidth(SIDEBAR_WIDTH)
-	applyBackdrop(frame.SidebarShell, SIDEBAR_BG, PANEL_BORDER, "sidebar")
+	lib._Internal.applySidebarShellBackground(frame.SidebarShell, app)
+
+	local sidebarSearch = lib._Internal.shouldUseSidebarSearch(app)
+	if sidebarSearch then
+		frame.SidebarFixed = CreateFrame("Frame", nil, frame.SidebarShell)
+		frame.SidebarFixed:SetPoint("TOPLEFT", frame.SidebarShell, "TOPLEFT", 8, -8)
+		frame.SidebarFixed:SetPoint("TOPRIGHT", frame.SidebarShell, "TOPRIGHT", -28, -8)
+		frame.SidebarFixed:SetHeight(76)
+		frame.SearchShell:SetParent(frame.SidebarFixed)
+		frame.SearchShell:ClearAllPoints()
+		frame.SearchShell:SetPoint("TOPLEFT", frame.SidebarFixed, "TOPLEFT", 0, -44)
+		frame.SearchShell:SetPoint("TOPRIGHT", frame.SidebarFixed, "TOPRIGHT", 0, -44)
+		frame.SearchShell:SetHeight(28)
+	end
 
 	frame.SidebarScroll = CreateFrame("ScrollFrame", nil, frame.SidebarShell, "UIPanelScrollFrameTemplate")
-	frame.SidebarScroll:SetPoint("TOPLEFT", frame.SidebarShell, "TOPLEFT", 8, -8)
+	frame.SidebarScroll:SetPoint("TOPLEFT", frame.SidebarShell, "TOPLEFT", 8, sidebarSearch and -92 or -8)
 	frame.SidebarScroll:SetPoint("BOTTOMRIGHT", frame.SidebarShell, "BOTTOMRIGHT", -28, 8)
 	frame.SidebarScroll._LibSettingsDesignerScrollStep = 44
 	skinScrollFrame(frame.SidebarScroll)
@@ -9553,7 +9721,7 @@ local function createFrame(app)
 	frame.ContentShell = CreateFrame("Frame", nil, frame, "BackdropTemplate")
 	frame.ContentShell:SetPoint("TOPLEFT", frame.SidebarShell, "TOPRIGHT", 8, 0)
 	frame.ContentShell:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -outerInsetRight, outerInsetY)
-	applyBackdrop(frame.ContentShell, CONTENT_BG, PANEL_BORDER, "content")
+	lib._Internal.applyContentShellBackground(frame.ContentShell, app)
 
 	frame.Scroll = CreateFrame("ScrollFrame", nil, frame.ContentShell, "UIPanelScrollFrameTemplate")
 	frame.Scroll:SetPoint("TOPLEFT", frame.ContentShell, "TOPLEFT", 12, -12)
@@ -9615,14 +9783,7 @@ local function refreshFrameTheme(frame, app)
 	lib.ApplyThemeColors(app)
 	lib.ApplyThemeBorders(app)
 	lib.ApplyThemeTextures(app)
-	if frame.bg and frame.bg.SetColorTexture then
-		frame.bg:SetColorTexture(
-			lib.ThemeColors.frameBg[1],
-			lib.ThemeColors.frameBg[2],
-			lib.ThemeColors.frameBg[3],
-			lib.ThemeColors.frameBg[4]
-		)
-	end
+	lib._Internal.applyFrameBackground(frame, app)
 	if frame.MaterialOverlay and frame.MaterialOverlay.SetVertexColor then
 		frame.MaterialOverlay:SetVertexColor(
 			lib.ThemeColors.overlayTint[1],
@@ -9663,10 +9824,10 @@ local function refreshFrameTheme(frame, app)
 		setFrameBackdrop(frame.SearchShell, lib.ThemeColors.searchBg, lib.ThemeColors.searchBorder, "search")
 	end
 	if frame.SidebarShell then
-		setFrameBackdrop(frame.SidebarShell, SIDEBAR_BG, PANEL_BORDER, "sidebar")
+		lib._Internal.applySidebarShellBackground(frame.SidebarShell, app)
 	end
 	if frame.ContentShell then
-		setFrameBackdrop(frame.ContentShell, CONTENT_BG, PANEL_BORDER, "content")
+		lib._Internal.applyContentShellBackground(frame.ContentShell, app)
 	end
 	if frame.Title then
 		setTextColor(frame.Title, TEXT.topbarGold)
