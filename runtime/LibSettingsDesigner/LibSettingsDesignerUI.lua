@@ -8828,6 +8828,154 @@ function lib._Internal.renderSearch(state, query)
 	end
 end
 
+function lib._Internal.hideSearchPreview(frame)
+	frame = frame and (frame._LibSettingsDesignerState and frame or frame.frame) or frame
+	local preview = frame and frame.SearchPreview
+	if preview then
+		preview:Hide()
+	end
+end
+
+function lib._Internal.showSearchPreview(state, query)
+	local frame = state and state.frame
+	local app = state and state.app
+	if not (frame and frame.SearchShell and app) then
+		return
+	end
+	query = tostring(query or "")
+	if query == "" then
+		lib._Internal.hideSearchPreview(frame)
+		return
+	end
+	local results = app:GetSearchResults(query, 14)
+	if not frame.SearchPreview then
+		local preview = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+		preview:SetFrameStrata("DIALOG")
+		preview:SetFrameLevel((frame.SearchShell:GetFrameLevel() or frame:GetFrameLevel() or 1) + 20)
+		applyBackdrop(preview, { 0.030, 0.028, 0.022, 0.96 }, { 0.62, 0.48, 0.22, 0.72 }, "card")
+		frame.SearchPreview = preview
+	end
+	local preview = frame.SearchPreview
+	for _, child in ipairs(preview.Rows or {}) do
+		child:Hide()
+	end
+	preview.Rows = preview.Rows or {}
+	preview:ClearAllPoints()
+	preview:SetPoint("TOPLEFT", frame.SearchShell, "BOTTOMLEFT", 0, -4)
+	preview:SetWidth(math.max(220, frame.SearchShell:GetWidth() or 240))
+
+	local rowHeight = 34
+	local maxRows = math.min(#results, 6)
+	local y = -6
+	for index = 1, maxRows do
+		local result = results[index]
+		local row = preview.Rows[index]
+		if not row then
+			row = CreateFrame("Button", nil, preview, "BackdropTemplate")
+			preview.Rows[index] = row
+		end
+		if not row.Icon then
+			row.Icon = row:CreateTexture(nil, "OVERLAY")
+			row.Icon:SetSize(22, 22)
+			row.Icon:SetPoint("LEFT", row, "LEFT", 8, 0)
+			row.Title = row:CreateFontString(nil, "OVERLAY", FONT_TEXT)
+			row.Title:SetPoint("TOPLEFT", row.Icon, "TOPRIGHT", 8, -4)
+			row.Title:SetPoint("RIGHT", row, "RIGHT", -8, 0)
+			row.Title:SetHeight(15)
+			row.Title:SetJustifyH("LEFT")
+			row.Path = row:CreateFontString(nil, "OVERLAY", FONT_MUTED)
+			row.Path:SetPoint("TOPLEFT", row.Title, "BOTTOMLEFT", 0, -1)
+			row.Path:SetPoint("RIGHT", row.Title, "RIGHT", 0, 0)
+			row.Path:SetHeight(13)
+			row.Path:SetJustifyH("LEFT")
+			row:SetScript("OnEnter", function(self)
+				setFrameBackdrop(self, { 0.14, 0.12, 0.075, 0.78 }, { 0, 0, 0, 0 }, false)
+			end)
+			row:SetScript("OnLeave", function(self)
+				setFrameBackdrop(self, { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, false)
+			end)
+		end
+		if row.Text then row.Text:Hide() end
+		if row.Icon then row.Icon:Show() end
+		if row.Title then row.Title:Show() end
+		if row.Path then row.Path:Show() end
+		row:ClearAllPoints()
+		row:SetPoint("TOPLEFT", preview, "TOPLEFT", 4, y)
+		row:SetPoint("RIGHT", preview, "RIGHT", -4, 0)
+		row:SetHeight(rowHeight)
+		setFrameBackdrop(row, { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, false)
+		local page = app:GetPage(result.pageID)
+		local iconSource, iconIsAtlas = resolvePageIcon(app, page)
+		if iconIsAtlas and row.Icon.SetAtlas then
+			local ok = pcall(row.Icon.SetAtlas, row.Icon, iconSource, false)
+			if not ok then row.Icon:SetTexture(ASSET.fallback) end
+		else
+			row.Icon:SetTexture(iconSource or ASSET.fallback)
+		end
+		row.Title:SetText(result.label or (page and page.title) or result.id or "")
+		setTextColor(row.Title, TEXT.main)
+		row.Path:SetText(result._pageResult and getPagePath(app, page) or getControlPath(app, result))
+		setTextColor(row.Path, TEXT.subtle)
+		local clickedPageID = result.pageID
+		local clickedFocusID = result.focusID or result.id
+		row:SetScript("OnClick", function()
+			lib._Internal.hideSearchPreview(frame)
+			frame.SearchBox:ClearFocus()
+			state:SetPage(clickedPageID, clickedFocusID)
+		end)
+		row:Show()
+		y = y - rowHeight
+	end
+
+	local footerIndex = maxRows + 1
+	local footer = preview.Rows[footerIndex]
+	if not footer then
+		footer = CreateFrame("Button", nil, preview, "BackdropTemplate")
+		preview.Rows[footerIndex] = footer
+	end
+	if footer.Icon then footer.Icon:Hide() end
+	if footer.Title then footer.Title:Hide() end
+	if footer.Path then footer.Path:Hide() end
+	if not footer.Text then
+		footer.Text = footer:CreateFontString(nil, "OVERLAY", FONT_TEXT)
+		footer.Text:SetAllPoints(footer)
+		footer.Text:SetJustifyH("CENTER")
+		footer.Text:SetJustifyV("MIDDLE")
+	end
+	footer.Text:Show()
+	footer:ClearAllPoints()
+	footer:SetPoint("TOPLEFT", preview, "TOPLEFT", 4, y - 2)
+	footer:SetPoint("RIGHT", preview, "RIGHT", -4, 0)
+	footer:SetHeight(28)
+	setFrameBackdrop(footer, { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, false)
+	local showAll = _G.SHOW_ALL or "Show All"
+	local resultsText = _G.SEARCH_RESULTS or "Results"
+	footer.Text:SetText(showAll .. " " .. tostring(#results) .. " " .. resultsText)
+	setTextColor(footer.Text, TEXT.gold)
+	footer:SetScript("OnEnter", function(self)
+		setFrameBackdrop(self, { 0.14, 0.12, 0.075, 0.78 }, { 0, 0, 0, 0 }, false)
+	end)
+	footer:SetScript("OnLeave", function(self)
+		setFrameBackdrop(self, { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, false)
+	end)
+	footer:SetScript("OnClick", function()
+		state.activeSearchQuery = query
+		state.view = "search"
+		lib._Internal.hideSearchPreview(frame)
+		frame.SearchBox:ClearFocus()
+		state:RenderContent()
+	end)
+	footer:SetShown(#results > 0)
+	y = y - (#results > 0 and 30 or 0)
+
+	if #results == 0 then
+		preview:SetHeight(44)
+	else
+		preview:SetHeight(math.abs(y) + 4)
+	end
+	preview:SetShown(#results > 0)
+end
+
 function lib._Internal.controlMatchesSearchFilter(app, control, filter)
 	if filter == "changed" then
 		return app:IsControlCustomized(control)
@@ -8937,7 +9085,7 @@ function StateMixin:RenderContent()
 	clearFixedContent(self)
 	self.groupCountHeaders = {}
 	local query = self.frame.SearchBox:GetText() or ""
-	if query ~= "" then
+	if query ~= "" and self.activeSearchQuery == query then
 		self.resetSearchScroll = self.lastSearchQuery ~= query
 		self.lastSearchQuery = query
 		lib._Internal.renderSearch(self, query)
@@ -9250,6 +9398,8 @@ function StateMixin:SaveCurrentContentScroll()
 end
 
 function StateMixin:SetDashboard(restoreScroll)
+	self.activeSearchQuery = nil
+	lib._Internal.hideSearchPreview(self.frame)
 	self.resetContentScroll = true
 	self.restoreContentScrollKey = restoreScroll and "dashboard" or nil
 	self.view = "dashboard"
@@ -9259,6 +9409,8 @@ function StateMixin:SetDashboard(restoreScroll)
 end
 
 function StateMixin:SetSearch(restoreScroll)
+	self.activeSearchQuery = nil
+	lib._Internal.hideSearchPreview(self.frame)
 	self.resetContentScroll = true
 	self.restoreContentScrollKey = restoreScroll and ("search:" .. tostring(self.searchFilter or "all")) or nil
 	self.view = "search"
@@ -9273,6 +9425,8 @@ function StateMixin:SetSearch(restoreScroll)
 end
 
 function StateMixin:SetCategory(categoryID, restoreScroll)
+	self.activeSearchQuery = nil
+	lib._Internal.hideSearchPreview(self.frame)
 	local category = self.app and self.app.categoriesByID and self.app.categoriesByID[categoryID]
 	local tabPageID = lib._Internal.resolveCategoryTabPageID(self, category)
 	if tabPageID then
@@ -9332,6 +9486,8 @@ function StateMixin:ResolveFocusControlID(page, focusID)
 end
 
 function StateMixin:SetPage(pageID, focusControlID)
+	self.activeSearchQuery = nil
+	lib._Internal.hideSearchPreview(self.frame)
 	local page = self.app:GetPage(pageID)
 	if not page or (self.app.IsPageVisible and not self.app:IsPageVisible(page)) then
 		local categoryID = page and page.category or self.selectedCategoryID
@@ -9933,20 +10089,44 @@ local function createFrame(app)
 	frame._LibSettingsDesignerState = state
 	updateContentMetrics(state)
 	frame:SetScript("OnHide", function()
+		lib._Internal.hideSearchPreview(frame)
 		lib.ReleaseAllCustomHandles(state)
 	end)
 
 	frame.SearchBox:SetScript("OnTextChanged", function()
+		local query = frame.SearchBox:GetText() or ""
 		if frame.SearchPlaceholder then
-			frame.SearchPlaceholder:SetShown(frame.SearchBox:GetText() == "")
+			frame.SearchPlaceholder:SetShown(query == "")
 		end
 		if frame.SearchClearButton then
-			frame.SearchClearButton:SetShown(frame.SearchBox:GetText() ~= "")
+			frame.SearchClearButton:SetShown(query ~= "")
 		end
 		if state.suppressSearchRender then
 			return
 		end
-		state:RenderContent()
+		state.activeSearchQuery = nil
+		if query ~= "" then
+			lib._Internal.showSearchPreview(state, query)
+		else
+			lib._Internal.hideSearchPreview(frame)
+			state:RenderContent()
+		end
+	end)
+	frame.SearchBox:SetScript("OnEscapePressed", function(self)
+		lib._Internal.hideSearchPreview(frame)
+		self:ClearFocus()
+	end)
+	frame.SearchBox:SetScript("OnEnterPressed", function(self)
+		local query = self:GetText() or ""
+		if query ~= "" then
+			state.activeSearchQuery = query
+			state.view = "search"
+			lib._Internal.hideSearchPreview(frame)
+			self:ClearFocus()
+			state:RenderContent()
+		else
+			self:ClearFocus()
+		end
 	end)
 	frame.ResetButton:SetScript("OnClick", function()
 		confirmResetCurrentPage(state)
