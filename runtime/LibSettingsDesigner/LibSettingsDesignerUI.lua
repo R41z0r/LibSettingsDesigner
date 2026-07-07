@@ -2118,6 +2118,9 @@ end
 local function getSettingRowHeight(control, state)
 	local layoutType = getControlLayoutType(control)
 	local controlType = getControlType(control)
+	if controlType == "sectionheader" then
+		return tonumber(control.height or control.rowHeight) or 38
+	end
 	if controlType == "custom" and type(control.getHeight) == "function" then
 		local ok, height = pcall(control.getHeight, state and state.app, control, state)
 		if ok and tonumber(height) then
@@ -6286,6 +6289,24 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 	row._state = state
 	state.controlRows = state.controlRows or {}
 	state.controlRows[#state.controlRows + 1] = { row = row, control = control }
+	if controlType == "sectionheader" then
+		local label = createText(row, FONT_TEXT, control.label or control.title or control.id, TEXT.main)
+		label:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 4, 8)
+		label:SetPoint("RIGHT", row, "RIGHT", -8, 0)
+		label:SetHeight(20)
+		label.Text:SetJustifyV("MIDDLE")
+		setTextColor(label.Text, TEXT.main)
+		local line = row:CreateTexture(nil, "ARTWORK")
+		preparePixelTexture(line)
+		line:SetColorTexture(ROW_SEPARATOR[1], ROW_SEPARATOR[2], ROW_SEPARATOR[3], 0.34)
+		line:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 4, 4)
+		line:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", -8, 4)
+		line:SetHeight(getPixelSize(row))
+		if parent and parent._LibSettingsDesignerContentY then
+			row._LibSettingsDesignerContentY = parent._LibSettingsDesignerContentY + (yOffset or -42)
+		end
+		return row
+	end
 	styleInlineSettingRow(row)
 	local actionReserveWidth = lib._Internal.addControlActionButtons(row, app, control, state, lib._Internal.getControlActions(app, control, state))
 	local function rightInset(value)
@@ -7103,10 +7124,16 @@ function lib._Internal.collectPageGroups(app, page, mainToggle)
 		end
 	end
 	table.sort(groups, function(a, b)
+		local at = tostring(a.title or a.id or "")
+		local bt = tostring(b.title or b.id or "")
+		local al = string.lower(at)
+		local bl = string.lower(bt)
+		if al ~= bl then return al < bl end
+		if at ~= bt then return at < bt end
 		local ao = tonumber(a.order) or 1000
 		local bo = tonumber(b.order) or 1000
 		if ao ~= bo then return ao < bo end
-		return tostring(a.title) < tostring(b.title)
+		return tostring(a.id or "") < tostring(b.id or "")
 	end)
 	local _ = app
 	return groups
@@ -7998,27 +8025,44 @@ function lib._Internal.getGroupControlLayout(state, group, width)
 	local controls = (group and group.controls) or {}
 	if matrixRows and columnCount > 1 then
 		local cursorY = 0
-		for startIndex = 1, #controls, columnCount do
-			local rowHeight = 0
-			for offset = 0, columnCount - 1 do
-				local control = controls[startIndex + offset]
-				if control then
+		local index = 1
+		while index <= #controls do
+			local control = controls[index]
+			if getControlType(control) == "sectionheader" then
+				local rowHeight = getSettingRowHeight(control, state)
+				entries[#entries + 1] = {
+					control = control,
+					column = 1,
+					y = -(46 + cursorY),
+					height = rowHeight,
+					xOffset = sectionInset,
+					width = innerWidth,
+				}
+				cursorY = cursorY + rowHeight + rowGap
+				index = index + 1
+			else
+				local rowHeight = 0
+				local rowControls = {}
+				while index <= #controls and #rowControls < columnCount do
+					control = controls[index]
+					if getControlType(control) == "sectionheader" and #rowControls > 0 then
+						break
+					end
+					rowControls[#rowControls + 1] = control
 					rowHeight = math.max(rowHeight, getSettingRowHeight(control, state))
+					index = index + 1
 				end
-			end
-			for offset = 0, columnCount - 1 do
-				local control = controls[startIndex + offset]
-				if control then
+				for offset, rowControl in ipairs(rowControls) do
 					entries[#entries + 1] = {
-						control = control,
-						column = offset + 1,
+						control = rowControl,
+						column = offset,
 						y = -(46 + cursorY),
 						height = rowHeight,
 						xOffset = sectionInset,
 					}
 				end
+				cursorY = cursorY + rowHeight + rowGap
 			end
-			cursorY = cursorY + rowHeight + rowGap
 		end
 		columnHeights[1] = cursorY
 	else
@@ -8032,6 +8076,7 @@ function lib._Internal.getGroupControlLayout(state, group, width)
 				y = -(46 + columnHeights[column]),
 				height = rowHeight,
 				xOffset = sectionInset,
+				width = getControlType(control) == "sectionheader" and innerWidth or nil,
 			}
 			columnHeights[column] = columnHeights[column] + rowHeight + rowGap
 		end
@@ -8118,7 +8163,7 @@ function lib._Internal.addGroupSection(state, group, pagePath, layout)
 		local columnGap = controlLayout.columnGap
 		for index, entry in ipairs(controlLayout.entries) do
 			local x = (entry.xOffset or 12) + ((entry.column or 1) - 1) * (columnWidth + columnGap)
-			local row = addSettingRow(state, entry.control, pagePath, section, entry.y, columnWidth, x)
+			local row = addSettingRow(state, entry.control, pagePath, section, entry.y, entry.width or columnWidth, x)
 			if index == #controlLayout.entries and row.Separator then
 				row.Separator:Hide()
 			end
@@ -9176,16 +9221,19 @@ function lib._Internal.addSidebarSectionHeader(state, title)
 	local height = lib._Internal.getSidebarSectionHeight(state.app)
 	local header = createSidebarFrame(state, height)
 	header:EnableMouse(false)
-	header.Text = header:CreateFontString(nil, "OVERLAY", FONT_MUTED)
-	header.Text:SetPoint("LEFT", header, "LEFT", 12, 0)
+	header.Text = header:CreateFontString(nil, "OVERLAY", FONT_TEXT)
+	header.Text:SetPoint("LEFT", header, "LEFT", 12, -1)
 	header.Text:SetPoint("RIGHT", header, "RIGHT", -12, 0)
 	header.Text:SetJustifyH("LEFT")
 	header.Text:SetJustifyV("MIDDLE")
+	header.Text:SetTextScale(1.08)
 	header.Text:SetText(title or "")
 	setTextColor(header.Text, lib.ThemeColors.sidebarSectionText or { 0.82, 0.68, 0.42, 0.92 })
+	header.Text:SetShadowColor(0, 0, 0, 0.9)
+	header.Text:SetShadowOffset(1, -1)
 	header.Line = header:CreateTexture(nil, "ARTWORK")
 	preparePixelTexture(header.Line)
-	header.Line:SetColorTexture(PANEL_BORDER[1], PANEL_BORDER[2], PANEL_BORDER[3], 0.26)
+	header.Line:SetColorTexture(TEXT.gold[1], TEXT.gold[2], TEXT.gold[3], 0.36)
 	header.Line:SetPoint("LEFT", header.Text, "RIGHT", 10, 0)
 	header.Line:SetPoint("RIGHT", header, "RIGHT", -8, 0)
 	header.Line:SetHeight(getPixelSize(header))
