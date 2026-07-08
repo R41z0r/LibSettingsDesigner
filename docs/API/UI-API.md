@@ -353,6 +353,9 @@ app:RegisterPage({
 page the full content width. With that space, `groupColumns`, `columns`, or
 `layoutColumns` can render groups side by side. A group can set `column = 1` or
 `column = 2` to pin itself, otherwise groups flow into the shorter column.
+Group sorting remains `order` first for compatibility. Use
+`groupSort = "title"` or `sortGroups = "title"` on the page for alphabetical
+group sorting.
 
 Groups can also split their own controls:
 

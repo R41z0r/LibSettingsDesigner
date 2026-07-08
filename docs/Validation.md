@@ -45,6 +45,16 @@ repository root:
 lua -e 'assert(loadfile("runtime/LibSettingsDesigner/LibSettingsDesignerConfig.lua")); assert(loadfile("runtime/LibSettingsDesigner/LibSettingsDesignerUI.lua"))'
 ```
 
+When the source runtime changes, synchronize the sample addon's vendored copy
+before final validation:
+
+```bash
+cp runtime/LibSettingsDesigner/LibSettingsDesignerConfig.lua Samples/LibSettingsDesignerSample/libs/LibSettingsDesigner/LibSettingsDesignerConfig.lua
+cp runtime/LibSettingsDesigner/LibSettingsDesignerUI.lua Samples/LibSettingsDesignerSample/libs/LibSettingsDesigner/LibSettingsDesignerUI.lua
+diff -q runtime/LibSettingsDesigner/LibSettingsDesignerConfig.lua Samples/LibSettingsDesignerSample/libs/LibSettingsDesigner/LibSettingsDesignerConfig.lua
+diff -q runtime/LibSettingsDesigner/LibSettingsDesignerUI.lua Samples/LibSettingsDesignerSample/libs/LibSettingsDesigner/LibSettingsDesignerUI.lua
+```
+
 When runtime code adds or changes `L["..."]` strings, verify every key exists
 in every built-in locale:
 

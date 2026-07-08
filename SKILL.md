@@ -519,10 +519,10 @@ Canonical direct fields:
 
 | Object | Canonical fields |
 | :----- | :--------------- |
-| Category | `id`, `title`, `description`, `order`, `icon`, `iconAtlas`, `iconKey`, `tabView`, `pageTabs`, `tabs`, `tabbedPages`, `defaultPageID`, `rememberSelectedPage`, `sidebarSection`, `sectionTitle` |
-| Page | `id`, `category`, `title`, `description`, `descriptionKey`, `order`, `icon`, `iconAtlas`, `iconKey`, `mainToggleID`, `tabTitle`, `tabHidden`, `pageKey`, `newTagID`, `sidePanel`, `showSidePanel`, `groupColumns`, `columnGap`, `onOpen`, `layout`, `type`, `content`, `blocks`, `infoBlocks`, `searchEntries`, `getHeight`, `render`, `refresh`, `release`, `getSettingCount`, `getCustomizedCount` |
-| Group | `id`, `title`, `order`, `columns`, `column`, `columnGap` |
-| Control | `id`, `key`, `type`, `label`, `description`, `default`, `dbDefault`, `getValue`, `setValue`, `getSelection`, `setSelection`, `setting`, `parentCheck`, `isEnabled`, visibility fields, search fields |
+| Category | `id`, `title`, `description`, `order`, `icon`, `iconAtlas`, `iconKey`, `tabView`, `pageTabs`, `tabs`, `tabbedPages`, `defaultPageID`, `rememberSelectedPage`, `sidebarSection`, `sidebarSectionTitle`, `sectionTitle` |
+| Page | `id`, `category`, `title`, `description`, `descriptionKey`, `order`, `icon`, `iconAtlas`, `iconKey`, `mainToggleID`, `tabTitle`, `tabHidden`, `pageKey`, `newTagID`, `sidePanel`, `rightPanel`, `detailPanel`, `showSidePanel`, `groupColumns`, `columnGap`, `groupSort`, `sortGroups`, `onOpen`, `layout`, `type`, `content`, `blocks`, `infoBlocks`, `searchEntries`, `getHeight`, `render`, `refresh`, `release`, `getSettingCount`, `getCustomizedCount` |
+| Group | `id`, `title`, `order`, `columns`, `controlColumns`, `column`, `layoutColumn`, `columnGap`, `controlColumnGap` |
+| Control | `id`, `key`, `type`, `label`, `description`, `default`, `dbDefault`, `getValue`, `setValue`, `getSelection`, `setSelection`, `setting`, `parentCheck`, `isEnabled`, `column`, `actions`, visibility fields, search fields |
 
 Legacy aliases are mapped by `RegisterLegacyCategory`,
 `RegisterLegacySection`, and `RegisterLegacyControl`, not by plain direct
@@ -568,6 +568,7 @@ Common category fields:
 | `defaultPageID` / `defaultPage` / `pageID` | Initial page for category tab view. |
 | `rememberSelectedPage` / `rememberTab` | Remember the last selected tab page. |
 | `sidebarSection` / `navSection` / `section` | Optional left-sidebar section heading before this category. |
+| `sidebarSectionTitle` / `sectionTitle` | Display label when it differs from the section id. |
 
 Common page fields:
 
@@ -585,6 +586,9 @@ Common page fields:
 | `sidePanel` / `rightPanel` / `detailPanel` | Page-level right info-panel control. Set `false` for full-width content. |
 | `showSidePanel` / `showRightPanel` | Page-level show gate for the right info panel. |
 | `groupColumns` / `columns` / `layoutColumns` | Number of group-section columns for full-width pages. |
+| `groupColumnGap` / `columnGap` | Gap between page group columns. |
+| `groupSort` / `groupSortMode` | Optional group sort mode. Default sorts by `order`; use `"title"` for alphabetical group sorting. |
+| `sortGroups` / `sortPageGroups` | Set `false` to keep registration order, or `"title"` for alphabetical group sorting. |
 | `subnav` / `subnavigation` | Page-level opt-in for right-panel group links. |
 | `showSubnav` / `showSubnavigation` | Page-level show gate for optional right-panel group links. |
 | `pageKey` | Stable alternate page/tag key for wrappers and new badges. |
@@ -596,6 +600,18 @@ Common page fields:
 | `hidden` / `hiddenWhen` | Hide gates. |
 
 Use stable ids and keys. Do not derive page/control ids from localized labels.
+
+Group sorting is compatibility-sensitive. The default must remain `order`
+first, then title/id as a tie-breaker. Use `groupSort = "title"` or
+`sortGroups = "title"` only as an explicit per-page opt-in when a host addon
+wants alphabetical group sorting. Use `sortGroups = false` or
+`sortPageGroups = false` only when registration order should be preserved.
+
+Flexible layout fields are additive and should stay opt-in. `sidePanel = false`
+creates full-width page content, `groupColumns` lays out groups side by side,
+group `columns` lays out controls inside a group, and `actions` adds small
+right-aligned row tools. Do not change defaults for existing pages while adding
+layout features.
 
 ## Control Field Reference
 
@@ -656,7 +672,7 @@ runtime actively consumes as UI behavior:
 | Element | Important runtime-consumed fields |
 | :------ | :-------------------------------- |
 | Toggle/Checkbox | `default`, `key`, `getValue`, `setValue`, `parentCheck`, `isEnabled`, `refreshOnChange`, `requiresReload` |
-| Slider | `min`, `max`, `step`, `formatter`, `valueFormatter`, `suffix` |
+| Slider | `min`, `max`, `step`, `formatter`, `valueFormatter`, `suffix`, `actions` |
 | Dropdown/ScrollDropdown | `values`, `options`, `list`, `orderList`, `order`, `listFunc`, `optionfunc`, `menuHeight` |
 | MultiDropdown | `getSelection`, `setSelection`, `isSelectedFunc`, `setSelectedFunc`, `selectionSource`, `summary`, `callback`, `menuHeight` |
 | Input | `numeric`, `min`, `max`, `step`, `clampToRange`, `maxChars`, `readOnly`, `inputWidth`, `multiline` |
@@ -1175,8 +1191,9 @@ keywords = { "alias", "display name", "old setting name" }
 Use `app:GetSearchResults(query, limit)` for runtime search. There is no public
 `app:Search(query)` method in the current runtime.
 
-Runtime search returns controls. It does not currently return standalone pages.
-Each control search blob includes:
+Runtime search returns visible controls and explicit page `searchEntries`. It
+does not index arbitrary page `keywords` / `searchtags` by itself. Each control
+search blob includes:
 
 - control label/title/text/id
 - control description/desc
@@ -1187,10 +1204,17 @@ Each control search blob includes:
 - owning category title
 - control notes
 
-Page `keywords` and page `searchtags` are not indexed by the current runtime.
-Put page-level aliases on important controls, or implement page search support
-before documenting it. If both `keywords` and `searchtags` are set on a control,
-the current runtime indexes `keywords`.
+For custom/action pages, use `page.searchEntries` when the search result should
+open a page-specific target that is not a normal control:
+
+```lua
+searchEntries = {
+  { id = "rule.create", label = "Create Rule", keywords = { "filter", "new" }, focusID = "create" },
+}
+```
+
+If both `keywords` and `searchtags` are set on a control, the current runtime
+indexes `keywords`.
 
 Good control tags include old setting names, common abbreviations, slash command
 terms, module names, and user-facing terms from older UI.
@@ -1488,7 +1512,15 @@ For runtime code tasks when source files are present:
 
 ```bash
 lua -e 'assert(loadfile("runtime/LibSettingsDesigner/LibSettingsDesignerConfig.lua")); assert(loadfile("runtime/LibSettingsDesigner/LibSettingsDesignerUI.lua"))'
+luacheck runtime/LibSettingsDesigner Samples/LibSettingsDesignerSample
 ```
+
+When `runtime/LibSettingsDesigner/LibSettingsDesignerConfig.lua` or
+`runtime/LibSettingsDesigner/LibSettingsDesignerUI.lua` changes, synchronize the
+matching files under
+`Samples/LibSettingsDesignerSample/libs/LibSettingsDesigner/` before final
+validation. The sample addon's vendored copy should match the source runtime
+unless a task explicitly asks to test a divergent vendored snapshot.
 
 When validating a host addon that vendors the library, check that addon's local
 copy instead:

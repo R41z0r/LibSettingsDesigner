@@ -143,6 +143,8 @@ app:RegisterPage(data)
 | `showSidePanel` / `showRightPanel` | boolean/function | Page-level show gate for the right info panel. |
 | `groupColumns` / `columns` / `layoutColumns` | number/function | Number of group-section columns for full-width pages. |
 | `groupColumnGap` / `columnGap` | number/function | Gap between page group columns. |
+| `groupSort` / `groupSortMode` | string | Optional group sort mode. Default sorts by `order`; use `"title"` for alphabetical group sorting. |
+| `sortGroups` / `sortPageGroups` | boolean/string | Set `false` to keep registration order, or `"title"` for alphabetical group sorting. |
 | `newTagID` | string | New badge tag for the page. |
 | `onOpen` | function | Called as `onOpen(page, app, state)` when the page opens. |
 | `order` | number | Sort order. |

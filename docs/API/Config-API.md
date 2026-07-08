@@ -258,6 +258,9 @@ Normal settings pages use the right-side page info panel by default. Set
 when the page should use the full content width. Full-width pages can set
 `groupColumns = 2`, `columns = 2`, or `layoutColumns = 2` to render group
 sections side by side. Use `groupColumnGap` / `columnGap` to tune the gap.
+Groups keep the existing `order`-first sort by default. Set
+`groupSort = "title"` or `sortGroups = "title"` on the page only when groups
+should sort alphabetically before falling back to `order`.
 
 Pages with more than one visible group can show optional right-panel group
 links when the wide side-panel layout is active. The default is off for

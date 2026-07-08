@@ -639,6 +639,8 @@ function AppMixin:RegisterLegacySection(section, data)
 		hiddenWhen = data.hiddenWhen,
 		sortGroups = data.sortGroups,
 		sortPageGroups = data.sortPageGroups,
+		groupSort = data.groupSort,
+		groupSortMode = data.groupSortMode,
 		order = data.order or 500,
 		legacy = true,
 	})

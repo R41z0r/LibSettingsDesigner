@@ -90,6 +90,7 @@ app:RegisterPage({
   sidePanel = false,
   groupColumns = 2,
   groupColumnGap = 14,
+  groupSort = "title",
   order = 100,
 })
 
@@ -109,7 +110,9 @@ app:RegisterGroup("nameplates.general", {
 ```
 
 `sidePanel = false` removes the right info/navigation panel. `groupColumns = 2`
-then lets the page place group sections side by side.
+then lets the page place group sections side by side. Existing pages keep
+`order`-first group sorting; `groupSort = "title"` opts this page into
+alphabetical group sorting.
 
 ## [Mixed Control Panel][Top]
 

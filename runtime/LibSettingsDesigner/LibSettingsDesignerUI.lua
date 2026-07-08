@@ -6401,12 +6401,12 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 		local controlWidth = getFieldControlWidth(rowWidth)
 		if controlType == "slider" then
 			if matrixRows then
-				local valueWidth = 58
-				local sliderWidth = math.max(96, math.min(150, matrixControlWidth - valueWidth - 12))
+				local matrixValueWidth = 58
+				local sliderWidth = math.max(96, math.min(150, matrixControlWidth - matrixValueWidth - 12))
 				setMatrixTitle()
 				local valueText = createText(row, FONT_TEXT, "", TEXT.gold, "RIGHT")
 				valueText:SetPoint("LEFT", row, "LEFT", matrixControlX + sliderWidth + 10, 0)
-				valueText:SetSize(valueWidth, 20)
+				valueText:SetSize(matrixValueWidth, 20)
 				addSliderWidget(row, app, control, {
 					point = { "LEFT", row, "LEFT", matrixControlX, 0 },
 					width = sliderWidth,
@@ -7144,16 +7144,24 @@ function lib._Internal.collectPageGroups(app, page, mainToggle)
 		end
 	end
 	if page.sortGroups ~= false and page.sortPageGroups ~= false then
+		local groupSort = page.groupSort or page.groupSortMode or page.sortGroups or page.sortPageGroups
+		local sortByTitle = groupSort == "title" or groupSort == "name" or groupSort == "alpha" or groupSort == "alphabetical"
 		table.sort(groups, function(a, b)
 			local at = tostring(a.title or a.id or "")
 			local bt = tostring(b.title or b.id or "")
 			local al = string.lower(at)
 			local bl = string.lower(bt)
-			if al ~= bl then return al < bl end
-			if at ~= bt then return at < bt end
 			local ao = tonumber(a.order) or 1000
 			local bo = tonumber(b.order) or 1000
-			if ao ~= bo then return ao < bo end
+			if sortByTitle then
+				if al ~= bl then return al < bl end
+				if at ~= bt then return at < bt end
+				if ao ~= bo then return ao < bo end
+			else
+				if ao ~= bo then return ao < bo end
+				if al ~= bl then return al < bl end
+				if at ~= bt then return at < bt end
+			end
 			return tostring(a.id or "") < tostring(b.id or "")
 		end)
 	end
