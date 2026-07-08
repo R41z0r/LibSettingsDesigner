@@ -6290,12 +6290,32 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 	state.controlRows = state.controlRows or {}
 	state.controlRows[#state.controlRows + 1] = { row = row, control = control }
 	if controlType == "sectionheader" then
+		local labelLeft = 4
+		if control.icon or control.iconAtlas then
+			local icon = row:CreateTexture(nil, "ARTWORK")
+			icon:SetSize(18, 18)
+			icon:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 4, 8)
+			if control.iconAtlas and icon.SetAtlas then
+				local ok = pcall(icon.SetAtlas, icon, control.iconAtlas, false)
+				if not ok and control.icon then icon:SetTexture(control.icon) end
+			elseif control.icon then
+				icon:SetTexture(control.icon)
+			end
+			if type(control.iconTexCoord) == "table" then icon:SetTexCoord(unpack(control.iconTexCoord)) end
+			icon:Show()
+			labelLeft = 28
+		end
 		local label = createText(row, FONT_TEXT, control.label or control.title or control.id, TEXT.main)
-		label:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 4, 8)
+		label:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", labelLeft, 8)
 		label:SetPoint("RIGHT", row, "RIGHT", -8, 0)
 		label:SetHeight(20)
 		label.Text:SetJustifyV("MIDDLE")
-		setTextColor(label.Text, TEXT.main)
+		if type(control.textColor) == "table" then
+			local color = control.textColor
+			setTextColor(label.Text, { color[1] or color.r or 1, color[2] or color.g or 1, color[3] or color.b or 1, color[4] or color.a or 1 })
+		else
+			setTextColor(label.Text, TEXT.main)
+		end
 		local line = row:CreateTexture(nil, "ARTWORK")
 		preparePixelTexture(line)
 		line:SetColorTexture(ROW_SEPARATOR[1], ROW_SEPARATOR[2], ROW_SEPARATOR[3], 0.34)
@@ -7123,18 +7143,20 @@ function lib._Internal.collectPageGroups(app, page, mainToggle)
 			table.remove(groups, index)
 		end
 	end
-	table.sort(groups, function(a, b)
-		local at = tostring(a.title or a.id or "")
-		local bt = tostring(b.title or b.id or "")
-		local al = string.lower(at)
-		local bl = string.lower(bt)
-		if al ~= bl then return al < bl end
-		if at ~= bt then return at < bt end
-		local ao = tonumber(a.order) or 1000
-		local bo = tonumber(b.order) or 1000
-		if ao ~= bo then return ao < bo end
-		return tostring(a.id or "") < tostring(b.id or "")
-	end)
+	if page.sortGroups ~= false and page.sortPageGroups ~= false then
+		table.sort(groups, function(a, b)
+			local at = tostring(a.title or a.id or "")
+			local bt = tostring(b.title or b.id or "")
+			local al = string.lower(at)
+			local bl = string.lower(bt)
+			if al ~= bl then return al < bl end
+			if at ~= bt then return at < bt end
+			local ao = tonumber(a.order) or 1000
+			local bo = tonumber(b.order) or 1000
+			if ao ~= bo then return ao < bo end
+			return tostring(a.id or "") < tostring(b.id or "")
+		end)
+	end
 	local _ = app
 	return groups
 end
@@ -8023,12 +8045,19 @@ function lib._Internal.getGroupControlLayout(state, group, width)
 	end
 	local entries = {}
 	local controls = (group and group.controls) or {}
+	local function isMatrixFullWidthControl(control)
+		local controlType = getControlType(control)
+		return controlType == "sectionheader"
+			or controlType == "reorderlist"
+			or controlType == "colorpalette"
+			or controlType == "custom"
+	end
 	if matrixRows and columnCount > 1 then
 		local cursorY = 0
 		local index = 1
 		while index <= #controls do
 			local control = controls[index]
-			if getControlType(control) == "sectionheader" then
+			if isMatrixFullWidthControl(control) then
 				local rowHeight = getSettingRowHeight(control, state)
 				entries[#entries + 1] = {
 					control = control,
@@ -8045,7 +8074,7 @@ function lib._Internal.getGroupControlLayout(state, group, width)
 				local rowControls = {}
 				while index <= #controls and #rowControls < columnCount do
 					control = controls[index]
-					if getControlType(control) == "sectionheader" and #rowControls > 0 then
+					if isMatrixFullWidthControl(control) and #rowControls > 0 then
 						break
 					end
 					rowControls[#rowControls + 1] = control
