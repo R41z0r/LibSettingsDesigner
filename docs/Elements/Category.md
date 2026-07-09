@@ -26,6 +26,8 @@ A category is a top-level sidebar bucket for related pages.
 | `pageTabs` / `tabs` / `tabbedPages` | boolean/function | Simple aliases for `tabView`. |
 | `defaultPageID` / `defaultPage` / `pageID` | string | Initial page for category tab view. |
 | `rememberSelectedPage` / `rememberTab` | boolean | Remember last selected tab page for this category. |
+| `sidebarSection` / `navSection` / `section` | string/table/function | Optional section heading in the left sidebar. |
+| `sidebarSectionTitle` / `sectionTitle` | string/function | Display label when it differs from the section id. |
 
 ## [Example][Top]
 
@@ -35,6 +37,7 @@ app:RegisterCategory({
   title = INTERFACE_LABEL or "Interface",
   order = 100,
   iconAtlas = "hud-microbutton-character-up",
+  sidebarSection = "Core",
 })
 ```
 
@@ -61,6 +64,7 @@ app:RegisterCategory({
   title = "Icons",
   tabView = {
     enabled = true,
+    panel = true,
     defaultPageID = "icons.catalog",
     remember = true,
   },
@@ -87,6 +91,32 @@ When `remember = true`, the selected page is kept in the open frame state and
 can be persisted through the app callbacks shown above. Without a remembered
 page, the category opens `defaultPageID`; without a valid default, it opens the
 first visible page by order.
+
+Set `tabView.panel = true` when the tab strip should sit on a
+semi-transparent background. A table value can provide `bg` / `bgColor` and
+`border` / `borderColor`; otherwise the renderer uses the global tab theme
+colors. The panel uses the normal backdrop border only; it does not add a
+separate hard pixel outline around the whole tab strip.
+
+Panel tables can also add a packaged texture behind the tab buttons:
+
+```lua
+tabView = {
+  enabled = true,
+  panel = {
+    bg = { 0.00, 0.03, 0.04, 0.38 },
+    border = { 0.00, 0.58, 0.72, 0.45 },
+    texture = "Interface\\AddOns\\MyAddon\\Media\\Glows\\teal_horizontal_glow",
+    textureAlpha = 0.82,
+    textureBlendMode = "ADD",
+    textureColor = { 0.62, 1.00, 0.92, 1 },
+    textureInsets = { left = 0, right = 0, top = 1, bottom = 1 },
+  },
+}
+```
+
+Texture paths must point to files shipped by the host addon. Do not use local
+absolute development paths in registration data.
 
 [//]: # (Links)
 [Top]: #Top

@@ -88,8 +88,9 @@ Open it in game with:
 /lsdsample
 ```
 
-It demonstrates dashboard cards, status tiles, info pages, controls, search,
-new-feature badges, slash commands, and a vendored runtime copy.
+It demonstrates dashboard cards, status tiles, info pages, controls, flexible
+page layouts, sidebar sections, search, new-feature badges, slash commands, and
+a vendored runtime copy.
 
 ## Contributor Notes
 

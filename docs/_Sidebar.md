@@ -52,5 +52,6 @@
 &nbsp;&nbsp; • [Custom Hosted Editors](Examples/Custom-Hosted-Editors.md "Custom Hosted Editors") \
 &nbsp; **Polish** \
 &nbsp;&nbsp; • [Support Links](Examples/Support-Links.md "Support Links") \
+&nbsp;&nbsp; • [Flexible Layouts](Examples/Flexible-Layouts.md "Flexible Layouts") \
 &nbsp;&nbsp; • [Theme Colors](Examples/Theme-Colors.md "Theme Colors") \
 &nbsp;&nbsp; • [Theme Borders](Examples/Theme-Borders.md "Theme Borders")

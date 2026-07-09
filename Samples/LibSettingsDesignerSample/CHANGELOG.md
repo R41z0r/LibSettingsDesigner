@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Added sample coverage for sidebar sections, glow-backed tab panels, two-column tab pages, full-width two-column pages, mixed control columns, and per-setting action menus.
 - Added an Atomic sample theme preset with dark panels and cyan accents.
 - Added a sample category tab view that remembers the last selected tab page.
 - Added a Superellipse sample theme preset with dark cyan colors, shape texture overlays, and optional borderless window styling.

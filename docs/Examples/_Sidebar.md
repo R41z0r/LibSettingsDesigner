@@ -20,6 +20,7 @@
 &nbsp;&nbsp; • [Custom Hosted Editors](Custom-Hosted-Editors.md "Custom Hosted Editors") \
 &nbsp; **Polish** \
 &nbsp;&nbsp; • [Support Links](Support-Links.md "Support Links") \
+&nbsp;&nbsp; • [Flexible Layouts](Flexible-Layouts.md "Flexible Layouts") \
 &nbsp;&nbsp; • [Theme Colors](Theme-Colors.md "Theme Colors") \
 &nbsp;&nbsp; • [Theme Borders](Theme-Borders.md "Theme Borders")
 

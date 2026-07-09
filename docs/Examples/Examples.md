@@ -21,6 +21,7 @@
 | [Runtime Refresh](Runtime-Refresh.md) | Updating rendered rows after external state changes. |
 | [Custom Hosted Editors](Custom-Hosted-Editors.md) | Host complex editors, record lists, and table-like pages inside the settings center. |
 | [Support Links](Support-Links.md) | Discord, GitHub, Ko-fi, website, and support buttons on an info page. |
+| [Flexible Layouts](Flexible-Layouts.md) | Sidebar sections, tab panels, full-width pages, group columns, and row actions. |
 | [Theme Colors](Theme-Colors.md) | Global UI chrome color overrides with per-key fallback to defaults. |
 | [Theme Borders](Theme-Borders.md) | Backdrop border asset overrides with per-zone fallback to defaults. |
 

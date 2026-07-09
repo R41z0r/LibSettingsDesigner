@@ -69,6 +69,7 @@ wrapper bridges, documenting elements, or validating changes.
 - [Runtime Refresh](Examples/Runtime-Refresh.md)
 - [Custom Hosted Editors](Examples/Custom-Hosted-Editors.md)
 - [Support Links](Examples/Support-Links.md)
+- [Flexible Layouts](Examples/Flexible-Layouts.md)
 - [Theme Colors](Examples/Theme-Colors.md)
 - [Theme Borders](Examples/Theme-Borders.md)
 

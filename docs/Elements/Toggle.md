@@ -6,6 +6,7 @@
 - [Fields](#fields)
 - [Simple DB Toggle](#simple-db-toggle)
 - [Explicit Getter and Setter](#explicit-getter-and-setter)
+- [Row Actions](#row-actions)
 - [Common Mistakes](#common-mistakes)
 
 </details>
@@ -31,6 +32,7 @@ A toggle stores a boolean value. Use `type = "toggle"` or `type = "checkbox"`.
 | `setValue` | function | Explicit value writer. |
 | `isEnabled` | function | Disabled-state gate. |
 | `parentCheck` | function | Parent enabled-state gate. |
+| `actions` / `settingActions` | table/function | Optional small row action buttons or menus. |
 
 Legacy aliases such as `var`, `text`, `desc`, `get`, and `set` are only safe
 through wrapper/legacy mapping. New direct registrations should use canonical
@@ -65,6 +67,23 @@ app:RegisterControl("general.core", {
     MyAddon.RefreshPrivateMode()
   end,
 })
+```
+
+## [Row Actions][Top]
+
+Use `actions` for a small gear/menu next to the row. The host addon owns the
+callback behavior:
+
+```lua
+actions = {
+  {
+    id = "privateModeTools",
+    icon = "Interface\\Icons\\INV_Misc_Gear_01",
+    menu = {
+      { text = "Open advanced rules", onClick = function() MyAddon.OpenRules() end },
+    },
+  },
+}
 ```
 
 ## [Common Mistakes][Top]
