@@ -33,6 +33,8 @@ A toggle stores a boolean value. Use `type = "toggle"` or `type = "checkbox"`.
 | `isEnabled` | function | Disabled-state gate. |
 | `parentCheck` | function | Parent enabled-state gate. |
 | `actions` / `settingActions` | table/function | Optional small row action buttons or menus. |
+| `getColor` | function | Adds an inline color picker after the toggle. |
+| `setColor` | function | Writes the inline picker color. The picker is disabled while the toggle is off. |
 
 Legacy aliases such as `var`, `text`, `desc`, `get`, and `set` are only safe
 through wrapper/legacy mapping. New direct registrations should use canonical
@@ -68,6 +70,10 @@ app:RegisterControl("general.core", {
   end,
 })
 ```
+
+When a toggle also provides `getColor` and `setColor`, the row renders the
+toggle first and the color picker after it. The picker remains visible but is
+disabled and dimmed while the toggle value is `false`.
 
 ## [Row Actions][Top]
 

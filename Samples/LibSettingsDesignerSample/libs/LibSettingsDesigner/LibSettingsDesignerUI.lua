@@ -4211,20 +4211,24 @@ local function refreshControlRow(app, control, row)
 	}) do
 		local button = row[buttonKey]
 		if button then
-			button._eqolDisabled = not enabled
+			local buttonEnabled = enabled
+			if buttonKey == "swatch" and button._LibSettingsDesignerInlineToggleColor then
+				buttonEnabled = buttonEnabled and app:GetControlValue(control) == true
+			end
+			button._eqolDisabled = not buttonEnabled
 			if button.SetEnabled then
-				button:SetEnabled(enabled)
-			elseif enabled and button.Enable then
+				button:SetEnabled(buttonEnabled)
+			elseif buttonEnabled and button.Enable then
 				button:Enable()
 			elseif button.Disable then
 				button:Disable()
 			end
 			if button.EnableMouse then
-				button:EnableMouse(enabled)
+				button:EnableMouse(buttonEnabled)
 			end
 			if button._eqolApplyVisual then
 				button._eqolApplyVisual(button)
-			elseif enabled then
+			elseif buttonEnabled then
 				setFrameBackdrop(
 					button,
 					button.selected and SELECTED_BG or lib.ThemeColors.buttonBg,
@@ -4260,6 +4264,7 @@ local function refreshControlRow(app, control, row)
 		local ok, r, g, b, a = pcall(control.getColor, key)
 		if ok then
 			row.swatch.Texture:SetColorTexture(r or 1, g or 1, b or 1, a or 1)
+			row.swatch.Texture:SetAlpha(row.swatch._LibSettingsDesignerInlineToggleColor and app:GetControlValue(control) ~= true and 0.35 or 1)
 			lib.ApplyShapeColorTexture(row.swatch, r, g, b, a)
 			if row.hexText then
 				row.hexText.Text:SetText(
@@ -5805,6 +5810,7 @@ local function addColorWidget(row, app, control, opts)
 
 	local swatch = CreateFrame("Button", nil, row, "BackdropTemplate")
 	swatch._eqolOwner = row
+	swatch._LibSettingsDesignerInlineToggleColor = opts.inlineToggleColor == true
 	swatch:SetSize(34, 24)
 	if swatchOnly and opts.point then
 		swatch:SetPoint(opts.point[1], opts.point[2], opts.point[3], opts.point[4], opts.point[5])
@@ -6543,6 +6549,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 		desc:Hide()
 	end
 	local hasNewBadge = lib.IsControlNew(app, control)
+	local hasInlineToggleColor = layoutType == "boolean" and type(control.getColor) == "function" and type(control.setColor) == "function"
 	local function setMatrixTitle()
 		title:ClearAllPoints()
 		title:SetPoint("LEFT", row, "LEFT", textLeft, 0)
@@ -6553,20 +6560,28 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 	end
 
 	if layoutType == "boolean" then
+		local booleanControlInset = hasInlineToggleColor and 130 or 88
 		if compact then
 			title:ClearAllPoints()
 			title:SetPoint("LEFT", row, "LEFT", textLeft, 0)
-			title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and rightInset(154) or rightInset(88), 0)
+			title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and rightInset(booleanControlInset + 66) or rightInset(booleanControlInset), 0)
 			title:SetHeight(20)
 			title.Text:SetJustifyV("MIDDLE")
 		else
-			title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and rightInset(154) or rightInset(88), 0)
+			title:SetPoint("RIGHT", row, "RIGHT", hasNewBadge and rightInset(booleanControlInset + 66) or rightInset(booleanControlInset), 0)
 			desc:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -5)
-			desc:SetPoint("RIGHT", row, "RIGHT", rightInset(88), 0)
+			desc:SetPoint("RIGHT", row, "RIGHT", rightInset(booleanControlInset), 0)
 			desc:SetHeight(30)
 		end
+		if hasInlineToggleColor then
+			addColorWidget(row, app, control, {
+				point = { "RIGHT", row, "RIGHT", rightInset(16), 0 },
+				swatchOnly = true,
+				inlineToggleColor = true,
+			})
+		end
 		addToggleWidget(row, app, control, {
-			point = { "RIGHT", row, "RIGHT", rightInset(16), 0 },
+			point = { "RIGHT", row, "RIGHT", rightInset(hasInlineToggleColor and 62 or 16), 0 },
 		})
 	elseif layoutType == "stacked" then
 		local valueWidth = controlType == "slider" and 96 or 0
@@ -6848,7 +6863,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 
 	if hasNewBadge then
 		local newBadge = lib.CreateNewBadge(row)
-		newBadge:SetPoint("TOPRIGHT", row, "TOPRIGHT", rightInset(118), -8)
+		newBadge:SetPoint("TOPRIGHT", row, "TOPRIGHT", rightInset(hasInlineToggleColor and 150 or 118), -8)
 	end
 
 	refreshControlRow(app, control, row)
