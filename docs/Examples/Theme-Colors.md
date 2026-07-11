@@ -98,6 +98,7 @@ Semantic keys:
 | `tabText`, `tabSelectedText`, `tabUnderline` | Category tab label and underline colors. |
 | `button`, `buttonBorder`, `buttonHover`, `buttonHoverBorder` | Standard flat buttons. |
 | `search`, `searchBorder` | Search box shell. |
+| `searchResult`, `searchResultBorder`, `searchResultHover`, `searchResultHoverBorder` | Full-search result cards and their hover state. |
 | `selected` | Selected button/card state. |
 | `text`, `mutedText`, `subtleText`, `disabledText` | Text colors. |
 | `accent` | Gold/accent color used by arrows, resize grip, and badges. |
@@ -113,6 +114,7 @@ detailSectionBorder, detailSectionHeaderBg, rowBg, rowBorder, rowHoverBg,
 rowHoverBorder, rowSeparator, selectedBg, sidebarBg, frameBg, overlayTint,
 buttonBg, buttonBorder, buttonHoverBg, buttonHoverBorder, buttonTopbarBg,
 buttonTopbarBorder, buttonTopbarHoverBg, searchBg, searchBorder,
+searchResultBg, searchResultBorder, searchResultHoverBg, searchResultHoverBorder,
 disabledControlBg, disabledControlBorder, disabledRowBg, disabledRowBorder,
 sidebarSectionText, tabPanelBg, tabPanelBorder, tabBg, tabHoverBg,
 tabSelectedBg, tabText, tabSelectedText, tabUnderline, textMain, textMuted,

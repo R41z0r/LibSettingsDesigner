@@ -171,7 +171,7 @@ Direct keys:
 ```text
 default, panel, topbar, content, sidebar, card, dashboardCard, detailSection,
 detailColumn, row, button, topbarButton, search, control, toggle, toggleKnob,
-swatch, reorderItem, dropdownControl, inputControl, statusChip
+searchResult, swatch, reorderItem, dropdownControl, inputControl, statusChip
 ```
 
 The outer decorative frame uses a separate sliced texture config under

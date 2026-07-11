@@ -768,6 +768,10 @@ lib.DEFAULT_COLORS = lib.CopyThemeColorMap({
 	buttonTopbarHoverBg = { 0.165, 0.135, 0.080, 0.98 },
 	searchBg = { 0.035, 0.034, 0.032, 0.95 },
 	searchBorder = { 0.30, 0.28, 0.22, 0.90 },
+	searchResultBg = CARD_BG,
+	searchResultBorder = CARD_BORDER,
+	searchResultHoverBg = CARD_BG_HOVER,
+	searchResultHoverBorder = CARD_BORDER_HOVER,
 	disabledControlBg = DISABLED_CONTROL_BG,
 	disabledControlBorder = DISABLED_CONTROL_BORDER,
 	disabledRowBg = DISABLED_ROW_BG,
@@ -813,6 +817,10 @@ lib.COLOR_ALIASES = {
 	inputFocusBorder = "inputFocusBorder",
 	search = "searchBg",
 	searchBorder = "searchBorder",
+	searchResult = "searchResultBg",
+	searchResultBorder = "searchResultBorder",
+	searchResultHover = "searchResultHoverBg",
+	searchResultHoverBorder = "searchResultHoverBorder",
 	selected = "selectedBg",
 	tabPanel = "tabPanelBg",
 	tabPanelBorder = "tabPanelBorder",
@@ -882,6 +890,18 @@ function lib.ResolveThemeColors(app)
 	end
 	if not (overrides and overrides.inputFocusBorder ~= nil) then
 		colors.inputFocusBorder = lib.CopyThemeColor(colors.buttonHoverBorder)
+	end
+	if not (overrides and (overrides.searchResultBg ~= nil or overrides.searchResult ~= nil)) then
+		colors.searchResultBg = lib.CopyThemeColor(colors.cardBg)
+	end
+	if not (overrides and overrides.searchResultBorder ~= nil) then
+		colors.searchResultBorder = lib.CopyThemeColor(colors.cardBorder)
+	end
+	if not (overrides and (overrides.searchResultHoverBg ~= nil or overrides.searchResultHover ~= nil)) then
+		colors.searchResultHoverBg = lib.CopyThemeColor(colors.cardBgHover)
+	end
+	if not (overrides and overrides.searchResultHoverBorder ~= nil) then
+		colors.searchResultHoverBorder = lib.CopyThemeColor(colors.cardBorderHover)
 	end
 	return colors
 end
@@ -998,6 +1018,7 @@ lib.BORDER_KEYS = {
 	"statusChip",
 	"topbarButton",
 	"search",
+	"searchResult",
 	"control",
 	"toggle",
 	"toggleKnob",
@@ -1073,6 +1094,9 @@ function lib.ResolveThemeBorders(app)
 	end
 	if not (overrides and overrides.statusChip ~= nil) then
 		borders.statusChip = lib.CopyThemeBorder(borders.card)
+	end
+	if not (overrides and overrides.searchResult ~= nil) then
+		borders.searchResult = lib.CopyThemeBorder(borders.card)
 	end
 	return borders
 end
@@ -1156,6 +1180,9 @@ function lib.ResolveThemeTextures(app)
 	end
 	if not (overrides and overrides.statusChip ~= nil) then
 		textures.statusChip = lib.CopyThemeTextureStyle(textures.card)
+	end
+	if not (overrides and overrides.searchResult ~= nil) then
+		textures.searchResult = lib.CopyThemeTextureStyle(textures.card)
 	end
 	return textures
 end
@@ -4382,11 +4409,15 @@ local function updateContentMetrics(state)
 	local useSearchView = query ~= ""
 	local page = state.view == "page" and state.app and state.app:GetPage(state.selectedPageID) or nil
 	local category = page and state.app and state.app.categoriesByID[page.category or ""] or nil
+	local useStandardPageLayout = page and not (
+		page.layout == "info" or page.type == "info" or page.content or page.infoBlocks
+		or page.layout == "custom" or page.type == "custom" or type(page.render) == "function"
+	)
 	local useSidePanel = state.view == "page" and not useSearchView
 		and lib._Internal.shouldUsePageSidePanel and lib._Internal.shouldUsePageSidePanel(state, page)
-	local useFixedHeader = state.view == "page" and not useSearchView
+	local useFixedHeader = state.view == "page" and not useSearchView and useStandardPageLayout
 		and lib._Internal.shouldUsePageFixedHeader and lib._Internal.shouldUsePageFixedHeader(state, page, category)
-	local useMatrixFixedHeader = state.view == "page" and not useSearchView and lib._Internal.shouldUseMatrixRows(state)
+	local useMatrixFixedHeader = state.view == "page" and not useSearchView and useStandardPageLayout and lib._Internal.shouldUseMatrixRows(state)
 	useFixedHeader = useFixedHeader or useMatrixFixedHeader
 	local useContentGutter = useSearchView or state.view == "category" or state.view == "dashboard" or state.view == "search"
 	local useDetachedScrollbar = useSidePanel or useContentGutter
@@ -4574,8 +4605,14 @@ updateScrollFrameVisibility = function(scrollFrame)
 	local range = scrollFrame.GetVerticalScrollRange and scrollFrame:GetVerticalScrollRange() or 0
 	local shown = range and range > 1
 	scrollBar:SetShown(shown)
+	if scrollBar.SetAlpha then
+		scrollBar:SetAlpha(shown and 1 or 0)
+	end
 	if scrollFrame._LibSettingsDesignerScrollRail and scrollFrame._LibSettingsDesignerScrollRail.SetShown then
 		scrollFrame._LibSettingsDesignerScrollRail:SetShown(shown)
+		if scrollFrame._LibSettingsDesignerScrollRail.SetAlpha then
+			scrollFrame._LibSettingsDesignerScrollRail:SetAlpha(shown and 1 or 0)
+		end
 	end
 end
 
@@ -4734,6 +4771,32 @@ function lib.SetSearchQuery(state, query)
 	end
 	state.frame.SearchBox:SetText(query or "")
 	state.frame.SearchBox:ClearFocus()
+end
+
+function lib._Internal.openFullSearch(state, query)
+	local frame = state and state.frame
+	if not (frame and frame.SearchBox) then
+		return
+	end
+	query = tostring(query or "")
+	state.suppressSearchRender = true
+	frame.SearchBox:SetText(query)
+	state.activeSearchQuery = query ~= "" and query or nil
+	state.view = "search"
+	state.selectedCategoryID = nil
+	state.selectedPageID = nil
+	state.resetContentScroll = true
+	lib._Internal.hideSearchPreview(frame)
+	frame.SearchBox:ClearFocus()
+	state:RenderContent()
+	if _G.C_Timer and _G.C_Timer.After then
+		_G.C_Timer.After(0, function()
+			state.suppressSearchRender = nil
+			lib._Internal.hideSearchPreview(frame)
+		end)
+	else
+		state.suppressSearchRender = nil
+	end
 end
 
 local function getDashboardIconSize()
@@ -4901,7 +4964,7 @@ local function addDashboardStatusPanel(state, stats, statusConfig)
 	for index, tile in ipairs(tiles) do
 		local action
 		if tile.searchQuery then
-			action = function() lib.SetSearchQuery(state, tile.searchQuery) end
+			action = function() lib._Internal.openFullSearch(state, tile.searchQuery) end
 		elseif type(tile.onClick) == "function" then
 			action = function() tile.onClick(state, app, stats) end
 		end
@@ -7111,7 +7174,7 @@ function lib._Internal.addDashboardNewPanel(state, parent, entries, width, title
 	local openNewButton = makeFlatButton(panel, (getLocale(state.app)["configCenterOpenButton"] or "Open"), 74, 24)
 	openNewButton:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -12, -10)
 	openNewButton:SetScript("OnClick", function()
-		lib.SetSearchQuery(state, "tag:new")
+		lib._Internal.openFullSearch(state, "tag:new")
 	end)
 
 	for index, entry in ipairs(entries) do
@@ -9047,7 +9110,8 @@ function lib._Internal.renderSearch(state, query)
 		if control._pageResult then
 			local page = app:GetPage(control.pageID)
 			local card = createContentFrame(state, 102)
-			styleRaisedTile(card, true)
+			applyBackdrop(card, lib.ThemeColors.searchResultBg, lib.ThemeColors.searchResultBorder, "searchResult")
+			applyHoverState(card, lib.ThemeColors.searchResultBg, lib.ThemeColors.searchResultHoverBg, lib.ThemeColors.searchResultBorder, lib.ThemeColors.searchResultHoverBorder)
 			card:SetScript("OnMouseUp", function()
 				state:SetPage(control.pageID, control.focusID)
 			end)
@@ -9087,8 +9151,8 @@ function lib._Internal.renderSearch(state, query)
 		else
 			local rowHeight = getSettingRowHeight(control, state)
 			local card = createContentFrame(state, rowHeight + 52)
-			applyBackdrop(card, CARD_BG, CARD_BORDER, "card")
-			createPixelBorder(card, CARD_BORDER)
+			applyBackdrop(card, lib.ThemeColors.searchResultBg, lib.ThemeColors.searchResultBorder, "searchResult")
+			createPixelBorder(card, lib.ThemeColors.searchResultBorder)
 
 			local rowWidth = (state.contentWidth or CONTENT_WIDTH) - 24
 			local row = addSettingRow(state, control, nil, card, -10, rowWidth)
@@ -9364,6 +9428,16 @@ end
 local StateMixin = {}
 
 function StateMixin:RenderContent()
+	local scrollBar = getScrollBar(self.frame and self.frame.Scroll)
+	if scrollBar and scrollBar.Hide then
+		if scrollBar.SetAlpha then scrollBar:SetAlpha(0) end
+		scrollBar:Hide()
+	end
+	local scrollRail = self.frame and self.frame.Scroll and self.frame.Scroll._LibSettingsDesignerScrollRail
+	if scrollRail and scrollRail.Hide then
+		if scrollRail.SetAlpha then scrollRail:SetAlpha(0) end
+		scrollRail:Hide()
+	end
 	updateContentMetrics(self)
 	clearContent(self)
 	clearFixedContent(self)
