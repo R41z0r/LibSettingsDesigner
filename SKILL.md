@@ -420,7 +420,8 @@ background, overlay, panel, content, sidebar, card, cardHover, cardBorder,
 cardHoverBorder, row, rowBorder, rowHover, rowHoverBorder, tabPanel,
 tabPanelBorder, tab, tabHover, tabSelected, tabText, tabSelectedText,
 tabUnderline, button, buttonBorder, buttonHover, buttonHoverBorder, search,
-searchBorder, dropdown, dropdownBorder, dropdownHover, dropdownHoverBorder,
+searchBorder, searchResult, searchResultBorder, searchResultHover, searchResultHoverBorder,
+dropdown, dropdownBorder, dropdownHover, dropdownHoverBorder,
 input, inputBorder, inputFocus, inputFocusBorder, selected, text, mutedText,
 subtleText, disabledText, accent, topbarText
 ```
@@ -462,7 +463,7 @@ Common border keys:
 ```text
 default, panel, topbar, content, sidebar, card, dashboardCard, detailSection,
 detailColumn, row, button, topbarButton, search, control, toggle, toggleKnob,
-swatch, reorderItem, dropdownControl, inputControl, statusChip
+searchResult, swatch, reorderItem, dropdownControl, inputControl, statusChip
 ```
 
 The decorative outer frame is configured separately with `borders.window`,
