@@ -92,6 +92,10 @@ can be persisted through the app callbacks shown above. Without a remembered
 page, the category opens `defaultPageID`; without a valid default, it opens the
 first visible page by order.
 
+Page tabs show a `New` badge when their page or one of its visible controls has
+an active `newTagID`. The badge needs no tab-specific field: provide
+`isNewTag(tagID)` on the app and place stable tags on the page or its controls.
+
 Set `tabView.panel = true` when the tab strip should sit on a
 semi-transparent background. A table value can provide `bg` / `bgColor` and
 `border` / `borderColor`; otherwise the renderer uses the global tab theme
