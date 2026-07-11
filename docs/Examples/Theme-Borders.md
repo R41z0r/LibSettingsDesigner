@@ -171,7 +171,7 @@ Direct keys:
 ```text
 default, panel, topbar, content, sidebar, card, dashboardCard, detailSection,
 detailColumn, row, button, topbarButton, search, control, toggle, toggleKnob,
-swatch, reorderItem
+swatch, reorderItem, dropdownControl, inputControl, statusChip
 ```
 
 The outer decorative frame uses a separate sliced texture config under
@@ -207,6 +207,11 @@ color / colorSwatch -> swatch
 dashboard -> dashboardCard
 detail -> detailSection
 ```
+
+`dropdownControl` is the dedicated opt-in dropdown style. Existing `dropdown`
+remains an alias for `button` for backward compatibility. Set app or control
+`dropdownStyle = "themed"` to use `dropdownControl` plus the dedicated dropdown
+theme colors.
 
 ## [Rules][Top]
 

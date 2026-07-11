@@ -107,6 +107,9 @@ and `setDensity` when that choice should persist in SavedVariables. Set
 | `colors` / `colorTable` / `themeColors` | table/function | Optional global UI theme color overrides. Missing keys keep defaults. |
 | `borders` / `themeBorders` / `borderAssets` | table/function | Optional global UI border asset overrides. Missing keys keep defaults. Use `window` / `windowBorder` for the decorative outer frame. |
 | `textures` / `themeTextures` / `textureBorders` / `shapeTextures` | table/function | Optional 3-slice texture overlays for non-backdrop shape art. Missing keys keep normal backdrops only. |
+| `dropdownStyle` | string | Optional `"themed"` / `"modern"` opt-in for dedicated dropdown colors and `dropdownControl` border/texture styles. Omit to preserve the established button appearance. |
+| `dropdownTextOutline` | boolean | Controls the value-text outline for themed dropdowns. Only `false` disables it. |
+| `inputStyle` | string | Optional `"themed"` / `"modern"` opt-in for dedicated input colors and `inputControl` border/texture styles. |
 | `windowBorder` / `windowBorderArt` / `panelBorderArt` | boolean/function | Set to `false` to hide the packaged outer window art frame. |
 | `density` | string/function | Initial density, `"compact"` or `"comfortable"`. |
 | `getDensity(app)` / `setDensity(density, app)` | function | Read/write the user's selected density. |

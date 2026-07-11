@@ -755,6 +755,14 @@ lib.DEFAULT_COLORS = lib.CopyThemeColorMap({
 	buttonBorder = CARD_BORDER,
 	buttonHoverBg = CARD_BG_HOVER,
 	buttonHoverBorder = CARD_BORDER_HOVER,
+	dropdownBg = { 0.070, 0.065, 0.055, 0.92 },
+	dropdownBorder = CARD_BORDER,
+	dropdownHoverBg = CARD_BG_HOVER,
+	dropdownHoverBorder = CARD_BORDER_HOVER,
+	inputBg = { 0.035, 0.038, 0.043, 0.94 },
+	inputBorder = CARD_BORDER,
+	inputFocusBg = { 0.050, 0.052, 0.056, 0.98 },
+	inputFocusBorder = CARD_BORDER_HOVER,
 	buttonTopbarBg = { 0.100, 0.090, 0.070, 0.88 },
 	buttonTopbarBorder = { 0.46, 0.36, 0.18, 0.70 },
 	buttonTopbarHoverBg = { 0.165, 0.135, 0.080, 0.98 },
@@ -795,6 +803,14 @@ lib.COLOR_ALIASES = {
 	buttonBorder = "buttonBorder",
 	buttonHover = "buttonHoverBg",
 	buttonHoverBorder = "buttonHoverBorder",
+	dropdown = "dropdownBg",
+	dropdownBorder = "dropdownBorder",
+	dropdownHover = "dropdownHoverBg",
+	dropdownHoverBorder = "dropdownHoverBorder",
+	input = "inputBg",
+	inputBorder = "inputBorder",
+	inputFocus = "inputFocusBg",
+	inputFocusBorder = "inputFocusBorder",
 	search = "searchBg",
 	searchBorder = "searchBorder",
 	selected = "selectedBg",
@@ -842,6 +858,30 @@ function lib.ResolveThemeColors(app)
 		for alias, key in pairs(lib.COLOR_ALIASES) do
 			lib.ApplyThemeColorValue(colors, overrides, alias, key)
 		end
+	end
+	if not (overrides and (overrides.dropdownBg ~= nil or overrides.dropdown ~= nil)) then
+		colors.dropdownBg = lib.CopyThemeColor(colors.buttonBg)
+	end
+	if not (overrides and overrides.dropdownBorder ~= nil) then
+		colors.dropdownBorder = lib.CopyThemeColor(colors.buttonBorder)
+	end
+	if not (overrides and (overrides.dropdownHoverBg ~= nil or overrides.dropdownHover ~= nil)) then
+		colors.dropdownHoverBg = lib.CopyThemeColor(colors.buttonHoverBg)
+	end
+	if not (overrides and overrides.dropdownHoverBorder ~= nil) then
+		colors.dropdownHoverBorder = lib.CopyThemeColor(colors.buttonHoverBorder)
+	end
+	if not (overrides and (overrides.inputBg ~= nil or overrides.input ~= nil)) then
+		colors.inputBg = lib.CopyThemeColor(colors.buttonBg)
+	end
+	if not (overrides and overrides.inputBorder ~= nil) then
+		colors.inputBorder = lib.CopyThemeColor(colors.buttonBorder)
+	end
+	if not (overrides and (overrides.inputFocusBg ~= nil or overrides.inputFocus ~= nil)) then
+		colors.inputFocusBg = lib.CopyThemeColor(colors.buttonHoverBg)
+	end
+	if not (overrides and overrides.inputFocusBorder ~= nil) then
+		colors.inputFocusBorder = lib.CopyThemeColor(colors.buttonHoverBorder)
 	end
 	return colors
 end
@@ -953,6 +993,9 @@ lib.BORDER_KEYS = {
 	"detailColumn",
 	"row",
 	"button",
+	"dropdownControl",
+	"inputControl",
+	"statusChip",
 	"topbarButton",
 	"search",
 	"control",
@@ -972,6 +1015,7 @@ lib.BORDER_ALIASES = {
 	switch = "toggle",
 	switchKnob = "toggleKnob",
 	dropdown = "button",
+	dropdowns = "button",
 	input = "control",
 	color = "swatch",
 	colorSwatch = "swatch",
@@ -1020,6 +1064,15 @@ function lib.ResolveThemeBorders(app)
 				borders[key] = lib.CopyThemeBorder(value)
 			end
 		end
+	end
+	if not (overrides and overrides.dropdownControl ~= nil) then
+		borders.dropdownControl = lib.CopyThemeBorder(borders.button)
+	end
+	if not (overrides and overrides.inputControl ~= nil) then
+		borders.inputControl = lib.CopyThemeBorder(borders.control)
+	end
+	if not (overrides and overrides.statusChip ~= nil) then
+		borders.statusChip = lib.CopyThemeBorder(borders.card)
 	end
 	return borders
 end
@@ -1094,6 +1147,15 @@ function lib.ResolveThemeTextures(app)
 				textures[key] = nil
 			end
 		end
+	end
+	if not (overrides and overrides.dropdownControl ~= nil) then
+		textures.dropdownControl = lib.CopyThemeTextureStyle(textures.button)
+	end
+	if not (overrides and overrides.inputControl ~= nil) then
+		textures.inputControl = lib.CopyThemeTextureStyle(textures.control)
+	end
+	if not (overrides and overrides.statusChip ~= nil) then
+		textures.statusChip = lib.CopyThemeTextureStyle(textures.card)
 	end
 	return textures
 end
@@ -1921,8 +1983,12 @@ end
 
 function lib.ApplyFlatButtonVisual(button)
 	if not button then return end
+	local styleKey = button._eqolBorderStyleKey or "button"
 	if lib.IsWidgetDisabled(button) then
-		setFrameBackdrop(button, DISABLED_CONTROL_BG, DISABLED_CONTROL_BORDER)
+		if lib._Internal.refreshDropdownTextOutline then
+			lib._Internal.refreshDropdownTextOutline(button._eqolValueText, false)
+		end
+		setFrameBackdrop(button, DISABLED_CONTROL_BG, DISABLED_CONTROL_BORDER, styleKey)
 		if button.Text then setTextColor(button.Text, TEXT.disabled) end
 		if button.Icon and button.Icon.SetAlpha then button.Icon:SetAlpha(0.45) end
 		if button.Arrow and button.Arrow.SetVertexColor then
@@ -1931,14 +1997,18 @@ function lib.ApplyFlatButtonVisual(button)
 		end
 		return
 	end
+	if lib._Internal.refreshDropdownTextOutline then
+		lib._Internal.refreshDropdownTextOutline(button._eqolValueText, true)
+	end
 	if button.selected then
-		setFrameBackdrop(button, SELECTED_BG, CARD_BORDER_HOVER)
+		setFrameBackdrop(button, SELECTED_BG, CARD_BORDER_HOVER, styleKey)
 	else
-			setFrameBackdrop(
-				button,
-				button._eqolNormalBg or lib.ThemeColors.buttonBg,
-				button._eqolNormalBorder or lib.ThemeColors.buttonBorder
-			)
+		setFrameBackdrop(
+			button,
+			button._eqolNormalBg or lib.ThemeColors.buttonBg,
+			button._eqolNormalBorder or lib.ThemeColors.buttonBorder,
+			styleKey
+		)
 	end
 	if button.Text then setTextColor(button.Text, TEXT.main) end
 	if button.Icon and button.Icon.SetAlpha then button.Icon:SetAlpha(1) end
@@ -3582,23 +3652,25 @@ function lib.AttachControlNoteHover(row, state, control)
 	if #notes == 0 then
 		return
 	end
+	local matrixRows = lib._Internal.shouldUseMatrixRows(row and row._state)
+	local matrixBorder = { 0, 0, 0, 0 }
 	row:SetScript("OnEnter", function(self)
 		if self._eqolDisabled then
-			setFrameBackdrop(self, DISABLED_ROW_BG, DISABLED_ROW_BORDER)
-			if self.SetBorderColor then self:SetBorderColor(DISABLED_ROW_BORDER) end
+			setFrameBackdrop(self, DISABLED_ROW_BG, matrixRows and matrixBorder or DISABLED_ROW_BORDER, matrixRows and false or nil)
+			if self.SetBorderColor then self:SetBorderColor(matrixRows and matrixBorder or DISABLED_ROW_BORDER) end
 			return
 		end
-		setFrameBackdrop(self, ROW_HOVER_BG, ROW_HOVER_BORDER)
-		if self.SetBorderColor then self:SetBorderColor(ROW_HOVER_BORDER) end
+		setFrameBackdrop(self, matrixRows and MATRIX_ROW_BG or ROW_HOVER_BG, matrixRows and matrixBorder or ROW_HOVER_BORDER, matrixRows and false or nil)
+		if self.SetBorderColor then self:SetBorderColor(matrixRows and matrixBorder or ROW_HOVER_BORDER) end
 		lib.ShowControlNotePanel(state, self, control)
 	end)
 	row:SetScript("OnLeave", function(self)
 		if self._eqolDisabled then
-			setFrameBackdrop(self, DISABLED_ROW_BG, DISABLED_ROW_BORDER)
-			if self.SetBorderColor then self:SetBorderColor(DISABLED_ROW_BORDER) end
+			setFrameBackdrop(self, DISABLED_ROW_BG, matrixRows and matrixBorder or DISABLED_ROW_BORDER, matrixRows and false or nil)
+			if self.SetBorderColor then self:SetBorderColor(matrixRows and matrixBorder or DISABLED_ROW_BORDER) end
 		else
-			setFrameBackdrop(self, ROW_BG, ROW_BORDER)
-			if self.SetBorderColor then self:SetBorderColor(ROW_BORDER) end
+			setFrameBackdrop(self, matrixRows and MATRIX_ROW_BG or ROW_BG, matrixRows and matrixBorder or ROW_BORDER, matrixRows and false or nil)
+			if self.SetBorderColor then self:SetBorderColor(matrixRows and matrixBorder or ROW_BORDER) end
 		end
 		lib.HideControlNotePanel(state)
 	end)
@@ -4013,6 +4085,9 @@ function makeFlatButton(parent, text, width, height, iconSource, iconIsAtlas)
 	button._eqolOwner = parent
 	button._eqolNormalBg = lib.ThemeColors.buttonBg
 	button._eqolNormalBorder = lib.ThemeColors.buttonBorder
+	button._eqolHoverBg = lib.ThemeColors.buttonHoverBg
+	button._eqolHoverBorder = lib.ThemeColors.buttonHoverBorder
+	button._eqolBorderStyleKey = "button"
 	applyBackdrop(button, button._eqolNormalBg, button._eqolNormalBorder, "button")
 	local leftInset = 10
 	if iconSource then
@@ -4033,7 +4108,7 @@ function makeFlatButton(parent, text, width, height, iconSource, iconIsAtlas)
 			lib.ApplyFlatButtonVisual(self)
 			return
 		end
-		setFrameBackdrop(self, lib.ThemeColors.buttonHoverBg, lib.ThemeColors.buttonHoverBorder)
+		setFrameBackdrop(self, self._eqolHoverBg, self._eqolHoverBorder, self._eqolBorderStyleKey)
 	end
 	button._eqolOnLeave = function(self)
 		lib.ApplyFlatButtonVisual(self)
@@ -4095,12 +4170,16 @@ local function refreshControlRow(app, control, row)
 	end
 	if row.editBox then
 		local editEnabled = enabled and not control.readOnly
+		row.editBox._eqolDisabled = not editEnabled
 		if row.editBox.SetEnabled then
 			row.editBox:SetEnabled(editEnabled)
 		elseif editEnabled and row.editBox.Enable then
 			row.editBox:Enable()
 		elseif row.editBox.Disable then
 			row.editBox:Disable()
+		end
+		if lib._Internal.applyThemedInputVisual then
+			lib._Internal.applyThemedInputVisual(row.editBox, editEnabled, editEnabled and row.editBox:HasFocus())
 		end
 		row.editBox:SetText(lib.FormatControlValue(control, app:GetControlValue(control)))
 	end
@@ -4620,7 +4699,7 @@ end
 local function addStatusChip(parent, text, color, width)
 	local chip = CreateFrame("Frame", nil, parent, "BackdropTemplate")
 	chip:SetSize(width or 86, 20)
-	applyBackdrop(chip, { 0.02, 0.05, 0.025, 0.86 }, { color[1], color[2], color[3], 0.45 }, "card")
+	applyBackdrop(chip, { 0.02, 0.05, 0.025, 0.86 }, { color[1], color[2], color[3], 0.45 }, "statusChip")
 	chip.Text = chip:CreateFontString(nil, "OVERLAY", FONT_MUTED)
 	chip.Text:SetAllPoints(chip)
 	chip.Text:SetJustifyH("CENTER")
@@ -5310,6 +5389,60 @@ local function addSliderWidget(row, app, control, opts)
 	return slider
 end
 
+function lib._Internal.useThemedDropdown(app, control)
+	local style = control and control.dropdownStyle
+	if style == nil then
+		style = app and app.opts and app.opts.dropdownStyle
+	end
+	return style == "themed" or style == "modern"
+end
+
+function lib._Internal.applyDropdownTextOutline(fontString, app, control)
+	if not (fontString and lib._Internal.useThemedDropdown(app, control)) then
+		return
+	end
+	local enabled = control and control.dropdownTextOutline
+	if enabled == nil then
+		enabled = app and app.opts and app.opts.dropdownTextOutline
+	end
+	if enabled == false then
+		return
+	end
+	local font, size, flags = fontString:GetFont()
+	flags = tostring(flags or "")
+	if font and size then
+		fontString._LibSettingsDesignerDropdownFont = { font = font, size = size, flags = flags }
+		lib._Internal.refreshDropdownTextOutline(fontString, true)
+	end
+end
+
+function lib._Internal.refreshDropdownTextOutline(fontString, enabled)
+	local fontState = fontString and fontString._LibSettingsDesignerDropdownFont
+	if not fontState then
+		return
+	end
+	local flags = fontState.flags
+	if enabled and not flags:find("OUTLINE", 1, true) then
+		flags = flags == "" and "OUTLINE" or (flags .. ",OUTLINE")
+	end
+	fontString:SetFont(fontState.font, fontState.size, flags)
+end
+
+function lib._Internal.applyDropdownButtonTheme(button, app, control, modernLayout)
+	if lib._Internal.useThemedDropdown(app, control) then
+		button._eqolNormalBg = lib.ThemeColors.dropdownBg
+		button._eqolNormalBorder = lib.ThemeColors.dropdownBorder
+		button._eqolHoverBg = lib.ThemeColors.dropdownHoverBg
+		button._eqolHoverBorder = lib.ThemeColors.dropdownHoverBorder
+		button._eqolBorderStyleKey = "dropdownControl"
+	elseif modernLayout then
+		button._eqolNormalBg = { 0.025, 0.034, 0.038, 0.72 }
+		button._eqolNormalBorder = { 0.38, 0.45, 0.43, 0.48 }
+		button._eqolBorderStyleKey = "control"
+	end
+	lib.ApplyFlatButtonVisual(button)
+end
+
 local function addDropdownWidget(row, app, control, opts)
 	opts = opts or {}
 	local options = opts.options or getControlOptions(control)
@@ -5318,11 +5451,7 @@ local function addDropdownWidget(row, app, control, opts)
 		return
 	end
 	local button = makeFlatButton(row, "", opts.width or 220, opts.height or 24)
-	if opts.modern then
-		button._eqolNormalBg = { 0.025, 0.034, 0.038, 0.72 }
-		button._eqolNormalBorder = { 0.38, 0.45, 0.43, 0.48 }
-		setFrameBackdrop(button, button._eqolNormalBg, button._eqolNormalBorder, "control")
-	end
+	lib._Internal.applyDropdownButtonTheme(button, app, control, opts.modern)
 	if opts.point then
 		button:SetPoint(opts.point[1], opts.point[2], opts.point[3], opts.point[4], opts.point[5])
 	else
@@ -5335,6 +5464,8 @@ local function addDropdownWidget(row, app, control, opts)
 	row.value:SetHeight(20)
 	row.value.Text:SetJustifyH("LEFT")
 	row.value.Text:SetJustifyV("MIDDLE")
+	button._eqolValueText = row.value.Text
+	lib._Internal.applyDropdownTextOutline(row.value.Text, app, control)
 	local arrow = createDropdownArrow(button, app, opts.modern and 14 or 12)
 	button.Arrow = arrow
 	arrow:SetPoint("RIGHT", button, "RIGHT", opts.modern and -10 or -8, 0)
@@ -5393,11 +5524,7 @@ local function addMultiDropdownWidget(row, app, control, opts)
 	end
 
 	local button = makeFlatButton(row, "", opts.width or 260, opts.height or 24)
-	if opts.modern then
-		button._eqolNormalBg = { 0.025, 0.034, 0.038, 0.72 }
-		button._eqolNormalBorder = { 0.38, 0.45, 0.43, 0.48 }
-		setFrameBackdrop(button, button._eqolNormalBg, button._eqolNormalBorder, "control")
-	end
+	lib._Internal.applyDropdownButtonTheme(button, app, control, opts.modern)
 	if opts.point then
 		button:SetPoint(opts.point[1], opts.point[2], opts.point[3], opts.point[4], opts.point[5])
 	else
@@ -5410,6 +5537,8 @@ local function addMultiDropdownWidget(row, app, control, opts)
 	row.value:SetHeight(20)
 	row.value.Text:SetJustifyH("LEFT")
 	row.value.Text:SetJustifyV("MIDDLE")
+	button._eqolValueText = row.value.Text
+	lib._Internal.applyDropdownTextOutline(row.value.Text, app, control)
 	local arrow = createDropdownArrow(button, app, opts.modern and 14 or 12)
 	button.Arrow = arrow
 	arrow:SetPoint("RIGHT", button, "RIGHT", opts.modern and -10 or -8, 0)
@@ -5467,9 +5596,34 @@ local function addMultiDropdownWidget(row, app, control, opts)
 	return button
 end
 
+function lib._Internal.useThemedInput(app, control)
+	local style = control and control.inputStyle
+	if style == nil then
+		style = app and app.opts and app.opts.inputStyle
+	end
+	return style == "themed" or style == "modern"
+end
+
+function lib._Internal.applyThemedInputVisual(editBox, enabled, focused)
+	if not (editBox and editBox._LibSettingsDesignerThemedInput) then
+		return
+	end
+	if not enabled then
+		setFrameBackdrop(editBox, DISABLED_CONTROL_BG, DISABLED_CONTROL_BORDER, "inputControl")
+		editBox:SetTextColor(TEXT.disabled[1], TEXT.disabled[2], TEXT.disabled[3], TEXT.disabled[4] or 1)
+	elseif focused then
+		setFrameBackdrop(editBox, lib.ThemeColors.inputFocusBg, lib.ThemeColors.inputFocusBorder, "inputControl")
+		editBox:SetTextColor(TEXT.main[1], TEXT.main[2], TEXT.main[3], TEXT.main[4] or 1)
+	else
+		setFrameBackdrop(editBox, lib.ThemeColors.inputBg, lib.ThemeColors.inputBorder, "inputControl")
+		editBox:SetTextColor(TEXT.main[1], TEXT.main[2], TEXT.main[3], TEXT.main[4] or 1)
+	end
+end
+
 local function addInputWidget(row, app, control, opts)
 	opts = opts or {}
-	local editBox = CreateFrame("EditBox", nil, row, "InputBoxTemplate")
+	local themed = lib._Internal.useThemedInput(app, control)
+	local editBox = CreateFrame("EditBox", nil, row, themed and "InputBoxTemplate,BackdropTemplate" or "InputBoxTemplate")
 	editBox:SetSize(opts.width or math.min(tonumber(control.inputWidth) or 178, 220), control.multiline and 48 or 26)
 	if opts.point then
 		editBox:SetPoint(opts.point[1], opts.point[2], opts.point[3], opts.point[4], opts.point[5])
@@ -5477,6 +5631,20 @@ local function addInputWidget(row, app, control, opts)
 		editBox:SetPoint("RIGHT", row, "RIGHT", -14, 0)
 	end
 	editBox:SetAutoFocus(false)
+	if themed then
+		editBox._LibSettingsDesignerThemedInput = true
+		for _, region in ipairs({ editBox.Left, editBox.Middle, editBox.Right }) do
+			if region then region:Hide() end
+		end
+		editBox:SetTextInsets(12, 12, 0, 0)
+		lib._Internal.applyThemedInputVisual(editBox, true, false)
+		editBox:HookScript("OnEditFocusGained", function(self)
+			lib._Internal.applyThemedInputVisual(self, true, true)
+		end)
+		editBox:HookScript("OnEditFocusLost", function(self)
+			lib._Internal.applyThemedInputVisual(self, not self._eqolDisabled, false)
+		end)
+	end
 	local fractionalNumeric = false
 	if control.numeric == true then
 		local minValue = tonumber(control.min)
@@ -5571,6 +5739,16 @@ local function addToggleWidget(row, app, control, opts)
 	switch._eqolOnEnter = function(self)
 		if self._eqolDisabled then
 			setFrameBackdrop(self, DISABLED_CONTROL_BG, DISABLED_CONTROL_BORDER)
+			return
+		end
+		local textureStyle = lib.ThemeTextures and lib.ThemeTextures.toggle
+		if textureStyle and textureStyle.replaceBackdrop then
+			setFrameBackdrop(
+				self,
+				self.checked and { 0.025, 0.600, 0.440, 0.98 } or { 0.050, 0.060, 0.062, 0.98 },
+				{ 0, 0, 0, 0 },
+				"toggle"
+			)
 			return
 		end
 		setBackdropBorderColor(self, self.checked and { 0.25, 1.00, 0.78, 0.86 } or { 0.62, 0.66, 0.54, 0.74 })
@@ -8173,6 +8351,15 @@ function lib._Internal.addGroupSection(state, group, pagePath, layout)
 	local chip = addStatusChip(header, tostring(customizedCount), TEXT.gold, width)
 	chip:SetPoint("RIGHT", header, "RIGHT", matrixRows and -14 or -36, 0)
 	chip:SetShown(customizedCount > 0)
+	chip:EnableMouse(true)
+	chip:SetScript("OnEnter", function(self)
+		_G.GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+		_G.GameTooltip:SetText(tostring(customizedCount) .. " " .. (getLocale(state.app)["configCenterChanged"] or "changed"), 1, 1, 1)
+		_G.GameTooltip:Show()
+	end)
+	chip:SetScript("OnLeave", function()
+		_G.GameTooltip:Hide()
+	end)
 	state.groupCountHeaders = state.groupCountHeaders or {}
 	state.groupCountHeaders[#state.groupCountHeaders + 1] = {
 		header = header,

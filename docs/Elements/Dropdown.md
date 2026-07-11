@@ -22,6 +22,13 @@ A dropdown stores one selected value.
 | `optionfunc` | function | Dynamic order/options provider. |
 | `menuHeight` | number | Menu height for long lists. |
 | `customDefaultText` | string | Text when no value is selected. |
+| `dropdownStyle` | string | Optional `"themed"` / `"modern"` opt-in for the dedicated dropdown theme slots. |
+| `dropdownTextOutline` | boolean | Controls the value-text outline for themed dropdowns. Defaults to `true`; set `false` to disable it. |
+
+The app-level `dropdownStyle` option applies the opt-in to all dropdown,
+MultiDropdown, SoundDropdown, and CheckboxDropdown buttons. A control-level
+value overrides the app default. Omitting it preserves the established button
+appearance for existing hosts.
 
 ## [Static Options][Top]
 
@@ -61,4 +68,3 @@ app:RegisterControl("profiles.select", {
 
 [//]: # (Links)
 [Top]: #Top
-

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added opt-in themed dropdown and input styling with dedicated color, border, and shape slots.
+- Improved shaped-control hover, disabled-text contrast, customized-count tooltips, and matrix-row hover behavior.
 - Added sample coverage for sidebar sections, glow-backed tab panels, two-column tab pages, full-width two-column pages, mixed control columns, and per-setting action menus.
 - Added an Atomic sample theme preset with dark panels and cyan accents.
 - Added a sample category tab view that remembers the last selected tab page.
