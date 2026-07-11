@@ -154,6 +154,9 @@ identifiers, which can make a badge appear through an id or DB key:
 - pages: `page.newTagID`, `page.id`, `page.pageKey`, `page.key`
 - controls: `control.newTagID`, `control.id`, `control.key`
 
+Page tabs inherit the badge from their page or any visible child control. Group
+tabs and matrix fixed-header tabs inherit it from any control in that group.
+
 ## [Page and Control Badges][Top]
 
 Badge on a page card/detail:

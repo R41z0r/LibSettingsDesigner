@@ -49,5 +49,9 @@ When `columns = 2`, controls without an explicit `column` flow into the shorter
 column. Use `column = 1` / `column = 2` when a mixed panel should keep toggles
 and sliders in predictable lanes.
 
+When a page renders group tabs or a matrix fixed header, a group tab shows a
+`New` badge if one of its controls has an active `newTagID`. Groups do not need
+their own tag; keep badge state on the page controls through `opts.isNewTag`.
+
 [//]: # (Links)
 [Top]: #Top

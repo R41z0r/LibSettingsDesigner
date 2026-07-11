@@ -432,13 +432,13 @@ lib.LOCALES = {
 		configCenterOkay = "확인",
 		configCenterOpenButton = "열기",
 		configCenterOpen = "설정 열기",
-			configCenterOpenDesc = "최신 설정 센터를 엽니다.",
-			configCenterPreview = "미리보기",
-			configCenterRemove = "제거",
-			configCenterReloadRequired = "다시 불러오기 필요",
-			configCenterReloadRequiredDesc = "변경된 하나 이상의 설정은 UI 다시 불러오기가 필요합니다.",
-			configCenterReloadUI = "UI 다시 불러오기",
-			configCenterResetColor = "색상 초기화",
+		configCenterOpenDesc = "최신 설정 센터를 엽니다.",
+		configCenterPreview = "미리보기",
+		configCenterRemove = "제거",
+		configCenterReloadRequired = "다시 불러오기 필요",
+		configCenterReloadRequiredDesc = "변경된 하나 이상의 설정은 UI 다시 불러오기가 필요합니다.",
+		configCenterReloadUI = "UI 다시 불러오기",
+		configCenterResetColor = "색상 초기화",
 		configCenterSearchPlaceholder = "설정 검색",
 		configCenterSetting = "설정",
 		configCenterSettings = "설정",
@@ -485,13 +485,13 @@ lib.LOCALES = {
 		configCenterOkay = "OK",
 		configCenterOpenButton = "Abrir",
 		configCenterOpen = "Abrir configurações",
-			configCenterOpenDesc = "Abre a central moderna de configurações.",
-			configCenterPreview = "Prévia",
-			configCenterRemove = "Remover",
-			configCenterReloadRequired = "Recarga necessária",
-			configCenterReloadRequiredDesc = "Uma ou mais configurações alteradas exigem recarregar a interface.",
-			configCenterReloadUI = "Recarregar interface",
-			configCenterResetColor = "Redefinir cor",
+		configCenterOpenDesc = "Abre a central moderna de configurações.",
+		configCenterPreview = "Prévia",
+		configCenterRemove = "Remover",
+		configCenterReloadRequired = "Recarga necessária",
+		configCenterReloadRequiredDesc = "Uma ou mais configurações alteradas exigem recarregar a interface.",
+		configCenterReloadUI = "Recarregar interface",
+		configCenterResetColor = "Redefinir cor",
 		configCenterSearchPlaceholder = "Buscar configurações",
 		configCenterSetting = "configuração",
 		configCenterSettings = "configurações",
@@ -538,13 +538,13 @@ lib.LOCALES = {
 		configCenterOkay = "OK",
 		configCenterOpenButton = "Открыть",
 		configCenterOpen = "Открыть настройки",
-			configCenterOpenDesc = "Открывает современный центр настроек.",
-			configCenterPreview = "Предпросмотр",
-			configCenterRemove = "Удалить",
-			configCenterReloadRequired = "Требуется перезагрузка",
-			configCenterReloadRequiredDesc = "Для одного или нескольких измененных параметров требуется перезагрузка интерфейса.",
-			configCenterReloadUI = "Перезагрузить UI",
-			configCenterResetColor = "Сбросить цвет",
+		configCenterOpenDesc = "Открывает современный центр настроек.",
+		configCenterPreview = "Предпросмотр",
+		configCenterRemove = "Удалить",
+		configCenterReloadRequired = "Требуется перезагрузка",
+		configCenterReloadRequiredDesc = "Для одного или нескольких измененных параметров требуется перезагрузка интерфейса.",
+		configCenterReloadUI = "Перезагрузить UI",
+		configCenterResetColor = "Сбросить цвет",
 		configCenterSearchPlaceholder = "Поиск настроек",
 		configCenterSetting = "настройка",
 		configCenterSettings = "настройки",
@@ -591,13 +591,13 @@ lib.LOCALES = {
 		configCenterOkay = "确定",
 		configCenterOpenButton = "打开",
 		configCenterOpen = "打开设置",
-			configCenterOpenDesc = "打开现代设置中心。",
-			configCenterPreview = "预览",
-			configCenterRemove = "移除",
-			configCenterReloadRequired = "需要重载",
-			configCenterReloadRequiredDesc = "一个或多个已更改的设置需要重载界面。",
-			configCenterReloadUI = "重载界面",
-			configCenterResetColor = "重置颜色",
+		configCenterOpenDesc = "打开现代设置中心。",
+		configCenterPreview = "预览",
+		configCenterRemove = "移除",
+		configCenterReloadRequired = "需要重载",
+		configCenterReloadRequiredDesc = "一个或多个已更改的设置需要重载界面。",
+		configCenterReloadUI = "重载界面",
+		configCenterResetColor = "重置颜色",
 		configCenterSearchPlaceholder = "搜索设置",
 		configCenterSetting = "设置",
 		configCenterSettings = "设置",
@@ -644,13 +644,13 @@ lib.LOCALES = {
 		configCenterOkay = "確定",
 		configCenterOpenButton = "開啟",
 		configCenterOpen = "開啟設定",
-			configCenterOpenDesc = "開啟現代設定中心。",
-			configCenterPreview = "預覽",
-			configCenterRemove = "移除",
-			configCenterReloadRequired = "需要重新載入",
-			configCenterReloadRequiredDesc = "一個或多個已變更的設定需要重新載入介面。",
-			configCenterReloadUI = "重新載入介面",
-			configCenterResetColor = "重設顏色",
+		configCenterOpenDesc = "開啟現代設定中心。",
+		configCenterPreview = "預覽",
+		configCenterRemove = "移除",
+		configCenterReloadRequired = "需要重新載入",
+		configCenterReloadRequiredDesc = "一個或多個已變更的設定需要重新載入介面。",
+		configCenterReloadUI = "重新載入介面",
+		configCenterResetColor = "重設顏色",
 		configCenterSearchPlaceholder = "搜尋設定",
 		configCenterSetting = "設定",
 		configCenterSettings = "設定",
@@ -7131,6 +7131,15 @@ function lib.IsPageOrChildNew(app, page)
 	return false
 end
 
+function lib.IsGroupOrChildNew(app, group)
+	for _, control in ipairs(group and group.controls or {}) do
+		if lib.IsControlNew(app, control) then
+			return true
+		end
+	end
+	return false
+end
+
 function lib.IsCategoryNew(app, categoryID)
 	if not (app and categoryID) then
 		return false
@@ -7688,17 +7697,20 @@ function lib._Internal.addPageTabs(state, header, category, selectedPage, startX
 	end
 	local labels = {}
 	local textWidths = {}
+	local newPages = {}
 	local widths = {}
 	local totalWidth = 0
+	local newBadgeWidth = 44
 	local measure = header:CreateFontString(nil, "OVERLAY", tabFont)
 	for index = 1, #pages do
 		local page = pages[index]
 		local label = lib.NormalizeTextValue(page.tabTitle or page.title or page.id)
 		labels[index] = label
+		newPages[index] = lib.IsPageOrChildNew(state.app, page)
 		measure:SetText(label)
 		local textWidth = math.ceil(measure:GetStringWidth() or 0)
 		textWidths[index] = textWidth
-		local measuredWidth = textWidth + (tabPaddingX * 2)
+		local measuredWidth = textWidth + (tabPaddingX * 2) + (newPages[index] and newBadgeWidth or 0)
 		widths[index] = math.max(tabMinWidth, math.min(tabMaxWidth, measuredWidth))
 		totalWidth = totalWidth + widths[index]
 	end
@@ -7733,11 +7745,15 @@ function lib._Internal.addPageTabs(state, header, category, selectedPage, startX
 		button.Underline:SetColorTexture(underlineColor[1], underlineColor[2], underlineColor[3], selected and (underlineColor[4] or 1) or 0)
 		button.Text = createText(button, tabFont, labels[index], selected and (lib.ThemeColors.tabSelectedText or TEXT.gold) or (lib.ThemeColors.tabText or TEXT.muted))
 		button.Text:SetPoint("LEFT", button, "LEFT", tabPaddingX, tabTextOffsetY)
-		button.Text:SetPoint("RIGHT", button, "RIGHT", -tabPaddingX, tabTextOffsetY)
+		button.Text:SetPoint("RIGHT", button, "RIGHT", -(tabPaddingX + (newPages[index] and newBadgeWidth or 0)), tabTextOffsetY)
 		button.Text:SetHeight(math.max(1, tabHeight - underlineHeight - 3))
 		button.Text.Text:SetJustifyV("MIDDLE")
 		if button.Text.Text.SetMaxLines then
 			button.Text.Text:SetMaxLines(1)
+		end
+		if newPages[index] then
+			button.NewBadge = lib.CreateNewBadge(button, state.app)
+			button.NewBadge:SetPoint("RIGHT", button, "RIGHT", -tabPaddingX, tabTextOffsetY)
 		end
 		button:SetScript("OnEnter", function(self)
 			if self.Highlight then
@@ -7794,12 +7810,15 @@ function lib._Internal.addSectionTabs(state, page, groups)
 	local measure = header:CreateFontString(nil, "OVERLAY", FONT_MUTED)
 	local widths = {}
 	local labels = {}
+	local newGroups = {}
 	local totalWidth = 0
+	local newBadgeWidth = 44
 	for index, group in ipairs(groups) do
 		local label = lib.NormalizeTextValue(group.title or group.id)
 		labels[index] = label
+		newGroups[index] = lib.IsGroupOrChildNew(state.app, group)
 		measure:SetText(label)
-		local width = math.max(minWidth, math.min(maxWidth, math.ceil(measure:GetStringWidth() or 0) + (paddingX * 2)))
+		local width = math.max(minWidth, math.min(maxWidth, math.ceil(measure:GetStringWidth() or 0) + (paddingX * 2) + (newGroups[index] and newBadgeWidth or 0)))
 		widths[index] = width
 		totalWidth = totalWidth + width
 	end
@@ -7831,11 +7850,15 @@ function lib._Internal.addSectionTabs(state, page, groups)
 		button.Underline:SetColorTexture(underlineColor[1], underlineColor[2], underlineColor[3], selected and (underlineColor[4] or 1) or 0)
 		button.Text = createText(button, FONT_MUTED, labels[index], selected and (lib.ThemeColors.tabSelectedText or TEXT.gold) or (lib.ThemeColors.tabText or TEXT.muted))
 		button.Text:SetPoint("LEFT", button, "LEFT", paddingX, 2)
-		button.Text:SetPoint("RIGHT", button, "RIGHT", -paddingX, 2)
+		button.Text:SetPoint("RIGHT", button, "RIGHT", -(paddingX + (newGroups[index] and newBadgeWidth or 0)), 2)
 		button.Text:SetHeight(22)
 		button.Text.Text:SetJustifyV("MIDDLE")
 		if button.Text.Text.SetMaxLines then
 			button.Text.Text:SetMaxLines(1)
+		end
+		if newGroups[index] then
+			button.NewBadge = lib.CreateNewBadge(button, state.app)
+			button.NewBadge:SetPoint("RIGHT", button, "RIGHT", -paddingX, 2)
 		end
 		button:SetScript("OnEnter", function(self)
 			local hoverBg = selected and (lib.ThemeColors.tabSelectedBg or { 0.150, 0.115, 0.055, 0.20 })
@@ -7917,12 +7940,15 @@ function lib._Internal.addMatrixPageFixedHeader(state, page, groups)
 	local measure = header:CreateFontString(nil, "OVERLAY", FONT_MUTED)
 	local widths = {}
 	local labels = {}
+	local newGroups = {}
 	local totalWidth = 0
+	local newBadgeWidth = 44
 	for index, group in ipairs(groups) do
 		local label = lib.NormalizeTextValue(group.title or group.id)
 		labels[index] = label
+		newGroups[index] = lib.IsGroupOrChildNew(state.app, group)
 		measure:SetText(label)
-		local tabWidth = math.max(minWidth, math.min(maxWidth, math.ceil(measure:GetStringWidth() or 0) + (paddingX * 2)))
+		local tabWidth = math.max(minWidth, math.min(maxWidth, math.ceil(measure:GetStringWidth() or 0) + (paddingX * 2) + (newGroups[index] and newBadgeWidth or 0)))
 		widths[index] = tabWidth
 		totalWidth = totalWidth + tabWidth
 	end
@@ -7952,9 +7978,16 @@ function lib._Internal.addMatrixPageFixedHeader(state, page, groups)
 		button.Underline:SetColorTexture(underlineColor[1], underlineColor[2], underlineColor[3], selected and (underlineColor[4] or 1) or 0)
 		button.Text = createText(button, FONT_MUTED, labels[index], selected and (lib.ThemeColors.tabSelectedText or TEXT.gold) or (lib.ThemeColors.tabText or TEXT.muted))
 		button.Text:SetPoint("LEFT", button, "LEFT", paddingX, 2)
-		button.Text:SetPoint("RIGHT", button, "RIGHT", -paddingX, 2)
+		button.Text:SetPoint("RIGHT", button, "RIGHT", -(paddingX + (newGroups[index] and newBadgeWidth or 0)), 2)
 		button.Text:SetHeight(22)
 		button.Text.Text:SetJustifyV("MIDDLE")
+		if button.Text.Text.SetMaxLines then
+			button.Text.Text:SetMaxLines(1)
+		end
+		if newGroups[index] then
+			button.NewBadge = lib.CreateNewBadge(button, state.app)
+			button.NewBadge:SetPoint("RIGHT", button, "RIGHT", -paddingX, 2)
+		end
 		button:SetScript("OnEnter", function(self)
 			self.Highlight:SetColorTexture(0.18, 0.50, 0.50, 0.26)
 			setTextColor(self.Text and self.Text.Text, TEXT.main)
