@@ -91,6 +91,8 @@ Semantic keys:
 | `sidebarSection` | Sidebar section heading text. |
 | `card`, `cardHover`, `cardBorder`, `cardHoverBorder` | Cards and card hover state. |
 | `row`, `rowBorder`, `rowHover`, `rowHoverBorder` | Setting rows and hover state. |
+| `dropdown`, `dropdownBorder`, `dropdownHover`, `dropdownHoverBorder` | Opt-in themed dropdown buttons when `dropdownStyle` is `"themed"` or `"modern"`. |
+| `input`, `inputBorder`, `inputFocus`, `inputFocusBorder` | Opt-in themed text inputs when `inputStyle` is `"themed"` or `"modern"`. |
 | `tabPanel`, `tabPanelBorder` | Optional category tab-strip background and border. |
 | `tab`, `tabHover`, `tabSelected` | Category tab background states. |
 | `tabText`, `tabSelectedText`, `tabUnderline` | Category tab label and underline colors. |

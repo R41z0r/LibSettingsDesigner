@@ -348,6 +348,9 @@ ConfigUI:Open("MyAddon", "general.core")
 | `colors` / `colorTable` / `themeColors` | Optional global UI theme color overrides; missing keys keep defaults. |
 | `borders` / `themeBorders` / `borderAssets` | Optional global UI border asset overrides; missing keys keep defaults. Use `window` / `windowBorder` for the decorative outer frame. |
 | `textures` / `themeTextures` / `textureBorders` / `shapeTextures` | Optional 3-slice texture overlays for non-backdrop shape art. |
+| `dropdownStyle` | Set to `"themed"` or `"modern"` to opt into dedicated dropdown colors and `dropdownControl` shape styling. |
+| `dropdownTextOutline` | Controls themed dropdown value outlines; only `false` disables them. Disabled values never retain the outline. |
+| `inputStyle` | Set to `"themed"` or `"modern"` to opt into dedicated input colors and `inputControl` shape styling. |
 | `windowBorder` / `windowBorderArt` / `panelBorderArt` | Set to `false` to hide the packaged outer window art frame. |
 | `density` | Initial density, `"compact"` or `"comfortable"`, string or function. |
 | `getDensity(app)` / `setDensity(density, app)` | Persist the user's selected density. |
@@ -417,8 +420,9 @@ background, overlay, panel, content, sidebar, card, cardHover, cardBorder,
 cardHoverBorder, row, rowBorder, rowHover, rowHoverBorder, tabPanel,
 tabPanelBorder, tab, tabHover, tabSelected, tabText, tabSelectedText,
 tabUnderline, button, buttonBorder, buttonHover, buttonHoverBorder, search,
-searchBorder, selected, text, mutedText, subtleText, disabledText, accent,
-topbarText
+searchBorder, dropdown, dropdownBorder, dropdownHover, dropdownHoverBorder,
+input, inputBorder, inputFocus, inputFocusBorder, selected, text, mutedText,
+subtleText, disabledText, accent, topbarText
 ```
 
 For precise one-off overrides, use direct detail keys such as `topbarBg`,
@@ -458,7 +462,7 @@ Common border keys:
 ```text
 default, panel, topbar, content, sidebar, card, dashboardCard, detailSection,
 detailColumn, row, button, topbarButton, search, control, toggle, toggleKnob,
-swatch, reorderItem
+swatch, reorderItem, dropdownControl, inputControl, statusChip
 ```
 
 The decorative outer frame is configured separately with `borders.window`,
@@ -476,6 +480,12 @@ borders. Use `themeTextures`, `textureBorders`, or `shapeTextures` for
 non-backdrop shape art such as a superellipse texture. Texture styles use the
 same keys as border styles and may set `replaceBackdrop = true` when the shape
 should replace the normal rectangular backdrop fill.
+
+`dropdownControl`, `inputControl`, and `statusChip` are dedicated opt-in shape
+slots. Existing `dropdown` and `input` border aliases still resolve to
+`button` and `control` for backward compatibility. A full-shape texture is not
+an outline mask; set `borderAlpha = 0` when it should render as a single fill
+instead of stacking a second full-shape border layer.
 
 Use `windowBorder = false` when a host theme should hide the packaged outer
 window art frame. Detailed shape texture examples are documented in
@@ -673,9 +683,9 @@ runtime actively consumes as UI behavior:
 | :------ | :-------------------------------- |
 | Toggle/Checkbox | `default`, `key`, `getValue`, `setValue`, `parentCheck`, `isEnabled`, `refreshOnChange`, `requiresReload` |
 | Slider | `min`, `max`, `step`, `formatter`, `valueFormatter`, `suffix`, `actions` |
-| Dropdown/ScrollDropdown | `values`, `options`, `list`, `orderList`, `order`, `listFunc`, `optionfunc`, `menuHeight` |
+| Dropdown/ScrollDropdown | `values`, `options`, `list`, `orderList`, `order`, `listFunc`, `optionfunc`, `menuHeight`, `dropdownStyle`, `dropdownTextOutline` |
 | MultiDropdown | `getSelection`, `setSelection`, `isSelectedFunc`, `setSelectedFunc`, `selectionSource`, `summary`, `callback`, `menuHeight` |
-| Input | `numeric`, `min`, `max`, `step`, `clampToRange`, `maxChars`, `readOnly`, `inputWidth`, `multiline` |
+| Input | `numeric`, `min`, `max`, `step`, `clampToRange`, `maxChars`, `readOnly`, `inputWidth`, `multiline`, `inputStyle` |
 | Button | `buttonText`, `onClick`, `setValue`, `trackCustomized = false` |
 | ColorPicker | `getColor`, `setColor`, `hasOpacity` |
 | ColorPalette | `entries`, `getColor`, `setColor`, `hasOpacity`, `colorizeLabel`, `hasOverride`, `clearColor`, `getInheritedColor`, `getDefaultColor` |

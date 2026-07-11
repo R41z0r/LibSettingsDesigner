@@ -30,6 +30,10 @@ Input controls store text or numbers.
 | `readOnly` | boolean | Prevent editing. |
 | `inputWidth` | number | Input width. |
 | `multiline` | boolean | Use multiline edit box. |
+| `inputStyle` | string | Optional `"themed"` / `"modern"` opt-in for dedicated input colors and shape styling. |
+
+The app-level `inputStyle` option applies the opt-in to every input. Omitting it
+keeps Blizzard's established `InputBoxTemplate` visuals.
 
 `multilineHeight` is currently metadata/pass-through only and is not consumed by
 the UI renderer. The current multiline editor height is fixed by the runtime.
