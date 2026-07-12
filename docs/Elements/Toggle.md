@@ -75,6 +75,12 @@ When a toggle also provides `getColor` and `setColor`, the row renders the
 toggle first and the color picker after it. The picker remains visible but is
 disabled and dimmed while the toggle value is `false`.
 
+Every control hover panel uses the complete control label as its gold heading;
+there is no separate generic Notes heading. Explicit notes and compact-density
+descriptions continue below it. A truncated row label creates this hover panel
+even when the control has no other note or description, while a fully visible
+label does not create a panel on its own.
+
 ## [Row Actions][Top]
 
 Use `actions` for a small gear/menu next to the row. The host addon owns the
