@@ -4516,6 +4516,12 @@ end
 
 local function skinScrollFrame(scrollFrame)
 	if not scrollFrame then return end
+	if scrollFrame.HookScript and not scrollFrame._LibSettingsDesignerRangeHooked then
+		scrollFrame._LibSettingsDesignerRangeHooked = true
+		scrollFrame:HookScript("OnScrollRangeChanged", function(self)
+			updateScrollFrameVisibility(self)
+		end)
+	end
 	local scrollBar = getScrollBar(scrollFrame)
 	local up = scrollFrame.ScrollBar and scrollFrame.ScrollBar.ScrollUpButton or scrollFrame.ScrollUpButton
 	local down = scrollFrame.ScrollBar and scrollFrame.ScrollBar.ScrollDownButton or scrollFrame.ScrollDownButton

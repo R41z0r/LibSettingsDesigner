@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed scroll buttons not updating when a settings page's scroll range changes.
 - Added `New` badges to category page tabs, group tabs, and matrix page tabs when they contain new settings.
 - Added opt-in themed dropdown and input styling with dedicated color, border, and shape slots.
 - Improved shaped-control hover, disabled-text contrast, customized-count tooltips, and matrix-row hover behavior.
