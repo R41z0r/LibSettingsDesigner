@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Added opt-in grouped submenus for structured dropdown options without changing existing option lists.
 - Show the complete setting label in the hover panel when a row label is truncated, and improve the panel background and heading clarity.
 - Fixed scroll buttons not updating when a settings page's scroll range changes.
 - Added `New` badges to category page tabs, group tabs, and matrix page tabs when they contain new settings.
