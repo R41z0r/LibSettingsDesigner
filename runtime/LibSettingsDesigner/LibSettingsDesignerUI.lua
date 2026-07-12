@@ -3847,15 +3847,21 @@ local function getControlOptions(control)
 		or type(control.orderList) == "table" and control.orderList
 		or type(control.order) == "table" and control.order)
 	local seen
+	local function resolvedOption(option, key, arrayEntry)
+		local resolved = { value = getOptionValue(option, key, arrayEntry), label = tostring(getOptionLabel(option, key) or key) }
+		if type(option) == "table" then
+			resolved.menuGroup = option.menuGroup
+			resolved.menuGroupLabel = option.menuGroupLabel
+			resolved.menuGroupOrder = tonumber(option.menuGroupOrder)
+		end
+		return resolved
+	end
 	if type(list) ~= "table" then
 		return options
 	end
 	if not order and #list > 0 then
 		for index, option in ipairs(list) do
-			options[#options + 1] = {
-				value = getOptionValue(option, index, false),
-				label = tostring(getOptionLabel(option, index) or index),
-			}
+			options[#options + 1] = resolvedOption(option, index, false)
 		end
 		return options
 	end
@@ -3864,20 +3870,14 @@ local function getControlOptions(control)
 		for _, key in ipairs(order) do
 			if key ~= "_order" and list[key] ~= nil then
 				local option = list[key]
-				options[#options + 1] = {
-					value = getOptionValue(option, key, false),
-					label = tostring(getOptionLabel(option, key) or key),
-				}
+				options[#options + 1] = resolvedOption(option, key, false)
 				seen[key] = true
 			end
 		end
 	end
 	for key, option in pairs(list) do
 		if key ~= "_order" and (not seen or not seen[key]) then
-			options[#options + 1] = {
-				value = getOptionValue(option, key, false),
-				label = tostring(getOptionLabel(option, key) or key),
-			}
+			options[#options + 1] = resolvedOption(option, key, false)
 		end
 	end
 	if not order then
@@ -5574,8 +5574,9 @@ local function addDropdownWidget(row, app, control, opts)
 				end
 				return app:GetControlValue(control)
 			end
-			for _, option in ipairs(menuOptions) do
-				local radio = rootDescription:CreateRadio(option.label, function(value)
+			local groupMenus, orderedGroups = {}, {}
+			local function addRadio(parentDescription, option)
+				local radio = parentDescription:CreateRadio(option.label, function(value)
 					return tostring(getCurrentValue()) == tostring(value)
 				end, function(value)
 					if opts.setValue then
@@ -5598,6 +5599,27 @@ local function addDropdownWidget(row, app, control, opts)
 				else
 					lib.AttachSoundPreviewCleanupInitializer(radio)
 				end
+			end
+			for _, option in ipairs(menuOptions) do
+				if option.menuGroup then
+					local group = groupMenus[option.menuGroup]
+					if not group then
+						group = { label = tostring(option.menuGroupLabel or option.menuGroup), order = option.menuGroupOrder or 1000, options = {} }
+						groupMenus[option.menuGroup] = group
+						orderedGroups[#orderedGroups + 1] = group
+					end
+					group.options[#group.options + 1] = option
+				else
+					addRadio(rootDescription, option)
+				end
+			end
+			table.sort(orderedGroups, function(a, b)
+				if a.order ~= b.order then return a.order < b.order end
+				return tostring(a.label) < tostring(b.label)
+			end)
+			for _, group in ipairs(orderedGroups) do
+				local submenu = rootDescription:CreateButton(group.label)
+				for _, option in ipairs(group.options) do addRadio(submenu, option) end
 			end
 		end)
 	end)

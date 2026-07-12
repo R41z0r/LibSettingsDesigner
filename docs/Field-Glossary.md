@@ -207,6 +207,10 @@ app:RegisterControl(pageID, data)
 | `actions` / `settingActions` / `controlActions` | table/function | Optional right-aligned row action buttons or menus. |
 | `column` / `layoutColumn` / `columnIndex` | number/string | Control column inside a multi-column group. |
 
+Structured dropdown option entries may use `menuGroup`, `menuGroupLabel`, and
+`menuGroupOrder` to place selected options in ordered submenus. These are
+explicit opt-in fields; generic `group*` metadata remains host-owned.
+
 Direct `RegisterControl` calls should use canonical fields. Legacy aliases such
 as `var`, `text`, `name`, `desc`, `get`, and `set` are mapped by
 `RegisterLegacyControl`, not by plain direct controls.
