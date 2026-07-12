@@ -3598,8 +3598,17 @@ function lib.HideControlNotePanel(state)
 	end
 end
 
-function lib.GetControlHoverNotes(state, control)
+function lib._Internal.isControlLabelTruncated(row)
+	local title = row and row.Title and row.Title.Text
+	return title and title.IsTruncated and title:IsTruncated() == true
+end
+
+function lib.GetControlHoverNotes(state, control, row)
 	local notes = lib.NormalizeNoteList(control)
+	local label = control and (control.label or control.id)
+	if label and lib._Internal.isControlLabelTruncated(row) then
+		notes[#notes + 1] = { order = -2000, truncatedLabel = true }
+	end
 	if lib.IsCompactDensity(state) and hasUsefulDescription(control) then
 		local exists = false
 		for _, note in ipairs(notes) do
@@ -3619,7 +3628,7 @@ function lib.GetControlHoverNotes(state, control)
 end
 
 function lib.ShowControlNotePanel(state, row, control)
-	local notes = lib.GetControlHoverNotes(state, control)
+	local notes = lib.GetControlHoverNotes(state, control, row)
 	if #notes == 0 or not state or not state.frame or not row then
 		return
 	end
@@ -3628,6 +3637,9 @@ function lib.ShowControlNotePanel(state, row, control)
 		panel = CreateFrame("Frame", nil, state.frame, "BackdropTemplate")
 		panel:SetFrameStrata("TOOLTIP")
 		panel:SetFrameLevel((state.frame:GetFrameLevel() or 1) + 50)
+		panel.OpaqueBackground = panel:CreateTexture(nil, "BACKGROUND", nil, -8)
+		panel.OpaqueBackground:SetAllPoints(panel)
+		preparePixelTexture(panel.OpaqueBackground)
 		state.notePanel = panel
 	end
 	panel:ClearAllPoints()
@@ -3642,27 +3654,30 @@ function lib.ShowControlNotePanel(state, row, control)
 		end
 	end
 	panel.Textures = {}
-	applyBackdrop(panel, CARD_BG, { 0, 0, 0, 0 }, "card")
+	panel.OpaqueBackground:SetColorTexture(CARD_BG[1], CARD_BG[2], CARD_BG[3], 1)
+	panel.OpaqueBackground:Show()
+	applyBackdrop(panel, { CARD_BG[1], CARD_BG[2], CARD_BG[3], 1 }, { 0, 0, 0, 0 }, "card")
 	createPixelBorder(panel, CARD_BORDER_HOVER)
 
 	panel.NoteInset = 10
 	local width = getControlNotePanelWidth(control, notes)
 	local textWidth = width - (panel.NoteInset * 2)
 	local y = -panel.NoteInset
-	local L = getLocale(state and state.app)
-	local label = L["configCenterNotes"] or "Notes"
+	local label = control and (control.label or control.id)
 	if label then
-		y = lib.AddNoteText(panel, label, TEXT.gold, y, textWidth, FONT_HEADER)
+		y = lib.AddNoteText(panel, label, TEXT.gold, y, textWidth, FONT_TEXT)
 	end
 	for _, note in ipairs(notes) do
-		if note.title then
-			y = lib.AddNoteText(panel, note.title, TEXT.gold, y, textWidth, FONT_TEXT)
-		end
-		if note.text then
-			y = lib.AddNoteText(panel, note.text, note.color or TEXT.main, y, textWidth, note.font)
-		end
-		for _, block in ipairs(note.blocks or {}) do
-			y = lib.RenderNoteBlock(panel, block, y, textWidth)
+		if not note.truncatedLabel then
+			if note.title then
+				y = lib.AddNoteText(panel, note.title, TEXT.gold, y, textWidth, FONT_TEXT)
+			end
+			if note.text then
+				y = lib.AddNoteText(panel, note.text, note.color or TEXT.main, y, textWidth, note.font)
+			end
+			for _, block in ipairs(note.blocks or {}) do
+				y = lib.RenderNoteBlock(panel, block, y, textWidth)
+			end
 		end
 	end
 	if y < -panel.NoteInset then
@@ -3675,7 +3690,7 @@ function lib.ShowControlNotePanel(state, row, control)
 end
 
 function lib.AttachControlNoteHover(row, state, control)
-	local notes = lib.GetControlHoverNotes(state, control)
+	local notes = lib.GetControlHoverNotes(state, control, row)
 	if #notes == 0 then
 		return
 	end
@@ -6597,6 +6612,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 	end
 
 	local title = createText(row, FONT_TEXT, control.label or control.id, TEXT.main)
+	row.Title = title
 	title:SetPoint("TOPLEFT", row, "TOPLEFT", textLeft, -12)
 	title:SetHeight(20)
 
