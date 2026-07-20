@@ -433,7 +433,9 @@ Value write order:
 
 There is no public `app:ResetControl` or `app:ResetPage` runtime API. The UI
 Defaults button resets the current page internally by resolving each visible
-control default and calling `app:SetControlValue(control, default)`.
+control default and calling `app:SetControlValue(control, default)`. Matrix
+group tabs may expose the same internal reset behavior for the active group;
+that action also resets visible controls only.
 
 Use explicit getter/setter fields for nested DB values:
 

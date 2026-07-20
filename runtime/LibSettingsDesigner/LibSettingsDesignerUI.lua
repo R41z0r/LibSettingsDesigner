@@ -89,6 +89,7 @@ lib.LOCALES = {
 		configCenterConfigure = "Configure",
 		configCenterConfirmDefaultsDesc = "This will restore all settings on %s to their defaults.",
 		configCenterConfirmDefaultsTitle = "Reset this page to default values?",
+		configCenterConfirmTabDefaultsTitle = "Reset this tab to default values?",
 		configCenterControlDropdown = "Dropdown",
 		configCenterControlSlider = "Slider",
 		configCenterCurrent = "Current",
@@ -142,6 +143,7 @@ lib.LOCALES = {
 		configCenterConfigure = "Konfigurieren",
 		configCenterConfirmDefaultsDesc = "Dadurch werden alle Einstellungen auf %s auf ihre Standardwerte zurückgesetzt.",
 		configCenterConfirmDefaultsTitle = "Diese Seite auf Standardwerte zurücksetzen?",
+		configCenterConfirmTabDefaultsTitle = "Diesen Tab auf Standardwerte zurücksetzen?",
 		configCenterControlDropdown = "Dropdown",
 		configCenterControlSlider = "Schieberegler",
 		configCenterCurrent = "Aktuell",
@@ -195,6 +197,7 @@ lib.LOCALES = {
 		configCenterConfigure = "Configurar",
 		configCenterConfirmDefaultsDesc = "Esto restaurará todos los ajustes de %s a sus valores predeterminados.",
 		configCenterConfirmDefaultsTitle = "¿Restablecer esta página a los valores predeterminados?",
+		configCenterConfirmTabDefaultsTitle = "¿Restablecer esta pestaña a los valores predeterminados?",
 		configCenterControlDropdown = "Desplegable",
 		configCenterControlSlider = "Deslizador",
 		configCenterCurrent = "Actual",
@@ -248,6 +251,7 @@ lib.LOCALES = {
 		configCenterConfigure = "Configurar",
 		configCenterConfirmDefaultsDesc = "Esto restaurará todos los ajustes de %s a sus valores predeterminados.",
 		configCenterConfirmDefaultsTitle = "¿Restablecer esta página a los valores predeterminados?",
+		configCenterConfirmTabDefaultsTitle = "¿Restablecer esta pestaña a los valores predeterminados?",
 		configCenterControlDropdown = "Desplegable",
 		configCenterControlSlider = "Deslizador",
 		configCenterCurrent = "Actual",
@@ -301,6 +305,7 @@ lib.LOCALES = {
 		configCenterConfigure = "Configurer",
 		configCenterConfirmDefaultsDesc = "Tous les réglages de %s seront restaurés à leurs valeurs par défaut.",
 		configCenterConfirmDefaultsTitle = "Réinitialiser cette page aux valeurs par défaut ?",
+		configCenterConfirmTabDefaultsTitle = "Réinitialiser cet onglet aux valeurs par défaut ?",
 		configCenterControlDropdown = "Menu déroulant",
 		configCenterControlSlider = "Curseur",
 		configCenterCurrent = "Actuel",
@@ -354,6 +359,7 @@ lib.LOCALES = {
 		configCenterConfigure = "Configura",
 		configCenterConfirmDefaultsDesc = "Questo ripristinerà tutte le impostazioni di %s ai valori predefiniti.",
 		configCenterConfirmDefaultsTitle = "Ripristinare questa pagina ai valori predefiniti?",
+		configCenterConfirmTabDefaultsTitle = "Ripristinare questa scheda ai valori predefiniti?",
 		configCenterControlDropdown = "Menu a discesa",
 		configCenterControlSlider = "Cursore",
 		configCenterCurrent = "Attuale",
@@ -407,6 +413,7 @@ lib.LOCALES = {
 		configCenterConfigure = "구성",
 		configCenterConfirmDefaultsDesc = "%s의 모든 설정을 기본값으로 복원합니다.",
 		configCenterConfirmDefaultsTitle = "이 페이지를 기본값으로 초기화할까요?",
+		configCenterConfirmTabDefaultsTitle = "이 탭을 기본값으로 초기화할까요?",
 		configCenterControlDropdown = "드롭다운",
 		configCenterControlSlider = "슬라이더",
 		configCenterCurrent = "현재",
@@ -460,6 +467,7 @@ lib.LOCALES = {
 		configCenterConfigure = "Configurar",
 		configCenterConfirmDefaultsDesc = "Isso restaurará todas as configurações de %s para os valores padrão.",
 		configCenterConfirmDefaultsTitle = "Restaurar esta página para os valores padrão?",
+		configCenterConfirmTabDefaultsTitle = "Restaurar esta aba para os valores padrão?",
 		configCenterControlDropdown = "Menu suspenso",
 		configCenterControlSlider = "Controle deslizante",
 		configCenterCurrent = "Atual",
@@ -513,6 +521,7 @@ lib.LOCALES = {
 		configCenterConfigure = "Настроить",
 		configCenterConfirmDefaultsDesc = "Все настройки на странице %s будут восстановлены по умолчанию.",
 		configCenterConfirmDefaultsTitle = "Сбросить эту страницу к значениям по умолчанию?",
+		configCenterConfirmTabDefaultsTitle = "Сбросить эту вкладку к значениям по умолчанию?",
 		configCenterControlDropdown = "Выпадающий список",
 		configCenterControlSlider = "Ползунок",
 		configCenterCurrent = "Текущее",
@@ -566,6 +575,7 @@ lib.LOCALES = {
 		configCenterConfigure = "配置",
 		configCenterConfirmDefaultsDesc = "这会将 %s 上的所有设置恢复为默认值。",
 		configCenterConfirmDefaultsTitle = "将此页面重置为默认值？",
+		configCenterConfirmTabDefaultsTitle = "将此选项卡重置为默认值？",
 		configCenterControlDropdown = "下拉菜单",
 		configCenterControlSlider = "滑块",
 		configCenterCurrent = "当前",
@@ -619,6 +629,7 @@ lib.LOCALES = {
 		configCenterConfigure = "設定",
 		configCenterConfirmDefaultsDesc = "這會將 %s 上的所有設定還原為預設值。",
 		configCenterConfirmDefaultsTitle = "將此頁面重設為預設值？",
+		configCenterConfirmTabDefaultsTitle = "將此分頁重設為預設值？",
 		configCenterControlDropdown = "下拉選單",
 		configCenterControlSlider = "滑桿",
 		configCenterCurrent = "目前",
@@ -4357,6 +4368,13 @@ function lib.RefreshVisibleRows(state)
 			end
 		end
 	end
+	if type(state.groupDefaultsButtons) == "table" then
+		for _, entry in ipairs(state.groupDefaultsButtons) do
+			if entry.button and entry.group then
+				entry.button:SetShown(lib.GetGroupCustomizedCount(state.app, entry.group) > 0)
+			end
+		end
+	end
 	lib.RefreshTopbar(state.frame, state)
 end
 
@@ -6981,15 +6999,8 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 	return row
 end
 
-local function resetCurrentPage(state)
-	if state.view ~= "page" or not state.selectedPageID then
-		return
-	end
-	local page = state.app:GetPage(state.selectedPageID)
-	if not page then
-		return
-	end
-	for _, control in ipairs(getVisiblePageControls(state.app, page)) do
+function lib._Internal.resetControlsToDefaults(state, controls)
+	for _, control in ipairs(controls or {}) do
 		local default, hasDefault
 		if type(state.app.GetControlDefault) == "function" then
 			default, hasDefault = state.app:GetControlDefault(control)
@@ -7003,7 +7014,31 @@ local function resetCurrentPage(state)
 	state:RenderContent()
 end
 
-local function confirmResetCurrentPage(state)
+function lib._Internal.resetCurrentPage(state)
+	if state.view ~= "page" or not state.selectedPageID then
+		return
+	end
+	local page = state.app:GetPage(state.selectedPageID)
+	if not page then
+		return
+	end
+	lib._Internal.resetControlsToDefaults(state, getVisiblePageControls(state.app, page))
+end
+
+function lib._Internal.resetCurrentGroup(state, group)
+	if state.view ~= "page" or not group then
+		return
+	end
+	local controls = {}
+	for _, control in ipairs(group.controls or {}) do
+		if type(state.app.IsControlVisible) ~= "function" or state.app:IsControlVisible(control) then
+			controls[#controls + 1] = control
+		end
+	end
+	lib._Internal.resetControlsToDefaults(state, controls)
+end
+
+function lib._Internal.confirmResetCurrentPage(state)
 	if state.view ~= "page" or not state.selectedPageID then
 		return
 	end
@@ -7013,7 +7048,7 @@ local function confirmResetCurrentPage(state)
 	end
 	local L = getLocale(state.app)
 	if not StaticPopupDialogs or not StaticPopup_Show then
-		resetCurrentPage(state)
+		lib._Internal.resetCurrentPage(state)
 		return
 	end
 	StaticPopupDialogs.LIB_SETTINGS_DESIGNER_CENTER_RESET_DEFAULTS = StaticPopupDialogs.LIB_SETTINGS_DESIGNER_CENTER_RESET_DEFAULTS or {
@@ -7024,8 +7059,10 @@ local function confirmResetCurrentPage(state)
 		hideOnEscape = true,
 		preferredIndex = 3,
 		OnAccept = function(_, data)
-			if data and data.state then
-				resetCurrentPage(data.state)
+			if data and data.state and data.group then
+				lib._Internal.resetCurrentGroup(data.state, data.group)
+			elseif data and data.state then
+				lib._Internal.resetCurrentPage(data.state)
 			end
 		end,
 	}
@@ -7036,6 +7073,66 @@ local function confirmResetCurrentPage(state)
 			page.title or page.id
 		)
 	StaticPopup_Show("LIB_SETTINGS_DESIGNER_CENTER_RESET_DEFAULTS", nil, nil, { state = state })
+end
+
+function lib._Internal.confirmResetCurrentGroup(state, group)
+	if state.view ~= "page" or not state.selectedPageID or not group then
+		return
+	end
+	local L = getLocale(state.app)
+	if not StaticPopupDialogs or not StaticPopup_Show then
+		lib._Internal.resetCurrentGroup(state, group)
+		return
+	end
+	StaticPopupDialogs.LIB_SETTINGS_DESIGNER_CENTER_RESET_DEFAULTS = StaticPopupDialogs.LIB_SETTINGS_DESIGNER_CENTER_RESET_DEFAULTS or {
+		button1 = L["configCenterOkay"] or "OK",
+		button2 = L["configCenterCancel"] or "Cancel",
+		timeout = 0,
+		whileDead = true,
+		hideOnEscape = true,
+		preferredIndex = 3,
+		OnAccept = function(_, data)
+			if data and data.state and data.group then
+				lib._Internal.resetCurrentGroup(data.state, data.group)
+			elseif data and data.state then
+				lib._Internal.resetCurrentPage(data.state)
+			end
+		end,
+	}
+	local dialog = StaticPopupDialogs.LIB_SETTINGS_DESIGNER_CENTER_RESET_DEFAULTS
+	dialog.text = (L["configCenterConfirmTabDefaultsTitle"] or "Reset this tab to default values?")
+		.. "\n\n"
+		.. (L["configCenterConfirmDefaultsDesc"] or "This will restore all settings on %s to their defaults."):format(
+			group.title or group.id
+		)
+	StaticPopup_Show("LIB_SETTINGS_DESIGNER_CENTER_RESET_DEFAULTS", nil, nil, { state = state, group = group })
+end
+
+function lib._Internal.addGroupDefaultsButton(state, header, group)
+	if not (state and header and group) or resolveTopbarOption(state.app, "showDefaults", true) == false then
+		return nil
+	end
+	local L = getLocale(state.app)
+	local button = makeFlatButton(header, L["configCenterDefaults"] or "Defaults", 104, 26)
+	button:SetPoint("TOPRIGHT", header, "TOPRIGHT", 0, -8)
+	setFrameBackdrop(button, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
+	setTextColor(button.Text, TEXT.topbarGold)
+	button:SetScript("OnEnter", function(self)
+		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarHoverBg, lib.ThemeColors.buttonHoverBorder, "topbarButton")
+	end)
+	button:SetScript("OnLeave", function(self)
+		setFrameBackdrop(self, lib.ThemeColors.buttonTopbarBg, lib.ThemeColors.buttonTopbarBorder, "topbarButton")
+	end)
+	button:SetScript("OnClick", function()
+		lib._Internal.confirmResetCurrentGroup(state, group)
+	end)
+	button:SetShown(lib.GetGroupCustomizedCount(state.app, group) > 0)
+	state.groupDefaultsButtons = state.groupDefaultsButtons or {}
+	state.groupDefaultsButtons[#state.groupDefaultsButtons + 1] = {
+		button = button,
+		group = group,
+	}
+	return button
 end
 
 local function addPageCard(state, page, row, index, columns)
@@ -7939,35 +8036,53 @@ function lib._Internal.addMatrixPageFixedHeader(state, page, groups)
 	if state.frame.Scroll and header.SetFrameLevel and state.frame.Scroll.GetFrameLevel then
 		header:SetFrameLevel((state.frame.Scroll:GetFrameLevel() or 1) + 3)
 	end
+	local activeGroupID
+	local activeGroup
+	if groups and #groups > 0 then
+		activeGroupID = state.activePageGroupIDs and state.activePageGroupIDs[page.id]
+		local groupByID = {}
+		for _, group in ipairs(groups) do
+			groupByID[group.id] = group
+		end
+		if #groups > 1 then
+			if not activeGroupID or not groupByID[activeGroupID] then
+				activeGroupID = groups[1].id
+				state.activePageGroupIDs = state.activePageGroupIDs or {}
+				state.activePageGroupIDs[page.id] = activeGroupID
+			end
+			activeGroup = groupByID[activeGroupID]
+		else
+			activeGroup = groups[1]
+		end
+	end
 
 	local iconSource, iconIsAtlas = resolvePageIcon(state.app, page)
 	local icon = createIconPlate(header, iconSource, 46, iconIsAtlas)
 	icon:SetPoint("TOPLEFT", header, "TOPLEFT", 0, -4)
+	local defaultsButton = lib._Internal.addGroupDefaultsButton(state, header, activeGroup)
 	local title = createText(header, FONT_TITLE, page.title or page.id, TEXT.main)
 	title:SetPoint("LEFT", icon, "RIGHT", 14, 5)
-	title:SetPoint("RIGHT", header, "RIGHT", -8, 5)
+	if defaultsButton then
+		title:SetPoint("RIGHT", defaultsButton, "LEFT", -12, 5)
+	else
+		title:SetPoint("RIGHT", header, "RIGHT", -8, 5)
+	end
 	title:SetHeight(26)
 	title.Text:SetJustifyV("MIDDLE")
 	local description = page.description or page.subtitle
 	if description and description ~= "" then
 		local subtitle = createText(header, FONT_MUTED, lib.NormalizeTextValue(description), TEXT.muted)
 		subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -2)
-		subtitle:SetPoint("RIGHT", header, "RIGHT", -8, 0)
+		if defaultsButton then
+			subtitle:SetPoint("RIGHT", defaultsButton, "LEFT", -12, 0)
+		else
+			subtitle:SetPoint("RIGHT", header, "RIGHT", -8, 0)
+		end
 		subtitle:SetHeight(18)
 	end
 
 	if not (groups and #groups > 1) then
 		return nil
-	end
-	local activeGroupID = state.activePageGroupIDs and state.activePageGroupIDs[page.id]
-	local groupByID = {}
-	for _, group in ipairs(groups) do
-		groupByID[group.id] = group
-	end
-	if not activeGroupID or not groupByID[activeGroupID] then
-		activeGroupID = groups[1].id
-		state.activePageGroupIDs = state.activePageGroupIDs or {}
-		state.activePageGroupIDs[page.id] = activeGroupID
 	end
 
 	local tabY = -70
@@ -9519,6 +9634,7 @@ function StateMixin:RenderContent()
 	clearContent(self)
 	clearFixedContent(self)
 	self.groupCountHeaders = {}
+	self.groupDefaultsButtons = {}
 	local query = self.frame.SearchBox:GetText() or ""
 	if query ~= "" and self.activeSearchQuery == query then
 		self.resetSearchScroll = self.lastSearchQuery ~= query
@@ -10567,7 +10683,7 @@ local function createFrame(app)
 		end
 	end)
 	frame.ResetButton:SetScript("OnClick", function()
-		confirmResetCurrentPage(state)
+		lib._Internal.confirmResetCurrentPage(state)
 	end)
 	frame.DensityButton:SetScript("OnClick", function()
 		if lib.ShouldShowDensityButton(app) then

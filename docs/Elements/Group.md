@@ -53,5 +53,11 @@ When a page renders group tabs or a matrix fixed header, a group tab shows a
 `New` badge if one of its controls has an active `newTagID`. Groups do not need
 their own tag; keep badge state on the page controls through `opts.isNewTag`.
 
+Matrix fixed headers also show a localized **Defaults** button for the active
+group when at least one visible control is customized. After confirmation, the
+button resets only visible controls in that group and leaves other groups
+unchanged. It follows the app-level `topbar.showDefaults` setting, so hosts that
+hide reset actions do not gain a separate group reset button.
+
 [//]: # (Links)
 [Top]: #Top

@@ -226,6 +226,9 @@ local app = Config:RegisterAddOn(addonName, {
 })
 ```
 
+`showDefaults = false` hides both the page-level Defaults action and the
+active-group Defaults action used by matrix fixed headers.
+
 `titleActions` render after the title from left to right. `actions` /
 `rightActions` render automatically to the left of the built-in search, lock,
 density, and defaults controls. The library owns spacing, button chrome, hover

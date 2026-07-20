@@ -806,6 +806,11 @@ page controls, resolves each default, and calls
 `app:SetControlValue(control, default)`. Disabled controls are not skipped if
 they are visible.
 
+Matrix fixed headers may show a Defaults button for the active group when that
+group has customized visible controls. It uses the same internal value/default
+contract, resets visible controls in that group only, and follows the app-level
+`topbar.showDefaults` setting. This is UI behavior, not a new public reset API.
+
 For composite controls such as color pickers, provide `key` or `setValue` if
 reset and customized state should work through `SetControlValue`. `getColor` and
 `setColor` alone only power the picker UI.
