@@ -1,4 +1,4 @@
-## Interface: 11508, 11509, 20505, 20506, 38001, 50504, 120005, 120007
+## Interface: 11508, 11509, 20505, 20506, 38001, 38002, 50504, 120005, 120007
 ## Title: LibSettingsDesigner Sample
 ## Notes: Standalone sample addon for previewing LibSettingsDesigner settings in game.
 ## Author: LibSettingsDesigner
