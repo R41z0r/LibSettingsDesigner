@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed `New` badges overlapping compact matrix settings and shortened tab labels by rendering them as non-layout overlays.
 - Added a confirmation-backed Defaults button for customized matrix tabs while preserving hidden settings and host reset-action preferences.
 - Added opt-in grouped submenus for structured dropdown options without changing existing option lists.
 - Show the complete setting label in the hover panel when a row label is truncated, and improve the panel background and heading clarity.
