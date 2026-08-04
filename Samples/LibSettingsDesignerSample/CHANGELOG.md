@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Made long grouped dropdown submenus scrollable and applied `menuHeight` consistently to root menus and submenus.
 - Fixed `New` badges overlapping compact matrix settings and shortened tab labels by rendering them as non-layout overlays.
 - Added a confirmation-backed Defaults button for customized matrix tabs while preserving hidden settings and host reset-action preferences.
 - Added opt-in grouped submenus for structured dropdown options without changing existing option lists.
