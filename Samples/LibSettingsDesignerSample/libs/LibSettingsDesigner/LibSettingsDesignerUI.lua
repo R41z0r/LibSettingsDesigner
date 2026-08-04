@@ -5637,6 +5637,7 @@ local function addDropdownWidget(row, app, control, opts)
 			end)
 			for _, group in ipairs(orderedGroups) do
 				local submenu = rootDescription:CreateButton(group.label)
+				setDropdownMenuScrollMode(submenu, control, #group.options)
 				for _, option in ipairs(group.options) do addRadio(submenu, option) end
 			end
 		end)

@@ -75,6 +75,10 @@ Use the canonical `menuGroup*` fields for this opt-in. Generic host metadata
 such as `group`, `groupLabel`, or `groupOrder` is not interpreted, so existing
 structured option tables keep their established behavior.
 
+Dropdown roots and grouped submenus automatically become scrollable when they
+contain more than 12 options. `menuHeight` overrides the automatic height for
+both levels.
+
 ## [Dynamic Options][Top]
 
 ```lua
