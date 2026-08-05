@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Added an opt-in Select All checkbox for MultiDropdown controls.
 - Made long grouped dropdown submenus scrollable and applied `menuHeight` consistently to root menus and submenus.
 - Fixed `New` badges overlapping compact matrix settings and shortened tab labels by rendering them as non-layout overlays.
 - Added a confirmation-backed Defaults button for customized matrix tabs while preserving hidden settings and host reset-action preferences.
