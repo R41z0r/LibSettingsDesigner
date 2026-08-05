@@ -226,6 +226,7 @@ as `var`, `text`, `name`, `desc`, `get`, and `set` are mapped by
 | `setSelection` | MultiDropdown writes an entire boolean selection map. |
 | `isSelectedFunc` | MultiDropdown reads one option at a time. |
 | `setSelectedFunc` | MultiDropdown writes one option at a time. |
+| `selectAllLabel` | Adds a localized checkbox that toggles all options and reflects whether every option is selected. |
 | `setting` | Existing settings object with `GetValue`/`SetValue`/default methods. |
 
 Use explicit getters/setters for nested DB tables:

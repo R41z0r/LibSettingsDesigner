@@ -685,7 +685,7 @@ runtime actively consumes as UI behavior:
 | Toggle/Checkbox | `default`, `key`, `getValue`, `setValue`, `parentCheck`, `isEnabled`, `refreshOnChange`, `requiresReload` |
 | Slider | `min`, `max`, `step`, `formatter`, `valueFormatter`, `suffix`, `actions` |
 | Dropdown/ScrollDropdown | `values`, `options`, `list`, `orderList`, `order`, `listFunc`, `optionfunc`, `menuHeight`, `dropdownStyle`, `dropdownTextOutline` |
-| MultiDropdown | `getSelection`, `setSelection`, `isSelectedFunc`, `setSelectedFunc`, `selectionSource`, `summary`, `callback`, `menuHeight` |
+| MultiDropdown | `getSelection`, `setSelection`, `isSelectedFunc`, `setSelectedFunc`, `selectionSource`, `summary`, `callback`, `menuHeight`, `selectAllLabel` |
 | Input | `numeric`, `min`, `max`, `step`, `clampToRange`, `maxChars`, `readOnly`, `inputWidth`, `multiline`, `inputStyle` |
 | Button | `buttonText`, `onClick`, `setValue`, `trackCustomized = false` |
 | ColorPicker | `getColor`, `setColor`, `hasOpacity` |
@@ -931,6 +931,7 @@ app:RegisterControl("group.roles", {
   label = "Roles",
   options = { tank = "Tank", healer = "Healer", damage = "Damage" },
   orderList = { "tank", "healer", "damage" },
+  selectAllLabel = "Select all",
   getSelection = function()
     return MyAddonDB.profile.roles or {}
   end,
@@ -1096,6 +1097,7 @@ MultiDropdowns:
 - Keep `setSelectedFunc` and `setSelection` focused on data and lightweight
   runtime preview changes.
 - Do not rebuild the settings frame while the menu is open.
+- Use a localized `selectAllLabel` string when the menu should provide a checkbox that toggles all options.
 
 ## Visibility and Enablement Rules
 

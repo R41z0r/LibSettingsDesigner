@@ -5687,6 +5687,40 @@ local function addMultiDropdownWidget(row, app, control, opts)
 		MenuUtil.CreateContextMenu(owner, function(_, rootDescription)
 			local menuOptions = getControlOptions(control)
 			setDropdownMenuScrollMode(rootDescription, control, #menuOptions)
+			if type(control.selectAllLabel) == "string" and control.selectAllLabel ~= "" then
+				local function areAllOptionsSelected()
+					if #menuOptions == 0 then return false end
+					local selection = lib.GetMultiSelection(app, control)
+					for _, option in ipairs(menuOptions) do
+						if not lib.IsMultiOptionSelected(selection, option.value) then
+							return false
+						end
+					end
+					return true
+				end
+				local function setAllOptionsSelected()
+					local selected = not areAllOptionsSelected()
+					local selection = {}
+					if selected then
+						for _, option in ipairs(menuOptions) do
+							lib.SetMultiOptionSelected(selection, option.value, true)
+						end
+					end
+					if type(control.setSelection) == "function" or control.setting or control.setValue or control.key ~= nil then
+						app:SetControlValue(control, selection)
+					elseif type(control.setSelectedFunc) == "function" then
+						for _, option in ipairs(menuOptions) do
+							pcall(control.setSelectedFunc, option.value, selected, option)
+						end
+						if type(control.callback) == "function" then pcall(control.callback, selection, control) end
+					end
+					lib.RefreshVisibleRows(row._state)
+					refreshSummary()
+				end
+				local check = rootDescription:CreateCheckbox(control.selectAllLabel, areAllOptionsSelected, setAllOptionsSelected)
+				lib.AttachSoundPreviewCleanupInitializer(check)
+				rootDescription:CreateDivider()
+			end
 			for _, option in ipairs(menuOptions) do
 				local function isSelected(value)
 					return lib.IsMultiOptionSelected(lib.GetMultiSelection(app, control), value)
