@@ -30,6 +30,7 @@ boolean map where selected keys are `true`.
 | `isSelectedFunc` | function | Per-option selected reader. |
 | `setSelectedFunc` | function | Per-option selected writer. |
 | `menuHeight` | number | Menu height. |
+| `selectAllLabel` | string | Adds a top-level checkbox that toggles every option and is checked when all options are selected. |
 
 `hideSummary` is currently metadata/pass-through only and is not consumed by the
 UI renderer.
@@ -43,6 +44,7 @@ app:RegisterControl("group.roles", {
   label = "Roles",
   options = { tank = "Tank", healer = "Healer", damage = "Damage" },
   orderList = { "tank", "healer", "damage" },
+  selectAllLabel = "Select all",
   getSelection = function()
     return MyAddonDB.profile.roles or {}
   end,
@@ -74,6 +76,7 @@ end
 - Do not rebuild the settings frame from `setSelectedFunc`.
 - Deselect by removing keys or assigning `nil`.
 - Use `menuHeight` for large option sets.
+- Set `selectAllLabel` to a localized label when the menu should offer a checkbox that toggles all options.
 
 [//]: # (Links)
 [Top]: #Top

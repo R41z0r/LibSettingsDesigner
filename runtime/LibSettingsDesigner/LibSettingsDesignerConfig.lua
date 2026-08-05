@@ -354,6 +354,7 @@ local LEGACY_CONTROL_METADATA_FIELDS = {
 	"showEntryID",
 	"showRemoveButton",
 	"selectionSource",
+	"selectAllLabel",
 	"soundResolver",
 	"step",
 	"subvar",
