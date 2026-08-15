@@ -65,7 +65,11 @@ end
 local function normalizeSearchText(text)
 	text = tostring(text or "")
 	text = text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
-	text = CaseAccentInsensitiveParse(text)
+	if type(CaseAccentInsensitiveParse) == "function" then
+		text = CaseAccentInsensitiveParse(text)
+	else
+		text = text:lower()
+	end
 	text = text:gsub("[%c%p]+", " ")
 	text = text:gsub("%s+", " ")
 	text = text:gsub("^%s+", ""):gsub("%s+$", "")
