@@ -5,6 +5,7 @@ read_globals = {
   "ADD",
   "C_AddOns",
   "C_Timer",
+  "CaseAccentInsensitiveParse",
   "DEFAULT_CHAT_FRAME",
   "ENABLE",
   "ENABLED",

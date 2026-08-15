@@ -63,9 +63,11 @@ local function normalizeID(text)
 end
 
 local function normalizeSearchText(text)
-	text = tostring(text or ""):lower()
+	text = tostring(text or "")
 	text = text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
-	text = text:gsub("[^%w]+", " ")
+	text = CaseAccentInsensitiveParse(text)
+	text = text:gsub("[%c%p]+", " ")
+	text = text:gsub("%s+", " ")
 	text = text:gsub("^%s+", ""):gsub("%s+$", "")
 	return text
 end
