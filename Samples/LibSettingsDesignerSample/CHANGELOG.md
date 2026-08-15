@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed settings search for Chinese and other non-ASCII text on Retail.
 - Added an opt-in Select All checkbox for MultiDropdown controls.
 - Made long grouped dropdown submenus scrollable and applied `menuHeight` consistently to root menus and submenus.
 - Fixed `New` badges overlapping compact matrix settings and shortened tab labels by rendering them as non-layout overlays.
