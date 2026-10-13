@@ -64,6 +64,13 @@ ConfigUI:Open(app, "icons") -- opens the category, or its resolved tab page
 ConfigUI:Open("MyAddon", "general.core")
 ```
 
+Selecting a visible control from search scrolls to its row and briefly flashes
+it twice (1.45 seconds). Configure its RGBA color with `opts.colors.searchHighlight`;
+the default is `{ 1, 0.72, 0.12, 0.32 }` (gold). Alpha `0` hides the flash while
+retaining scrolling. Content changes and window hide cancel the highlight.
+Direct `Open(app, pageID, controlID)` calls scroll to the control without flashing
+it. Page-only navigation does not flash a control either.
+
 Use stable category/page/control ids. Do not use localized labels. A category id
 opens that category; when the category has `tabView` enabled, it resolves to the
 remembered, default, or first visible tab page.

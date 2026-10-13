@@ -38,6 +38,9 @@ For docs, examples, `AGENTS.md`, or `SKILL.md` changes:
 
 ## [Runtime Change Checklist][Top]
 
+For search/focus changes, run `lua scripts/test_search_navigation.lua` from the
+repository root to cover synchronous and deferred search-field notifications.
+
 For allowed code changes in this repository, run focused syntax checks from the
 repository root:
 
@@ -203,9 +206,10 @@ rg -n 'getValue|setValue|getSelection|setSelection|parentCheck|visibleWhen|hidde
 7. Verify hidden rows/pages are actually absent.
 8. Test search by label, id, keyword alias, and note text.
 9. Test reset on one control and one page.
-10. Test direct navigation: `ConfigUI:Open(app, pageID, controlID)`.
-11. Test compact/comfortable density when enabled.
-12. Check BugSack or the default Lua error frame.
+10. Test direct navigation: `ConfigUI:Open(app, pageID, controlID)`. Check a far-down search result, repeated focus, rapid page changes, and closing before deferred focus runs. Confirm search selections flash twice and clean up, while direct control links scroll without flashing. Exercise both synchronous and deferred `OnTextChanged` delivery for navigation's programmatic search clear; neither may rebuild the page again or cancel target focus.
+11. Check `colors.searchHighlight` with default gold, custom array/named RGBA, a dynamic theme change, and alpha `0`; scrolling must remain active. Page-only navigation must not flash a control.
+12. Test compact/comfortable density when enabled.
+13. Check BugSack or the default Lua error frame.
 
 ## [Reporting Template][Top]
 

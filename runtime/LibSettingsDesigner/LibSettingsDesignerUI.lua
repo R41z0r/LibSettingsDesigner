@@ -783,6 +783,7 @@ lib.DEFAULT_COLORS = lib.CopyThemeColorMap({
 	searchResultBorder = CARD_BORDER,
 	searchResultHoverBg = CARD_BG_HOVER,
 	searchResultHoverBorder = CARD_BORDER_HOVER,
+	searchHighlight = { 1, 0.72, 0.12, 0.32 },
 	disabledControlBg = DISABLED_CONTROL_BG,
 	disabledControlBorder = DISABLED_CONTROL_BORDER,
 	disabledRowBg = DISABLED_ROW_BG,
@@ -4655,7 +4656,44 @@ updateScrollFrameVisibility = function(scrollFrame)
 	end
 end
 
-function lib.ScrollToControlRow(state, controlID)
+function lib.CancelControlFocus(state)
+	state.controlFocusGeneration = (state.controlFocusGeneration or 0) + 1
+	if state.controlFocusAnimation then state.controlFocusAnimation:Stop() end
+	if state.controlFocusHighlight then state.controlFocusHighlight:Hide() end
+	state.controlFocusAnimation = nil
+	state.controlFocusHighlight = nil
+end
+
+function lib.FlashControlRow(state, row)
+	lib.CancelControlFocus(state)
+	local highlight = row._LibSettingsDesignerFocusHighlight
+	if not highlight then
+		highlight = row:CreateTexture(nil, "ARTWORK", nil, -1)
+		highlight:SetAllPoints(row)
+		local group = highlight:CreateAnimationGroup()
+		local phases = { { 0, 1, 0.15 }, { 1, 0.12, 0.35 }, { 0.12, 1, 0.15 }, { 1, 0, 0.8 } }
+		for order, phase in ipairs(phases) do
+			local alpha = group:CreateAnimation("Alpha")
+			alpha:SetOrder(order)
+			alpha:SetFromAlpha(phase[1])
+			alpha:SetToAlpha(phase[2])
+			alpha:SetDuration(phase[3])
+		end
+		group:SetScript("OnFinished", function() highlight:Hide() end)
+		group:SetScript("OnStop", function() highlight:Hide() end)
+		highlight.animation = group
+		row._LibSettingsDesignerFocusHighlight = highlight
+	end
+	local color = lib.ResolveThemeColors(state.app).searchHighlight or lib.DEFAULT_COLORS.searchHighlight
+	highlight:SetColorTexture(color[1], color[2], color[3], color[4])
+	state.controlFocusHighlight = highlight
+	state.controlFocusAnimation = highlight.animation
+	highlight:SetAlpha(0)
+	highlight:Show()
+	highlight.animation:Play()
+end
+
+function lib.ScrollToControlRow(state, controlID, highlightControl)
 	if not controlID or not state.frame or not state.frame.Scroll then
 		return
 	end
@@ -4674,6 +4712,7 @@ function lib.ScrollToControlRow(state, controlID)
 					scrollBar:SetValue(target)
 				end
 			end
+			if highlightControl then lib.FlashControlRow(state, row) end
 			return
 		end
 	end
@@ -4685,16 +4724,25 @@ function lib.FocusPendingControl(state)
 		return
 	end
 	state.pendingFocusControlID = nil
+	local highlightControl = state.pendingFocusHighlight == true
+	state.pendingFocusHighlight = nil
+	local generation = state.controlFocusGeneration
+	local rows = state.controlRows
+	local function focus()
+		-- Ignore deferred focus after a refresh, navigation, or window close.
+		if state.controlFocusGeneration ~= generation or state.controlRows ~= rows then return end
+		if not state.frame or not state.frame:IsShown() then return end
+		lib.ScrollToControlRow(state, controlID, highlightControl)
+	end
 	if _G.C_Timer and _G.C_Timer.After then
-		_G.C_Timer.After(0, function()
-			lib.ScrollToControlRow(state, controlID)
-		end)
+		_G.C_Timer.After(0, focus)
 	else
-		lib.ScrollToControlRow(state, controlID)
+		focus()
 	end
 end
 
 local function clearContent(state)
+	lib.CancelControlFocus(state)
 	lib.ReleaseAllCustomHandles(state)
 	clearFrameList(state.contentFrames)
 	state.controlRows = {}
@@ -4819,6 +4867,7 @@ function lib._Internal.openFullSearch(state, query)
 	end
 	query = tostring(query or "")
 	state.suppressSearchRender = true
+	state.suppressedSearchText = query
 	frame.SearchBox:SetText(query)
 	state.activeSearchQuery = query ~= "" and query or nil
 	state.view = "search"
@@ -9346,7 +9395,7 @@ function lib._Internal.renderSearch(state, query)
 			applyBackdrop(card, lib.ThemeColors.searchResultBg, lib.ThemeColors.searchResultBorder, "searchResult")
 			applyHoverState(card, lib.ThemeColors.searchResultBg, lib.ThemeColors.searchResultHoverBg, lib.ThemeColors.searchResultBorder, lib.ThemeColors.searchResultHoverBorder)
 			card:SetScript("OnMouseUp", function()
-				state:SetPage(control.pageID, control.focusID)
+				state:SetPage(control.pageID, control.focusID, true)
 			end)
 
 			local iconSource, iconIsAtlas = resolvePageIcon(app, page)
@@ -9378,7 +9427,7 @@ function lib._Internal.renderSearch(state, query)
 			local openButton = makeFlatButton(card, (L["configCenterOpenButton"] or "Open"), 74, 24)
 			openButton:SetPoint("BOTTOMRIGHT", card, "BOTTOMRIGHT", -14, 8)
 			openButton:SetScript("OnClick", function()
-				state:SetPage(control.pageID, control.focusID)
+				state:SetPage(control.pageID, control.focusID, true)
 			end)
 			state.y = state.y - 8
 		else
@@ -9402,7 +9451,7 @@ function lib._Internal.renderSearch(state, query)
 			local openButton = makeFlatButton(card, (L["configCenterOpenButton"] or "Open"), 74, 24)
 			openButton:SetPoint("BOTTOMRIGHT", card, "BOTTOMRIGHT", -14, 8)
 			openButton:SetScript("OnClick", function()
-				state:SetPage(control.pageID, control.id)
+				state:SetPage(control.pageID, control.id, true)
 			end)
 			state.y = state.y - 8
 		end
@@ -9502,7 +9551,7 @@ function lib._Internal.showSearchPreview(state, query)
 		row:SetScript("OnClick", function()
 			lib._Internal.hideSearchPreview(frame)
 			frame.SearchBox:ClearFocus()
-			state:SetPage(clickedPageID, clickedFocusID)
+			state:SetPage(clickedPageID, clickedFocusID, true)
 		end)
 		row:Show()
 		y = y - rowHeight
@@ -9644,7 +9693,7 @@ function lib._Internal.renderSearchLanding(state)
 			local openButton = makeFlatButton(card, (L["configCenterOpenButton"] or "Open"), 74, 24)
 			openButton:SetPoint("BOTTOMRIGHT", card, "BOTTOMRIGHT", -14, 8)
 			openButton:SetScript("OnClick", function()
-				state:SetPage(control.pageID, control.id)
+				state:SetPage(control.pageID, control.id, true)
 			end)
 			state.y = state.y - 8
 			shown = shown + 1
@@ -10013,6 +10062,7 @@ function StateMixin:SetSearch(restoreScroll)
 	self.selectedPageID = nil
 	if self.frame.SearchBox:GetText() ~= "" then
 		self.suppressSearchRender = true
+		self.suppressedSearchText = ""
 		self.frame.SearchBox:SetText("")
 		self.suppressSearchRender = nil
 	end
@@ -10080,7 +10130,7 @@ function StateMixin:ResolveFocusControlID(page, focusID)
 	return nil, nil
 end
 
-function StateMixin:SetPage(pageID, focusControlID)
+function StateMixin:SetPage(pageID, focusControlID, highlightControl)
 	self.activeSearchQuery = nil
 	lib._Internal.hideSearchPreview(self.frame)
 	local page = self.app:GetPage(pageID)
@@ -10113,12 +10163,14 @@ function StateMixin:SetPage(pageID, focusControlID)
 		end
 		if resolvedControlID then
 			self.pendingFocusControlID = resolvedControlID
+			self.pendingFocusHighlight = highlightControl == true
 		else
 			self.pendingCustomFocusID = focusControlID
 		end
 	end
 	if self.frame.SearchBox:GetText() ~= "" then
 		self.suppressSearchRender = true
+		self.suppressedSearchText = ""
 		self.frame.SearchBox:SetText("")
 		self.suppressSearchRender = nil
 	end
@@ -10684,6 +10736,7 @@ local function createFrame(app)
 	frame._LibSettingsDesignerState = state
 	updateContentMetrics(state)
 	frame:SetScript("OnHide", function()
+		lib.CancelControlFocus(state)
 		lib._Internal.hideSearchPreview(frame)
 		lib.ReleaseAllCustomHandles(state)
 	end)
@@ -10695,6 +10748,13 @@ local function createFrame(app)
 		end
 		if frame.SearchClearButton then
 			frame.SearchClearButton:SetShown(query ~= "")
+		end
+		-- SetText notifications can arrive after navigation has rendered the target.
+		-- Acknowledge the expected value without rebuilding and cancelling focus.
+		if state.suppressedSearchText ~= nil then
+			local expected = state.suppressedSearchText
+			state.suppressedSearchText = nil
+			if query == expected then return end
 		end
 		if state.suppressSearchRender then
 			return

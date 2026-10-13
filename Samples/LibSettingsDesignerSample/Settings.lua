@@ -138,6 +138,7 @@ local SAMPLE_THEME_COLORS = {
 		tabPanelBorder = { 0.62, 0.52, 0.30, 0.46 },
 		tabSelected = { 0.22, 0.15, 0.05, 0.34 },
 		accent = { 1.00, 0.82, 0.36, 1 },
+		searchHighlight = { 1.00, 0.82, 0.36, 0.32 },
 	},
 	midnight = {
 		background = { 0.020, 0.024, 0.032, 0.98 },
@@ -153,6 +154,7 @@ local SAMPLE_THEME_COLORS = {
 		tabPanelBorder = { 0.24, 0.42, 0.62, 0.56 },
 		tabSelected = { 0.040, 0.135, 0.200, 0.46 },
 		accent = { 0.42, 0.72, 1.00, 1 },
+		searchHighlight = { 0.42, 0.72, 1.00, 0.32 },
 		topbarText = { 0.70, 0.86, 1.00, 1 },
 	},
 	atomic = {
@@ -193,6 +195,7 @@ local SAMPLE_THEME_COLORS = {
 		tabSelected = { 0.000, 0.190, 0.225, 0.42 },
 		tabHover = { 0.000, 0.135, 0.175, 0.32 },
 		accent = { 0.00, 0.78, 1.00, 1 },
+		searchHighlight = { 0.00, 0.78, 1.00, 0.32 },
 		text = { 0.88, 0.94, 0.98, 1 },
 		mutedText = { 0.68, 0.74, 0.80, 1 },
 		subtleText = { 0.45, 0.52, 0.58, 1 },
@@ -224,6 +227,7 @@ local SAMPLE_THEME_COLORS = {
 		tabPanelBorder = { 0.00, 0.54, 0.72, 0.58 },
 		tabSelected = { 0.000, 0.165, 0.205, 0.44 },
 		accent = { 0.00, 0.78, 1.00, 1 },
+		searchHighlight = { 0.00, 0.78, 1.00, 0.32 },
 		text = { 0.88, 0.94, 0.98, 1 },
 		mutedText = { 0.68, 0.74, 0.80, 1 },
 		subtleText = { 0.45, 0.52, 0.58, 1 },
@@ -240,6 +244,7 @@ local SAMPLE_THEME_COLORS = {
 		buttonHover = { 0.180, 0.090, 0.040, 0.98 },
 		searchBorder = { 0.68, 0.34, 0.16, 0.90 },
 		accent = { 1.00, 0.56, 0.22, 1 },
+		searchHighlight = { 1.00, 0.56, 0.22, 0.32 },
 		topbarBorder = { 0.72, 0.36, 0.16, 0.72 },
 	},
 }
