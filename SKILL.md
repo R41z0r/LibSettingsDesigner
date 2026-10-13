@@ -420,11 +420,27 @@ background, overlay, panel, content, sidebar, card, cardHover, cardBorder,
 cardHoverBorder, row, rowBorder, rowHover, rowHoverBorder, tabPanel,
 tabPanelBorder, tab, tabHover, tabSelected, tabText, tabSelectedText,
 tabUnderline, button, buttonBorder, buttonHover, buttonHoverBorder, search,
-searchBorder, searchResult, searchResultBorder, searchResultHover, searchResultHoverBorder,
+searchBorder, searchHighlight, searchResult, searchResultBorder, searchResultHover, searchResultHoverBorder,
 dropdown, dropdownBorder, dropdownHover, dropdownHoverBorder,
 input, inputBorder, inputFocus, inputFocusBorder, selected, text, mutedText,
 subtleText, disabledText, accent, topbarText
 ```
+
+`colors.searchHighlight` controls the brief target-row flash after selecting a
+search result. Direct `UI:Open(app, pageID, controlID)` links only scroll; they
+do not flash. Only search navigation opts into the internal highlight flag.
+It is independent of `accent` and search-result card hover colors. The default
+is `{ 1, 0.72, 0.12, 0.32 }` (gold); e.g. use
+`searchHighlight = { 0.2, 0.75, 1, 0.4 }` for cyan. Named RGBA values and dynamic
+theme functions work through the existing theme resolver. Alpha controls peak
+opacity; alpha `0` hides the flash while retaining scroll-to-control behavior.
+The row flashes twice over 1.45 seconds after layout/scrolling. Page-only links
+do not flash; content refresh/navigation and window hide cancel the animation
+and pending focus. Resolve the color for the target app on every flash, including
+reused rows. Acknowledge programmatic search changes by their expected text value:
+`OnTextChanged` may run after `SetText` returns, so a synchronous suppression flag
+alone can rebuild the page and cancel the pending highlight. See
+`docs/Examples/Theme-Colors.md` and `docs/API/UI-API.md`.
 
 For precise one-off overrides, use direct detail keys such as `topbarBg`,
 `topbarBorder`, `buttonTopbarBg`, `dashboardCardBg`, `detailSectionBg`,

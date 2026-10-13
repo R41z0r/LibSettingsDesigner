@@ -39,6 +39,7 @@ local app = Config:RegisterAddOn(addonName, {
     button = { 0.08, 0.07, 0.05, 0.94 },
     buttonHover = { 0.16, 0.12, 0.06, 0.98 },
     searchBorder = { 0.55, 0.44, 0.24, 0.90 },
+    searchHighlight = { 0.20, 0.75, 1.00, 0.40 },
   },
 })
 ```
@@ -99,6 +100,7 @@ Semantic keys:
 | `button`, `buttonBorder`, `buttonHover`, `buttonHoverBorder` | Standard flat buttons. |
 | `search`, `searchBorder` | Search box shell. |
 | `searchResult`, `searchResultBorder`, `searchResultHover`, `searchResultHoverBorder` | Full-search result cards and their hover state. |
+| `searchHighlight` | Target-row flash after selecting a search result. Default `{ 1, 0.72, 0.12, 0.32 }`; independent of `accent` and search-result hover colors. |
 | `selected` | Selected button/card state. |
 | `text`, `mutedText`, `subtleText`, `disabledText` | Text colors. |
 | `accent` | Gold/accent color used by arrows, resize grip, and badges. |
@@ -114,12 +116,21 @@ detailSectionBorder, detailSectionHeaderBg, rowBg, rowBorder, rowHoverBg,
 rowHoverBorder, rowSeparator, selectedBg, sidebarBg, frameBg, overlayTint,
 buttonBg, buttonBorder, buttonHoverBg, buttonHoverBorder, buttonTopbarBg,
 buttonTopbarBorder, buttonTopbarHoverBg, searchBg, searchBorder,
-searchResultBg, searchResultBorder, searchResultHoverBg, searchResultHoverBorder,
+searchResultBg, searchResultBorder, searchResultHoverBg, searchResultHoverBorder, searchHighlight,
 disabledControlBg, disabledControlBorder, disabledRowBg, disabledRowBorder,
 sidebarSectionText, tabPanelBg, tabPanelBorder, tabBg, tabHoverBg,
 tabSelectedBg, tabText, tabSelectedText, tabUnderline, textMain, textMuted,
 textSubtle, textDisabled, topbarAccent, success
 ```
+
+The target row flashes twice over 1.45 seconds once the page layout and scroll
+position are ready. `searchHighlight` accepts the same array/named RGBA values
+and dynamic theme functions as other colors. Alpha sets peak opacity; use `0`
+to suppress the visible flash while keeping navigation and scrolling. The color
+is resolved for the target app on every flash, including repeated focus on the
+same row. Content changes and window hide cancel the animation and pending
+focus. Page-only links and direct `UI:Open(app, pageID, controlID)` calls do not flash
+a control; direct control links retain scrolling.
 
 ## [Rules][Top]
 

@@ -1,6 +1,13 @@
 # Changelog
 
-## Unreleased
+## 2026-10-13
+
+### Added
+
+- Selecting a search result now briefly highlights its setting after scrolling to it. Direct settings links continue to scroll without flashing.
+- Added `colors.searchHighlight` to customize the highlight color and opacity, with theme examples and updated API documentation and skill guidance.
+
+## v2026.08.15.111337 - 2026-08-15
 
 - Fixed settings search for Chinese and other non-ASCII text on Retail.
 - Added an opt-in Select All checkbox for MultiDropdown controls.

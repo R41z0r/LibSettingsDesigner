@@ -44,6 +44,7 @@ Config:RegisterAddOn(addonID, opts)
 | `db` | function | Returns the table used for simple DB-backed controls. |
 | `locale` | table | Host addon locale table. |
 | `colors` / `colorTable` / `themeColors` | table/function | Optional global UI theme color overrides. Missing keys keep defaults. |
+| `colors.searchHighlight` | RGBA table | Target-row flash after selecting a search result. Default `{ 1, 0.72, 0.12, 0.32 }`; alpha `0` hides the flash without disabling scrolling. Also supported through `colorTable`/`themeColors`. |
 | `borders` / `themeBorders` / `borderAssets` | table/function | Optional global UI border asset overrides. Missing keys keep defaults. Use `window` / `windowBorder` for the decorative outer frame. |
 | `textures` / `themeTextures` / `textureBorders` / `shapeTextures` | table/function | Optional 3-slice texture overlays for non-backdrop shape art. Missing keys keep normal backdrops only. |
 | `windowBorder` / `windowBorderArt` / `panelBorderArt` | boolean/function | Set to `false` to hide the packaged outer window art frame. |
