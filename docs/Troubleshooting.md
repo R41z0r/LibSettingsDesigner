@@ -320,9 +320,9 @@ After documentation or runtime changes, validate the expected user path:
 9. Open a page directly with `ConfigUI:Open(app, pageID, controlID)`.
 10. Check BugSack/console for Lua errors.
 
-[//]: # (Links)
-[Top]: #Top
-
 For help that must remain visible, use `type = "inlinehint"` with a localized
 `label`. Control descriptions and notes may appear only on hover in compact
-layouts. See [Notes](Elements/Notes.md#inline-hints).
+layouts. See [InlineHint](Elements/InlineHint.md).
+
+[//]: # (Links)
+[Top]: #Top

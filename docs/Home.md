@@ -39,6 +39,7 @@ wrapper bridges, documenting elements, or validating changes.
 - [Category](Elements/Category.md)
 - [Page](Elements/Page.md)
 - [Group](Elements/Group.md)
+- [InlineHint](Elements/InlineHint.md)
 - [Toggle](Elements/Toggle.md)
 - [Slider](Elements/Slider.md)
 - [Dropdown](Elements/Dropdown.md)

@@ -41,6 +41,13 @@ For docs, examples, `AGENTS.md`, or `SKILL.md` changes:
 For search/focus changes, run `lua scripts/test_search_navigation.lua` from the
 repository root to cover synchronous and deferred search-field notifications.
 
+For inline hint and subgroup layout changes, also run:
+
+```bash
+lua scripts/test_inline_hint_layout.lua
+lua scripts/test_subgroup_layout.lua
+```
+
 For allowed code changes in this repository, run focused syntax checks from the
 repository root:
 
@@ -209,7 +216,9 @@ rg -n 'getValue|setValue|getSelection|setSelection|parentCheck|visibleWhen|hidde
 10. Test direct navigation: `ConfigUI:Open(app, pageID, controlID)`. Check a far-down search result, repeated focus, rapid page changes, and closing before deferred focus runs. Confirm search selections flash twice and clean up, while direct control links scroll without flashing. Exercise both synchronous and deferred `OnTextChanged` delivery for navigation's programmatic search clear; neither may rebuild the page again or cancel target focus.
 11. Check `colors.searchHighlight` with default gold, custom array/named RGBA, a dynamic theme change, and alpha `0`; scrolling must remain active. Page-only navigation must not flash a control.
 12. Test compact/comfortable density when enabled.
-13. Check BugSack or the default Lua error frame.
+13. Check inline hints with long localized text, narrow/wide windows, both densities, and one/two-column groups. Verify wrapping, subsequent-row spacing, and no tooltip. Check subtle subgroup headings, indentation, gutters, and hidden children.
+14. Check custom controls with and without `hideHeader`, including dynamic heights.
+15. Check BugSack or the default Lua error frame.
 
 ## [Reporting Template][Top]
 
@@ -233,8 +242,3 @@ Remaining recommendations:
 
 [//]: # (Links)
 [Top]: #Top
-
-For inline hints, check long localized text at narrow and wide widths, compact
-and comfortable density, and one/two-column groups. Hints must span the group,
-wrap without clipping, leave subsequent controls below them, and show no tooltip.
-Run `lua scripts/test_inline_hint_layout.lua` for layout regression coverage.
