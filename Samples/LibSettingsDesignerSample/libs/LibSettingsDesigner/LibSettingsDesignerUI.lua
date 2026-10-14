@@ -8730,7 +8730,8 @@ end
 
 function lib._Internal.addGroupSection(state, group, pagePath, layout)
 	local matrixRows = lib._Internal.shouldUseMatrixRows(state)
-	local collapsed = (not matrixRows) and state.collapsedGroups and state.collapsedGroups[group.id] == true
+	local hideHeader = state.tabbedGroupID == group.id
+	local collapsed = (not hideHeader) and (not matrixRows) and state.collapsedGroups and state.collapsedGroups[group.id] == true
 	local customizedCount = lib.GetGroupCustomizedCount(state.app, group)
 	local sectionWidth = layout and tonumber(layout.width) or (state.pageSectionWidth or state.pageLeftWidth or 420)
 	local controlLayout = lib._Internal.getGroupControlLayout(state, group, sectionWidth)
@@ -8738,7 +8739,8 @@ function lib._Internal.addGroupSection(state, group, pagePath, layout)
 	if not collapsed then
 		controlsHeight = controlLayout.controlsHeight
 	end
-	local height = collapsed and 40 or (46 + controlsHeight + 14)
+	local headerOffset = hideHeader and 6 or 46
+	local height = collapsed and 40 or (headerOffset + controlsHeight + 14)
 	local section
 	if layout and layout.x and layout.y then
 		section = trackFrame(state.contentFrames, CreateFrame("Frame", nil, state.content, "BackdropTemplate"))
@@ -8759,6 +8761,7 @@ function lib._Internal.addGroupSection(state, group, pagePath, layout)
 	header:SetPoint("TOPLEFT", section, "TOPLEFT", 0, 0)
 	header:SetPoint("TOPRIGHT", section, "TOPRIGHT", 0, 0)
 	header:SetHeight(40)
+	header:SetShown(not hideHeader)
 	applyBackdrop(header, matrixRows and { 0, 0, 0, 0 } or DETAIL_COLORS.sectionHeaderBg, { 0, 0, 0, 0 }, "detailSection")
 	header.Text = header:CreateFontString(nil, "OVERLAY", FONT_HEADER)
 	header.Text:SetPoint("LEFT", header, "LEFT", 14, 0)
@@ -8806,7 +8809,7 @@ function lib._Internal.addGroupSection(state, group, pagePath, layout)
 		local columnGap = controlLayout.columnGap
 		for index, entry in ipairs(controlLayout.entries) do
 			local x = (entry.xOffset or 12) + ((entry.column or 1) - 1) * (columnWidth + columnGap)
-			local row = addSettingRow(state, entry.control, pagePath, section, entry.y, entry.width or columnWidth, x)
+			local row = addSettingRow(state, entry.control, pagePath, section, entry.y + (46 - headerOffset), entry.width or columnWidth, x)
 			if index == #controlLayout.entries and row.Separator then
 				row.Separator:Hide()
 			end
@@ -9413,6 +9416,7 @@ function lib._Internal.renderPage(state, pageID)
 		if not state.matrixPageFixedHeader then
 			activeGroupID = lib._Internal.addSectionTabs(state, page, groups)
 		end
+		state.tabbedGroupID = activeGroupID
 		local renderGroups = groups
 		if activeGroupID then
 			renderGroups = {}
@@ -9782,6 +9786,7 @@ function StateMixin:RenderContent()
 	updateContentMetrics(self)
 	clearContent(self)
 	clearFixedContent(self)
+	self.tabbedGroupID = nil
 	self.groupCountHeaders = {}
 	self.groupDefaultsButtons = {}
 	local query = self.frame.SearchBox:GetText() or ""

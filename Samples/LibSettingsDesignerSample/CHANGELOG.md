@@ -2,6 +2,10 @@
 
 ## 2026-10-14
 
+### Changed
+
+- Removed repeated group headings beneath visible tabs while retaining headings on pages without tabs.
+
 ### Added
 
 - Added optional indented controls and subtle section headings for always-visible subgroups.
