@@ -338,3 +338,10 @@ the wrapper.
 
 [//]: # (Links)
 [Top]: #Top
+
+## Section Header Controls
+
+`type = "sectionheader"` creates an inline full-width heading within its group.
+`justifyH` accepts `"LEFT"` (default), `"CENTER"`, or `"RIGHT"`; unsupported
+values use left alignment. Icons remain on the left. Omit the icon to center
+the label across the whole row. See [Group](Elements/Group.md#inline-section-headings).

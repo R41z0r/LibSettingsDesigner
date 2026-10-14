@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-14
+
+### Added
+
+- Section headings support optional centered or right-aligned text through `justifyH`.
+
 ## 2026-10-13
 
 ### Added

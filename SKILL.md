@@ -1613,3 +1613,11 @@ Not verified / limitations:
 Recommended next steps:
 - ...
 ```
+
+## Inline Section Header Alignment
+
+Use a `sectionheader` control with `justifyH = "CENTER"` for a centered
+heading spanning a group's control columns. The default is `"LEFT"`;
+`"RIGHT"` is also supported. Legacy wrappers must forward `justifyH`.
+Icons stay left-aligned and reserve label space; omit them for a title
+centered across the whole row. See `docs/Elements/Group.md`.
