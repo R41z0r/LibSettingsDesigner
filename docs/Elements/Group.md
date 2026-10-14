@@ -4,6 +4,7 @@
 - [Overview](#overview)
 - [Fields](#fields)
 - [Example](#example)
+- [Inline Section Headings](#inline-section-headings)
 
 </details>
 
@@ -58,6 +59,29 @@ group when at least one visible control is customized. After confirmation, the
 button resets only visible controls in that group and leaves other groups
 unchanged. It follows the app-level `topbar.showDefaults` setting, so hosts that
 hide reset actions do not gain a separate group reset button.
+
+## [Inline Section Headings][Top]
+
+Use a `sectionheader` control to divide settings within an existing group.
+It spans the group's control columns and starts the following controls on a
+new row. `justifyH` accepts `"LEFT"` (default), `"CENTER"`, or `"RIGHT"`.
+Omitted or unsupported values preserve left alignment. This aligns the label;
+an optional icon retains its existing left position and reserves label space.
+For a title centered across the whole row, omit the icon.
+
+```lua
+app:RegisterControl("interface.action-bars", {
+  id = "appearance.heading",
+  groupID = "visibility",
+  type = "sectionheader",
+  label = "Appearance",
+  justifyH = "CENTER",
+  trackCustomized = false,
+  order = 100,
+})
+```
+
+Legacy wrappers should forward `justifyH` to `RegisterLegacyControl`.
 
 [//]: # (Links)
 [Top]: #Top

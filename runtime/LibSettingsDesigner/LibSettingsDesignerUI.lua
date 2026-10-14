@@ -6682,7 +6682,8 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 	state.controlRows = state.controlRows or {}
 	state.controlRows[#state.controlRows + 1] = { row = row, control = control }
 	if controlType == "sectionheader" then
-		local labelLeft = 4
+		local alignment = control.justifyH == "CENTER" and "CENTER" or control.justifyH == "RIGHT" and "RIGHT" or "LEFT"
+		local labelLeft = alignment == "CENTER" and 8 or 4
 		if control.icon or control.iconAtlas then
 			local icon = row:CreateTexture(nil, "ARTWORK")
 			icon:SetSize(18, 18)
@@ -6702,6 +6703,7 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 		label:SetPoint("RIGHT", row, "RIGHT", -8, 0)
 		label:SetHeight(20)
 		label.Text:SetJustifyV("MIDDLE")
+		label.Text:SetJustifyH(alignment)
 		if type(control.textColor) == "table" then
 			local color = control.textColor
 			setTextColor(label.Text, { color[1] or color.r or 1, color[2] or color.g or 1, color[3] or color.b or 1, color[4] or color.a or 1 })
