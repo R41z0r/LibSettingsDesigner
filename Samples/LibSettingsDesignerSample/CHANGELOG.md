@@ -4,6 +4,8 @@
 
 ### Added
 
+- Added mint-colored inline hints with automatic text wrapping for guidance that stays visible.
+
 - Section headings support optional centered or right-aligned text through `justifyH`.
 
 ## 2026-10-13

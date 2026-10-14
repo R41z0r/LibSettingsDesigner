@@ -7,6 +7,7 @@
 - [Simple Note](#simple-note)
 - [Rich Note](#rich-note)
 - [Spacing Rule](#spacing-rule)
+- [Inline hints](#inline-hints)
 
 </details>
 
@@ -71,6 +72,29 @@ notes = {
 
 The note panel measures rendered font height and removes the trailing row gap
 from the final panel height. This keeps top and bottom padding visually even.
+
+
+## Inline hints
+
+Register a noninteractive `type = "inlinehint"` control for guidance that must
+stay visible without hovering. `label` contains the localized hint, and optional
+`textColor` accepts RGBA array or named fields. The default is soft mint green
+`{ 0.60, 0.86, 0.76, 1 }`. It spans all control columns, wraps at the available
+width, and measures rendered font height on layout. It has no background,
+separator, input, or hover tooltip, and never counts as customized.
+
+```lua
+app:RegisterControl("interface.action-bars", {
+  id = "visibility.hint",
+  groupID = "visibility",
+  type = "inlinehint",
+  label = "Move and customize enabled elements in Edit Mode.",
+  order = 110,
+})
+```
+
+Keep `description` and `notes` for hover help. Use a stable id and group/order
+for inline hints; do not attach them to the previously registered control.
 
 [//]: # (Links)
 [Top]: #Top

@@ -2224,7 +2224,24 @@ function lib.IsCompactDensity(state)
 	return state and state.density == "compact"
 end
 
-local function getSettingRowHeight(control, state)
+function lib._Internal.getInlineHintHeight(control, state, width)
+	local measure = state._inlineHintMeasure
+	if not measure then
+		measure = state.frame:CreateFontString(nil, "OVERLAY", FONT_TEXT)
+		measure:Hide()
+		state._inlineHintMeasure = measure
+	end
+	measure:SetWidth(math.max(1, (width or state.pageLeftWidth or 620) - 24))
+	measure:SetHeight(0)
+	measure:SetMaxLines(0)
+	measure:SetWordWrap(true)
+	measure:SetNonSpaceWrap(true)
+	measure:SetText(control.label or "")
+	return math.max(18, math.ceil(measure:GetStringHeight()) + 2) + 16
+end
+
+local function getSettingRowHeight(control, state, width)
+	if getControlType(control) == "inlinehint" then return lib._Internal.getInlineHintHeight(control, state, width) end
 	local layoutType = getControlLayoutType(control)
 	local controlType = getControlType(control)
 	if controlType == "sectionheader" then
@@ -4173,6 +4190,7 @@ function makeFlatButton(parent, text, width, height, iconSource, iconIsAtlas)
 end
 
 local function refreshControlRow(app, control, row)
+	if getControlType(control) == "inlinehint" then return end
 	local enabled = app:IsControlEnabled(control)
 	local matrixRows = lib._Internal.shouldUseMatrixRows(row and row._state)
 	local matrixBorder = { 0, 0, 0, 0 }
@@ -6664,8 +6682,8 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 	local layoutType = getControlLayoutType(control)
 	local compact = lib.IsCompactDensity(state)
 	local matrixRows = lib._Internal.shouldUseMatrixRows(state)
-	local rowHeight = getSettingRowHeight(control, state)
 	local rowWidth = width or parent and (parent:GetWidth() - 24) or state.pageLeftWidth or state.contentWidth or 620
+	local rowHeight = getSettingRowHeight(control, state, rowWidth)
 	local row
 	if parent then
 		row = CreateFrame("Frame", nil, parent, "BackdropTemplate")
@@ -6681,6 +6699,21 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 	row._state = state
 	state.controlRows = state.controlRows or {}
 	state.controlRows[#state.controlRows + 1] = { row = row, control = control }
+	if controlType == "inlinehint" then
+		local color = control.textColor or { 0.60, 0.86, 0.76, 1 }
+		local label = createText(row, FONT_TEXT, control.label or "", { color[1] or color.r or 0.60, color[2] or color.g or 0.86, color[3] or color.b or 0.76, color[4] or color.a or 1 })
+		label:SetPoint("TOPLEFT", row, "TOPLEFT", 12, -8)
+		label:SetSize(math.max(1, rowWidth - 24), rowHeight - 16)
+		label.Text:ClearAllPoints()
+		label.Text:SetPoint("TOPLEFT", label, "TOPLEFT")
+		label.Text:SetWidth(math.max(1, rowWidth - 24))
+		label.Text:SetHeight(0)
+		label.Text:SetMaxLines(0)
+		label.Text:SetWordWrap(true)
+		label.Text:SetNonSpaceWrap(true)
+		row:EnableMouse(false)
+		return row
+	end
 	if controlType == "sectionheader" then
 		local alignment = control.justifyH == "CENTER" and "CENTER" or control.justifyH == "RIGHT" and "RIGHT" or "LEFT"
 		local labelLeft = alignment == "CENTER" and 8 or 4
@@ -8601,6 +8634,7 @@ function lib._Internal.getGroupControlLayout(state, group, width)
 	local function isMatrixFullWidthControl(control)
 		local controlType = getControlType(control)
 		return controlType == "sectionheader"
+			or controlType == "inlinehint"
 			or controlType == "reorderlist"
 			or controlType == "colorpalette"
 			or controlType == "custom"
@@ -8611,7 +8645,7 @@ function lib._Internal.getGroupControlLayout(state, group, width)
 		while index <= #controls do
 			local control = controls[index]
 			if isMatrixFullWidthControl(control) then
-				local rowHeight = getSettingRowHeight(control, state)
+				local rowHeight = getSettingRowHeight(control, state, innerWidth)
 				entries[#entries + 1] = {
 					control = control,
 					column = 1,
@@ -8651,16 +8685,24 @@ function lib._Internal.getGroupControlLayout(state, group, width)
 		for _, control in ipairs(controls) do
 			local column = lib._Internal.getColumnIndex(control.column or control.layoutColumn or control.columnIndex, columnCount)
 				or lib._Internal.getShortestColumn(columnHeights, columnCount)
-			local rowHeight = getSettingRowHeight(control, state)
+			local inlineHint = getControlType(control) == "inlinehint"
+			if inlineHint then
+				column = 1
+				for index = 2, columnCount do columnHeights[1] = math.max(columnHeights[1], columnHeights[index]) end
+			end
+			local rowHeight = getSettingRowHeight(control, state, inlineHint and innerWidth or columnWidth)
 			entries[#entries + 1] = {
 				control = control,
 				column = column,
 				y = -(46 + columnHeights[column]),
 				height = rowHeight,
 				xOffset = sectionInset,
-				width = getControlType(control) == "sectionheader" and innerWidth or nil,
+				width = (inlineHint or getControlType(control) == "sectionheader") and innerWidth or nil,
 			}
 			columnHeights[column] = columnHeights[column] + rowHeight + rowGap
+			if inlineHint then
+				for index = 2, columnCount do columnHeights[index] = columnHeights[1] end
+			end
 		end
 	end
 	local controlsHeight = 0

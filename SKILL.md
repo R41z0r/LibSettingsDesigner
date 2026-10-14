@@ -1621,3 +1621,11 @@ heading spanning a group's control columns. The default is `"LEFT"`;
 `"RIGHT"` is also supported. Legacy wrappers must forward `justifyH`.
 Icons stay left-aligned and reserve label space; omit them for a title
 centered across the whole row. See `docs/Elements/Group.md`.
+
+## Visible Inline Hints
+
+Use `type = "inlinehint"` with localized `label` and optional `textColor` for
+always-visible guidance. Hints span group columns and measure wrapped text,
+use soft mint by default, and do not display hover help. Host wrappers should
+register them as controls with stable ids, not as notes on a previous control.
+See `docs/Elements/Notes.md#inline-hints`.

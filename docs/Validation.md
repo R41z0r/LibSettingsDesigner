@@ -233,3 +233,8 @@ Remaining recommendations:
 
 [//]: # (Links)
 [Top]: #Top
+
+For inline hints, check long localized text at narrow and wide widths, compact
+and comfortable density, and one/two-column groups. Hints must span the group,
+wrap without clipping, leave subsequent controls below them, and show no tooltip.
+Run `lua scripts/test_inline_hint_layout.lua` for layout regression coverage.

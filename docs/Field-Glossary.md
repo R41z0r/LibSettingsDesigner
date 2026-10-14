@@ -345,3 +345,6 @@ the wrapper.
 `justifyH` accepts `"LEFT"` (default), `"CENTER"`, or `"RIGHT"`; unsupported
 values use left alignment. Icons remain on the left. Omit the icon to center
 the label across the whole row. See [Group](Elements/Group.md#inline-section-headings).
+
+Inline guidance uses `type = "inlinehint"`, localized `label`, and optional
+`textColor` (RGBA). See [Notes](Elements/Notes.md#inline-hints).

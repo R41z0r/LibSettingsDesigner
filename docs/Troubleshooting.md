@@ -322,3 +322,7 @@ After documentation or runtime changes, validate the expected user path:
 
 [//]: # (Links)
 [Top]: #Top
+
+For help that must remain visible, use `type = "inlinehint"` with a localized
+`label`. Control descriptions and notes may appear only on hover in compact
+layouts. See [Notes](Elements/Notes.md#inline-hints).
