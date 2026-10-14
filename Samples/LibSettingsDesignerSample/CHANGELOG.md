@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Capitalized the Changed search filter consistently across supported languages.
+
 ## 2026-10-14
 
 ### Changed
