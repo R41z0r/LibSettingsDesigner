@@ -4,6 +4,8 @@
 
 ### Added
 
+- Added optional indented controls and subtle section headings for always-visible subgroups.
+
 - Added mint-colored inline hints with automatic text wrapping for guidance that stays visible.
 
 - Section headings support optional centered or right-aligned text through `justifyH`.

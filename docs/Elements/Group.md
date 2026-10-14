@@ -85,3 +85,13 @@ Legacy wrappers should forward `justifyH` to `RegisterLegacyControl`.
 
 [//]: # (Links)
 [Top]: #Top
+
+### Always-visible subgroups
+
+Use `headerStyle = "subtle"` on a `sectionheader` for a compact, muted title
+without a separator. Set `indent = 16` on the heading and its controls to
+visually nest them beneath a normal section heading. Indentation is measured
+in UI units, clamped to 0–48, and preserves the two-column gutter and right edge.
+There is no collapse state. Give each subgroup heading a `hiddenWhen` predicate
+matching the visibility of its contents so empty headings do not remain visible.
+Legacy wrappers must forward `headerStyle` and `indent`.

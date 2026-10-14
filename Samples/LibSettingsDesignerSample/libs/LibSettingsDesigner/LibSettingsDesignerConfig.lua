@@ -315,6 +315,8 @@ local LEGACY_CONTROL_METADATA_FIELDS = {
 	"isSelectedFunc",
 	"isVisible",
 	"justifyH",
+	"indent",
+	"headerStyle",
 	"list",
 	"listFunc",
 	"max",

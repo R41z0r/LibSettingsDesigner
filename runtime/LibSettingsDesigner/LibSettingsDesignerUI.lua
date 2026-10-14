@@ -2245,7 +2245,7 @@ local function getSettingRowHeight(control, state, width)
 	local layoutType = getControlLayoutType(control)
 	local controlType = getControlType(control)
 	if controlType == "sectionheader" then
-		return tonumber(control.height or control.rowHeight) or 38
+		return tonumber(control.height or control.rowHeight) or (control.headerStyle == "subtle" and 30 or 38)
 	end
 	if controlType == "custom" and type(control.getHeight) == "function" then
 		local ok, height = pcall(control.getHeight, state and state.app, control, state)
@@ -6741,14 +6741,16 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 			local color = control.textColor
 			setTextColor(label.Text, { color[1] or color.r or 1, color[2] or color.g or 1, color[3] or color.b or 1, color[4] or color.a or 1 })
 		else
-			setTextColor(label.Text, TEXT.main)
+			setTextColor(label.Text, control.headerStyle == "subtle" and TEXT.muted or TEXT.main)
 		end
-		local line = row:CreateTexture(nil, "ARTWORK")
-		preparePixelTexture(line)
-		line:SetColorTexture(ROW_SEPARATOR[1], ROW_SEPARATOR[2], ROW_SEPARATOR[3], 0.34)
-		line:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 4, 4)
-		line:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", -8, 4)
-		line:SetHeight(getPixelSize(row))
+		if control.headerStyle ~= "subtle" then
+			local line = row:CreateTexture(nil, "ARTWORK")
+			preparePixelTexture(line)
+			line:SetColorTexture(ROW_SEPARATOR[1], ROW_SEPARATOR[2], ROW_SEPARATOR[3], 0.34)
+			line:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 4, 4)
+			line:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", -8, 4)
+			line:SetHeight(getPixelSize(row))
+		end
 		if parent and parent._LibSettingsDesignerContentY then
 			row._LibSettingsDesignerContentY = parent._LibSettingsDesignerContentY + (yOffset or -42)
 		end
@@ -8685,24 +8687,32 @@ function lib._Internal.getGroupControlLayout(state, group, width)
 		for _, control in ipairs(controls) do
 			local column = lib._Internal.getColumnIndex(control.column or control.layoutColumn or control.columnIndex, columnCount)
 				or lib._Internal.getShortestColumn(columnHeights, columnCount)
-			local inlineHint = getControlType(control) == "inlinehint"
-			if inlineHint then
+			local fullWidth = getControlType(control) == "inlinehint" or getControlType(control) == "sectionheader"
+			if fullWidth then
 				column = 1
 				for index = 2, columnCount do columnHeights[1] = math.max(columnHeights[1], columnHeights[index]) end
 			end
-			local rowHeight = getSettingRowHeight(control, state, inlineHint and innerWidth or columnWidth)
+			local rowHeight = getSettingRowHeight(control, state, fullWidth and innerWidth or columnWidth)
 			entries[#entries + 1] = {
 				control = control,
 				column = column,
 				y = -(46 + columnHeights[column]),
 				height = rowHeight,
 				xOffset = sectionInset,
-				width = (inlineHint or getControlType(control) == "sectionheader") and innerWidth or nil,
+				width = fullWidth and innerWidth or nil,
 			}
 			columnHeights[column] = columnHeights[column] + rowHeight + rowGap
-			if inlineHint then
+			if fullWidth then
 				for index = 2, columnCount do columnHeights[index] = columnHeights[1] end
 			end
+		end
+	end
+	for _, entry in ipairs(entries) do
+		local indent = math.min(48, math.max(0, tonumber(entry.control.indent) or 0))
+		if indent > 0 then
+			local columns = entry.width and 1 or columnCount
+			entry.xOffset = entry.xOffset + indent * (1 - ((entry.column or 1) - 1) / columns)
+			entry.width = math.max(1, (entry.width or columnWidth) - indent / columns)
 		end
 	end
 	local controlsHeight = 0
