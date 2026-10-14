@@ -124,3 +124,6 @@ Keep visibility predicates on the heading and children consistent.
 
 [//]: # (Links)
 [Top]: #Top
+
+When a visible tab selects a group, the repeated group header and its space are omitted.
+Pages without group tabs retain their group headers. Section headers inside the group remain visible.
