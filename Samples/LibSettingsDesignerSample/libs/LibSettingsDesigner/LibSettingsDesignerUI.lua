@@ -7031,6 +7031,11 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 		desc:SetPoint("RIGHT", row, "RIGHT", -18, 0)
 		desc:SetHeight(control.description and control.description ~= "" and 24 or 1)
 		local top = control.description and control.description ~= "" and -68 or -48
+		if control.hideHeader then
+			title:Hide()
+			desc:Hide()
+			top = -12
+		end
 		local container = CreateFrame("Frame", nil, row, "BackdropTemplate")
 		container:SetPoint("TOPLEFT", row, "TOPLEFT", FIELD_CONTROL_LEFT, top)
 		container:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", -14, 14)

@@ -44,6 +44,12 @@ app:RegisterControl("tools.editor", {
 `getHeight(app, control, state)` may be used instead of fixed `rowHeight` when
 the control height is dynamic.
 
+Set `hideHeader = true` to hide the built-in label and description and start
+the custom content 12 pixels below the row top. Keep `label` and `description`
+for search and hover information. Use a preceding `sectionheader` control with
+`justifyH = "CENTER"` when the title should appear above the custom row.
+Include the reduced top inset in your `rowHeight` or `getHeight` calculation.
+
 ## [Custom Page][Top]
 
 ```lua
