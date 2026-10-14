@@ -7,6 +7,7 @@
 - [Simple Note](#simple-note)
 - [Rich Note](#rich-note)
 - [Spacing Rule](#spacing-rule)
+- [Inline hints](#inline-hints)
 
 </details>
 
@@ -71,6 +72,12 @@ notes = {
 
 The note panel measures rendered font height and removes the trailing row gap
 from the final panel height. This keeps top and bottom padding visually even.
+
+
+## [Inline hints][Top]
+
+For guidance that stays visible, use an [InlineHint](InlineHint.md) control.
+Notes remain hover help; inline hints are independent, noninteractive rows.
 
 [//]: # (Links)
 [Top]: #Top

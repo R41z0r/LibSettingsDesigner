@@ -5,6 +5,7 @@
 - [Fields](#fields)
 - [Example](#example)
 - [Inline Section Headings](#inline-section-headings)
+- [Always-visible subgroups](#always-visible-subgroups)
 
 </details>
 
@@ -82,6 +83,44 @@ app:RegisterControl("interface.action-bars", {
 ```
 
 Legacy wrappers should forward `justifyH` to `RegisterLegacyControl`.
+
+## [Always-visible subgroups][Top]
+
+Use `headerStyle = "subtle"` on a `sectionheader` for a compact, muted title
+without a separator. Set `indent = 16` on the heading and its controls to
+visually nest them beneath a normal section heading. Indentation is measured
+in UI units, clamped to 0–48, and preserves the two-column gutter and right edge.
+There is no collapse state. Give each subgroup heading a `hiddenWhen` predicate
+matching the visibility of its contents so empty headings do not remain visible.
+Legacy wrappers must forward `headerStyle` and `indent`.
+
+
+| Control field | Type | Behavior |
+| :------------ | :--- | :------- |
+| `headerStyle` | string | `"subtle"` uses muted text, no separator, and a default height of 30 instead of 38. |
+| `indent` | number | Group-row indentation in UI units, clamped to 0–48. Default 0. |
+| `height` / `rowHeight` | number | Optional section-heading height override. |
+| `textColor` | table | Optional heading RGBA override. |
+
+These headings store no value. Omit `key` and `default`, and set
+`trackCustomized = false`. For example, after registering the page and group:
+
+```lua
+app:RegisterControl("interface.action-bars", {
+  id = "visibility.advanced.heading", groupID = "visibility",
+  type = "sectionheader", label = "Advanced visibility",
+  headerStyle = "subtle", indent = 16, order = 200,
+  trackCustomized = false,
+})
+app:RegisterControl("interface.action-bars", {
+  id = "hideOutOfCombat", key = "hideOutOfCombat", groupID = "visibility",
+  type = "toggle", label = "Hide out of combat", default = false,
+  indent = 16, order = 210,
+})
+```
+
+Indentation is a group-layout field, not a nested group or automatic dependency.
+Keep visibility predicates on the heading and children consistent.
 
 [//]: # (Links)
 [Top]: #Top

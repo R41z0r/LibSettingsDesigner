@@ -36,6 +36,7 @@
 &nbsp;&nbsp; • [ColorOverrides](Elements/ColorOverrides.md "ColorOverrides Legacy Alias") \
 &nbsp;&nbsp; • [ReorderList](Elements/ReorderList.md "ReorderList") \
 &nbsp;&nbsp; • [Expandable](Elements/Expandable.md "Expandable") \
+&nbsp;&nbsp; • [InlineHint](Elements/InlineHint.md "Inline Hint") \
 &nbsp;&nbsp; • [Notes](Elements/Notes.md "Notes")
 
 **Examples** \

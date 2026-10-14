@@ -315,6 +315,8 @@ local LEGACY_CONTROL_METADATA_FIELDS = {
 	"isSelectedFunc",
 	"isVisible",
 	"justifyH",
+	"indent",
+	"headerStyle",
 	"list",
 	"listFunc",
 	"max",
@@ -590,6 +592,7 @@ function AppMixin:RegisterControl(pageID, data)
 		self.controls[#self.controls + 1] = control
 		page.controls[#page.controls + 1] = control
 	end
+	if control.type == "inlinehint" then control.trackCustomized = false end
 	control.pageID = pageID
 	if control.groupID then
 		self:RegisterGroup(pageID, { id = control.groupID, title = control.groupTitle or control.groupID })

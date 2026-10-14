@@ -250,6 +250,21 @@ app:RegisterControl("general.core", {
 Do not use localized labels as ids. A translation change must not break saved
 state, search focus, open targets, or wrapper mappings.
 
+## Inline Layout and Guidance
+
+- Use `sectionheader` controls for full-width headings within a group;
+  `justifyH` accepts `LEFT`, `CENTER`, or `RIGHT`.
+- Use `headerStyle = "subtle"` for muted headings without separators and
+  `indent` (0–48 UI units) on grouped controls for always-visible subgroups.
+  Keep heading and child visibility predicates consistent.
+- Use `inlinehint` with a localized `label` and optional RGBA `textColor` for
+  always-visible guidance. It stores no value and never counts as customized.
+  See `docs/Elements/InlineHint.md`.
+- Use `hideHeader = true` on custom controls when the host owns the heading.
+  Account for the 12-unit top inset when specifying the custom row height.
+- Forward layout metadata through host wrappers; do not replace hints with
+  hover notes or insert host-specific guidance into the generic runtime.
+
 ## Value and Default Rules
 
 Documented default resolution order:

@@ -198,6 +198,11 @@ app:RegisterControl(pageID, data)
 | `label` | string | User-visible row label. |
 | `description` | string | Short row description. |
 | `groupID` | string | Direct group assignment. |
+| `indent` | number | Group-row indentation, clamped to 0–48 UI units. |
+| `headerStyle` | string | `"subtle"` for compact section headings without a separator. |
+| `justifyH` | string | Section-heading alignment: `"LEFT"`, `"CENTER"`, or `"RIGHT"`. |
+| `hideHeader` | boolean | Hide a custom control's built-in label/description; content starts 12 UI units below the top. |
+| `textColor` | table | RGBA text override for section headings and inline hints. |
 | `order` | number | Sort order within page/group. |
 | `default` | any/function | Default value used by reset/customized checks. |
 | `dbDefault` | any/function | Alternate DB default provider. |
@@ -207,6 +212,9 @@ app:RegisterControl(pageID, data)
 | `reloadReason` | string | Optional reason text shown in the reload button tooltip. |
 | `actions` / `settingActions` / `controlActions` | table/function | Optional right-aligned row action buttons or menus. |
 | `column` / `layoutColumn` / `columnIndex` | number/string | Control column inside a multi-column group. |
+
+Use [`sectionheader`](Elements/Group.md#inline-section-headings) for group headings
+and [`inlinehint`](Elements/InlineHint.md) for always-visible guidance.
 
 Structured dropdown option entries may use `menuGroup`, `menuGroupLabel`, and
 `menuGroupOrder` to place selected options in ordered submenus. These are
@@ -338,10 +346,3 @@ the wrapper.
 
 [//]: # (Links)
 [Top]: #Top
-
-## Section Header Controls
-
-`type = "sectionheader"` creates an inline full-width heading within its group.
-`justifyH` accepts `"LEFT"` (default), `"CENTER"`, or `"RIGHT"`; unsupported
-values use left alignment. Icons remain on the left. Omit the icon to center
-the label across the whole row. See [Group](Elements/Group.md#inline-section-headings).

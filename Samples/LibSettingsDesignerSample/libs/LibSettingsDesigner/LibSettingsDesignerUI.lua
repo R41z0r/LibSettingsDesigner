@@ -2224,11 +2224,28 @@ function lib.IsCompactDensity(state)
 	return state and state.density == "compact"
 end
 
-local function getSettingRowHeight(control, state)
+function lib._Internal.getInlineHintHeight(control, state, width)
+	local measure = state._inlineHintMeasure
+	if not measure then
+		measure = state.frame:CreateFontString(nil, "OVERLAY", FONT_TEXT)
+		measure:Hide()
+		state._inlineHintMeasure = measure
+	end
+	measure:SetWidth(math.max(1, (width or state.pageLeftWidth or 620) - 24))
+	measure:SetHeight(0)
+	measure:SetMaxLines(0)
+	measure:SetWordWrap(true)
+	measure:SetNonSpaceWrap(true)
+	measure:SetText(control.label or "")
+	return math.max(18, math.ceil(measure:GetStringHeight()) + 2) + 16
+end
+
+local function getSettingRowHeight(control, state, width)
+	if getControlType(control) == "inlinehint" then return lib._Internal.getInlineHintHeight(control, state, width) end
 	local layoutType = getControlLayoutType(control)
 	local controlType = getControlType(control)
 	if controlType == "sectionheader" then
-		return tonumber(control.height or control.rowHeight) or 38
+		return tonumber(control.height or control.rowHeight) or (control.headerStyle == "subtle" and 30 or 38)
 	end
 	if controlType == "custom" and type(control.getHeight) == "function" then
 		local ok, height = pcall(control.getHeight, state and state.app, control, state)
@@ -4173,6 +4190,7 @@ function makeFlatButton(parent, text, width, height, iconSource, iconIsAtlas)
 end
 
 local function refreshControlRow(app, control, row)
+	if getControlType(control) == "inlinehint" then return end
 	local enabled = app:IsControlEnabled(control)
 	local matrixRows = lib._Internal.shouldUseMatrixRows(row and row._state)
 	local matrixBorder = { 0, 0, 0, 0 }
@@ -6664,8 +6682,8 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 	local layoutType = getControlLayoutType(control)
 	local compact = lib.IsCompactDensity(state)
 	local matrixRows = lib._Internal.shouldUseMatrixRows(state)
-	local rowHeight = getSettingRowHeight(control, state)
 	local rowWidth = width or parent and (parent:GetWidth() - 24) or state.pageLeftWidth or state.contentWidth or 620
+	local rowHeight = getSettingRowHeight(control, state, rowWidth)
 	local row
 	if parent then
 		row = CreateFrame("Frame", nil, parent, "BackdropTemplate")
@@ -6681,6 +6699,21 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 	row._state = state
 	state.controlRows = state.controlRows or {}
 	state.controlRows[#state.controlRows + 1] = { row = row, control = control }
+	if controlType == "inlinehint" then
+		local color = control.textColor or { 0.60, 0.86, 0.76, 1 }
+		local label = createText(row, FONT_TEXT, control.label or "", { color[1] or color.r or 0.60, color[2] or color.g or 0.86, color[3] or color.b or 0.76, color[4] or color.a or 1 })
+		label:SetPoint("TOPLEFT", row, "TOPLEFT", 12, -8)
+		label:SetSize(math.max(1, rowWidth - 24), rowHeight - 16)
+		label.Text:ClearAllPoints()
+		label.Text:SetPoint("TOPLEFT", label, "TOPLEFT")
+		label.Text:SetWidth(math.max(1, rowWidth - 24))
+		label.Text:SetHeight(0)
+		label.Text:SetMaxLines(0)
+		label.Text:SetWordWrap(true)
+		label.Text:SetNonSpaceWrap(true)
+		row:EnableMouse(false)
+		return row
+	end
 	if controlType == "sectionheader" then
 		local alignment = control.justifyH == "CENTER" and "CENTER" or control.justifyH == "RIGHT" and "RIGHT" or "LEFT"
 		local labelLeft = alignment == "CENTER" and 8 or 4
@@ -6708,14 +6741,16 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 			local color = control.textColor
 			setTextColor(label.Text, { color[1] or color.r or 1, color[2] or color.g or 1, color[3] or color.b or 1, color[4] or color.a or 1 })
 		else
-			setTextColor(label.Text, TEXT.main)
+			setTextColor(label.Text, control.headerStyle == "subtle" and TEXT.muted or TEXT.main)
 		end
-		local line = row:CreateTexture(nil, "ARTWORK")
-		preparePixelTexture(line)
-		line:SetColorTexture(ROW_SEPARATOR[1], ROW_SEPARATOR[2], ROW_SEPARATOR[3], 0.34)
-		line:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 4, 4)
-		line:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", -8, 4)
-		line:SetHeight(getPixelSize(row))
+		if control.headerStyle ~= "subtle" then
+			local line = row:CreateTexture(nil, "ARTWORK")
+			preparePixelTexture(line)
+			line:SetColorTexture(ROW_SEPARATOR[1], ROW_SEPARATOR[2], ROW_SEPARATOR[3], 0.34)
+			line:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 4, 4)
+			line:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", -8, 4)
+			line:SetHeight(getPixelSize(row))
+		end
 		if parent and parent._LibSettingsDesignerContentY then
 			row._LibSettingsDesignerContentY = parent._LibSettingsDesignerContentY + (yOffset or -42)
 		end
@@ -7031,6 +7066,11 @@ local function addSettingRow(state, control, pathText, parent, yOffset, width, x
 		desc:SetPoint("RIGHT", row, "RIGHT", -18, 0)
 		desc:SetHeight(control.description and control.description ~= "" and 24 or 1)
 		local top = control.description and control.description ~= "" and -68 or -48
+		if control.hideHeader then
+			title:Hide()
+			desc:Hide()
+			top = -12
+		end
 		local container = CreateFrame("Frame", nil, row, "BackdropTemplate")
 		container:SetPoint("TOPLEFT", row, "TOPLEFT", FIELD_CONTROL_LEFT, top)
 		container:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", -14, 14)
@@ -8596,6 +8636,7 @@ function lib._Internal.getGroupControlLayout(state, group, width)
 	local function isMatrixFullWidthControl(control)
 		local controlType = getControlType(control)
 		return controlType == "sectionheader"
+			or controlType == "inlinehint"
 			or controlType == "reorderlist"
 			or controlType == "colorpalette"
 			or controlType == "custom"
@@ -8606,7 +8647,7 @@ function lib._Internal.getGroupControlLayout(state, group, width)
 		while index <= #controls do
 			local control = controls[index]
 			if isMatrixFullWidthControl(control) then
-				local rowHeight = getSettingRowHeight(control, state)
+				local rowHeight = getSettingRowHeight(control, state, innerWidth)
 				entries[#entries + 1] = {
 					control = control,
 					column = 1,
@@ -8646,16 +8687,32 @@ function lib._Internal.getGroupControlLayout(state, group, width)
 		for _, control in ipairs(controls) do
 			local column = lib._Internal.getColumnIndex(control.column or control.layoutColumn or control.columnIndex, columnCount)
 				or lib._Internal.getShortestColumn(columnHeights, columnCount)
-			local rowHeight = getSettingRowHeight(control, state)
+			local fullWidth = getControlType(control) == "inlinehint" or getControlType(control) == "sectionheader"
+			if fullWidth then
+				column = 1
+				for index = 2, columnCount do columnHeights[1] = math.max(columnHeights[1], columnHeights[index]) end
+			end
+			local rowHeight = getSettingRowHeight(control, state, fullWidth and innerWidth or columnWidth)
 			entries[#entries + 1] = {
 				control = control,
 				column = column,
 				y = -(46 + columnHeights[column]),
 				height = rowHeight,
 				xOffset = sectionInset,
-				width = getControlType(control) == "sectionheader" and innerWidth or nil,
+				width = fullWidth and innerWidth or nil,
 			}
 			columnHeights[column] = columnHeights[column] + rowHeight + rowGap
+			if fullWidth then
+				for index = 2, columnCount do columnHeights[index] = columnHeights[1] end
+			end
+		end
+	end
+	for _, entry in ipairs(entries) do
+		local indent = math.min(48, math.max(0, tonumber(entry.control.indent) or 0))
+		if indent > 0 then
+			local columns = entry.width and 1 or columnCount
+			entry.xOffset = entry.xOffset + indent * (1 - ((entry.column or 1) - 1) / columns)
+			entry.width = math.max(1, (entry.width or columnWidth) - indent / columns)
 		end
 	end
 	local controlsHeight = 0

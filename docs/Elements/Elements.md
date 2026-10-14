@@ -49,6 +49,7 @@ For all shared fields and aliases, see [Field Glossary](../Field-Glossary.md).
 
 | Element | Purpose |
 | :------ | :------ |
+| [InlineHint](InlineHint.md) | Always-visible guidance spanning control columns. |
 | [Notes](Notes.md) | Hover notes, rich notes, text, images, and spacers. |
 | [Dashboard](Dashboard.md) | Landing dashboard configuration. |
 | [InfoPage](InfoPage.md) | Static/help pages with text, commands, buttons, and spacers. |
@@ -70,6 +71,7 @@ For all shared fields and aliases, see [Field Glossary](../Field-Glossary.md).
 | Toggle plus related mode/threshold | [CheckboxDropdown](CheckboxDropdown.md) |
 | Let users reorder entries | [ReorderList](ReorderList.md) |
 | Host a specialized editor | [Custom](Custom.md) |
+| Keep guidance visible without hovering | [InlineHint](InlineHint.md) |
 | Add long explanatory hover help | [Notes](Notes.md) |
 | Create a non-settings help page | [InfoPage](InfoPage.md) |
 | Add collapsible changelog text | [Expandable](Expandable.md) |

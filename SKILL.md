@@ -709,7 +709,9 @@ runtime actively consumes as UI behavior:
 | SoundDropdown | `soundResolver`, `previewSoundFunc`, `previewTooltip`, `playbackChannel`, `getPlaybackChannel`, `menuHeight` |
 | CheckboxDropdown | `dropdownKey`, `dropdownDefault`, `dropdownValues`, `dropdownOptions`, `dropdownList`, `dropdownOrder`, `dropdownGet`, `dropdownSet` |
 | ReorderList | `getEntries`, `addEntry`, `removeEntry`, `moveEntry`, `setEntryFormat`, `formatOptions`, `formatOrder`, `formatEntryLabel`, `showEntryID`, `showAddButton`, `showRemoveButton`, `entryToggle`, `rowActions`, `emptyText`, `addButtonText`, `addPopupText`, `addPopupTitle`, `numeric`, `maxChars`, `rowHeight` |
-| Custom | `type = "custom"`, `rowHeight`, `getHeight`, `render`, `refresh`, `release` |
+| InlineHint | `type = "inlinehint"`, `label`, `textColor`, visibility gates; no saved value |
+| Section heading | `type = "sectionheader"`, `justifyH`, `headerStyle`, `indent`, `textColor` |
+| Custom | `type = "custom"`, `hideHeader`, `rowHeight`, `getHeight`, `render`, `refresh`, `release` |
 | Keybind | Legacy/fallback bridge control; prefer host wrapper or `openLegacySettings` patterns. |
 
 Use `type = "colorpalette"` for multiple keyed colors in new code.
@@ -722,6 +724,36 @@ Do not document these as active UI behavior unless runtime support is added:
 - Input `multilineHeight`
 - ColorPicker `callback`
 - ColorPicker `colorizeLabel`
+
+## Inline Section Header Alignment
+
+Use a `sectionheader` control with `justifyH = "CENTER"` for a centered
+heading spanning a group's control columns. The default is `"LEFT"`;
+`"RIGHT"` is also supported. Legacy wrappers must forward `justifyH`.
+Icons stay left-aligned and reserve label space; omit them for a title
+centered across the whole row. See `docs/Elements/Group.md`.
+
+## Visible Inline Hints
+
+Use `type = "inlinehint"` with localized `label` and optional `textColor` for
+always-visible guidance. Hints span group columns and measure wrapped text,
+use soft mint by default, and do not display hover help. Host wrappers should
+register them as controls with stable ids, not as notes on a previous control.
+See `docs/Elements/InlineHint.md`.
+
+## Always-Visible Subgroups
+
+Use `headerStyle = "subtle"` for muted section headings without separators,
+and `indent = 16` on grouped controls to visually nest a subgroup. Indentation
+is clamped to 0–48 UI units. Keep heading/child visibility consistent; there is
+no automatic collapse or dependency state. Wrappers must forward these fields.
+
+## Custom Control Headers
+
+Custom controls can set `hideHeader = true` to suppress their built-in label
+and description. Content starts 12 UI units below the row top; account for that
+in `rowHeight` / `getHeight`. Retain the label for search. See
+`docs/Elements/Custom.md`.
 
 ## Value Resolution Contract
 
@@ -1613,11 +1645,3 @@ Not verified / limitations:
 Recommended next steps:
 - ...
 ```
-
-## Inline Section Header Alignment
-
-Use a `sectionheader` control with `justifyH = "CENTER"` for a centered
-heading spanning a group's control columns. The default is `"LEFT"`;
-`"RIGHT"` is also supported. Legacy wrappers must forward `justifyH`.
-Icons stay left-aligned and reserve label space; omit them for a title
-centered across the whole row. See `docs/Elements/Group.md`.

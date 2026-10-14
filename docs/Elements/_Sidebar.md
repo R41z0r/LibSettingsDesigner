@@ -30,6 +30,7 @@
 &nbsp;&nbsp; • [ColorOverrides](ColorOverrides.md "ColorOverrides Legacy Alias") \
 &nbsp;&nbsp; • [ReorderList](ReorderList.md "ReorderList") \
 &nbsp;&nbsp; • [Expandable](Expandable.md "Expandable") \
+&nbsp;&nbsp; • [InlineHint](InlineHint.md "Inline Hint") \
 &nbsp;&nbsp; • [Notes](Notes.md "Notes")
 
 **Other** \
