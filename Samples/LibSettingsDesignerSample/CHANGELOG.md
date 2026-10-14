@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Reduced empty space on pages without tabs and removed redundant default Settings headings.
+
 ### Fixed
 
 - Capitalized the Changed search filter consistently across supported languages.

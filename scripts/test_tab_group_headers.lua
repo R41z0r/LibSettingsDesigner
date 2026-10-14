@@ -29,3 +29,13 @@ for _,matrix in ipairs({true,false}) do
 end
 assert(source:find('self.tabbedGroupID = nil',1,true))
 print('PASS tab headers: no redundant header/gap, no hidden collapsed content, untabbed headers retained in both layouts')
+
+for _,matrix in ipairs({true,false}) do
+ frames,rows={},{}
+ local state={matrix=matrix,singleDefaultGroupID='settings',collapsedGroups={settings=true},y=0}
+ local _,height=lib._Internal.addGroupSection(state,{id='settings'},'path')
+ assert(frames[2].shown==false and height==72 and rows[1]==-6)
+end
+assert(source:find('self.singleDefaultGroupID = nil',1,true))
+assert(source:find('groups[1].id == "settings"',1,true))
+print('PASS sole default group: heading hidden, content visible, state reset')

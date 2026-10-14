@@ -4501,6 +4501,7 @@ local function updateContentMetrics(state)
 	state.sidePanelMode = useSidePanel and "right" or nil
 	state.pageFixedHeader = useFixedHeader == true
 	state.matrixPageFixedHeader = useMatrixFixedHeader == true
+	state.matrixPageHeaderHeight = useMatrixFixedHeader and (#lib._Internal.collectPageGroups(state.app, page, nil) > 1 and 104 or 64) or nil
 	state.pageRightWidth = pageRightWidth
 	state.pageGap = useSidePanel and PAGE_GAP or 0
 	state.pageLeftOuterWidth = leftOuterWidth
@@ -4512,7 +4513,7 @@ local function updateContentMetrics(state)
 		local scrollBottomOffset = PAGE_LAYOUT.contentPad
 		if state.view == "page" and useFixedHeader then
 			scrollTopOffset = PAGE_LAYOUT.contentPad
-				+ (useMatrixFixedHeader and 104 or PAGE_LAYOUT.detailNavHeight)
+				+ (useMatrixFixedHeader and state.matrixPageHeaderHeight or PAGE_LAYOUT.detailNavHeight)
 				+ PAGE_LAYOUT.detailNavGap
 				+ PAGE_LAYOUT.scrollInset
 			scrollBottomOffset = PAGE_LAYOUT.scrollBottomPad
@@ -8175,7 +8176,7 @@ function lib._Internal.addMatrixPageFixedHeader(state, page, groups)
 	local width = state.pageSectionWidth or state.pageLeftWidth or 420
 	local header = trackFrame(state.fixedFrames, CreateFrame("Frame", nil, state.frame.ContentShell, "BackdropTemplate"))
 	header:SetPoint("TOPLEFT", state.frame.ContentShell, "TOPLEFT", PAGE_LAYOUT.contentPad + PAGE_LAYOUT.columnInset, -PAGE_LAYOUT.contentPad)
-	header:SetSize(width, 104)
+	header:SetSize(width, state.matrixPageHeaderHeight or 104)
 	applyBackdrop(header, { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, "detailSection")
 	if state.frame.Scroll and header.SetFrameLevel and state.frame.Scroll.GetFrameLevel then
 		header:SetFrameLevel((state.frame.Scroll:GetFrameLevel() or 1) + 3)
@@ -8741,7 +8742,7 @@ end
 
 function lib._Internal.addGroupSection(state, group, pagePath, layout)
 	local matrixRows = lib._Internal.shouldUseMatrixRows(state)
-	local hideHeader = state.tabbedGroupID == group.id
+	local hideHeader = state.tabbedGroupID == group.id or state.singleDefaultGroupID == group.id
 	local collapsed = (not hideHeader) and (not matrixRows) and state.collapsedGroups and state.collapsedGroups[group.id] == true
 	local customizedCount = lib.GetGroupCustomizedCount(state.app, group)
 	local sectionWidth = layout and tonumber(layout.width) or (state.pageSectionWidth or state.pageLeftWidth or 420)
@@ -9428,6 +9429,9 @@ function lib._Internal.renderPage(state, pageID)
 			activeGroupID = lib._Internal.addSectionTabs(state, page, groups)
 		end
 		state.tabbedGroupID = activeGroupID
+		if #groups == 1 and groups[1].id == "settings" and groups[1].title == (getLocale(app)["configCenterTitle"] or "Settings") then
+			state.singleDefaultGroupID = groups[1].id
+		end
 		local renderGroups = groups
 		if activeGroupID then
 			renderGroups = {}
@@ -9798,6 +9802,7 @@ function StateMixin:RenderContent()
 	clearContent(self)
 	clearFixedContent(self)
 	self.tabbedGroupID = nil
+	self.singleDefaultGroupID = nil
 	self.groupCountHeaders = {}
 	self.groupDefaultsButtons = {}
 	local query = self.frame.SearchBox:GetText() or ""

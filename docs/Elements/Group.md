@@ -127,3 +127,5 @@ Keep visibility predicates on the heading and children consistent.
 
 When a visible tab selects a group, the repeated group header and its space are omitted.
 Pages without group tabs retain their group headers. Section headers inside the group remain visible.
+
+Pages without group tabs use a compact matrix header. A sole default `settings` group with the generic localized Settings title omits its redundant header; named groups and section headings remain visible.
