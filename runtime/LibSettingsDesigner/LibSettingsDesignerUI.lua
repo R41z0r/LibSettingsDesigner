@@ -9788,6 +9788,7 @@ end
 local StateMixin = {}
 
 function StateMixin:RenderContent()
+	if self.app and self.app.FlushRegistrationSorts then self.app:FlushRegistrationSorts() end
 	local scrollBar = getScrollBar(self.frame and self.frame.Scroll)
 	if scrollBar and scrollBar.Hide then
 		if scrollBar.SetAlpha then scrollBar:SetAlpha(0) end

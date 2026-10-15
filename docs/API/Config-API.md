@@ -163,6 +163,33 @@ closeButton = {
 
 ## [Registration Methods][Top]
 
+### Registration batches
+
+Wrap a complete metadata build in a batch to sort each changed registration
+array once when the outermost batch ends:
+
+```lua
+app:BeginRegistrationBatch()
+app:RegisterCategory({ id = "general", title = "General" })
+app:RegisterPage({ id = "general.core", category = "general", title = "Core" })
+-- Register all groups, controls and notes here, including child-addon metadata.
+app:EndRegistrationBatch()
+```
+
+- `BeginRegistrationBatch()` supports nesting. Pair every begin with an end,
+  including error paths in host code that catches registration errors.
+- `EndRegistrationBatch()` sorts pending categories, pages, groups, controls,
+  and notes only when the outermost batch ends. An unmatched end is a no-op.
+- `FlushRegistrationSorts()` orders pending arrays without ending the batch.
+- `GetCategories()`, `GetPages()`, `GetPageControls()`, and `GetDefaultPageID()`
+  flush pending sorting before returning ordered data. Rendering content also
+  flushes pending sorting.
+- `GetPage(id)` and ID maps remain immediate lookups without flushing. Direct
+  array reads through returned objects can be unsorted during a batch; flush
+  explicitly before relying on their order.
+- Registration outside a batch keeps its immediate sorting behavior. No timer
+  or client event is required by the library.
+
 ### `app:RegisterCategory(data)`
 
 Registers a top-level sidebar/category bucket.
