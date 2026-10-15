@@ -183,17 +183,22 @@ local function getCategoryKey(category)
 	return tostring(category)
 end
 
-local function addSearchBlob(parts, value)
+local function addSearchBlob(parts, value, cache)
 	if value == nil or value == false then
 		return
 	end
 	if type(value) == "table" then
 		for _, entry in ipairs(value) do
-			addSearchBlob(parts, entry)
+			addSearchBlob(parts, entry, cache)
 		end
 		return
 	end
-	parts[#parts + 1] = normalizeSearchText(value)
+	local normalized = cache and type(value) == "string" and cache[value]
+	if normalized == nil or normalized == false then
+		normalized = normalizeSearchText(value)
+		if cache and type(value) == "string" then cache[value] = normalized end
+	end
+	parts[#parts + 1] = normalized
 end
 
 local AppMixin = {}
@@ -398,6 +403,7 @@ local function sortRegistrationList(app, list)
 end
 
 function AppMixin:BeginRegistrationBatch()
+	if (self._registrationBatchDepth or 0) == 0 then self._registrationSearchCache = {} end
 	self._registrationBatchDepth = (self._registrationBatchDepth or 0) + 1
 end
 
@@ -414,7 +420,10 @@ function AppMixin:EndRegistrationBatch()
 	local depth = self._registrationBatchDepth or 0
 	if depth == 0 then return end
 	self._registrationBatchDepth = depth - 1
-	if depth == 1 then self:FlushRegistrationSorts() end
+	if depth == 1 then
+		self:FlushRegistrationSorts()
+		self._registrationSearchCache = nil
+	end
 end
 
 local function rebuildSearchBlob(app, control)
@@ -422,13 +431,13 @@ local function rebuildSearchBlob(app, control)
 	local page = app.pagesByID[control.pageID or ""]
 	local group = page and page.groupsByID and page.groupsByID[control.groupID or ""]
 	local category = page and app.categoriesByID[page.category or ""]
-	addSearchBlob(parts, control.label or control.title or control.text or control.id)
-	addSearchBlob(parts, control.description or control.desc)
-	addSearchBlob(parts, control.key or control.settingKey)
-	addSearchBlob(parts, control.keywords or control.searchtags)
-	addSearchBlob(parts, page and page.title)
-	addSearchBlob(parts, group and group.title)
-	addSearchBlob(parts, category and category.title)
+	addSearchBlob(parts, control.label or control.title or control.text or control.id, app._registrationSearchCache)
+	addSearchBlob(parts, control.description or control.desc, app._registrationSearchCache)
+	addSearchBlob(parts, control.key or control.settingKey, app._registrationSearchCache)
+	addSearchBlob(parts, control.keywords or control.searchtags, app._registrationSearchCache)
+	addSearchBlob(parts, page and page.title, app._registrationSearchCache)
+	addSearchBlob(parts, group and group.title, app._registrationSearchCache)
+	addSearchBlob(parts, category and category.title, app._registrationSearchCache)
 	local notes = control.notes
 	if type(notes) == "string" then
 		notes = { { text = notes } }
@@ -436,10 +445,10 @@ local function rebuildSearchBlob(app, control)
 		notes = {}
 	end
 	for _, note in ipairs(notes) do
-		addSearchBlob(parts, note.title)
-		addSearchBlob(parts, note.text)
+		addSearchBlob(parts, note.title, app._registrationSearchCache)
+		addSearchBlob(parts, note.text, app._registrationSearchCache)
 		for _, block in ipairs(note.blocks or {}) do
-			addSearchBlob(parts, type(block) == "table" and (block.title or block.text) or block)
+			addSearchBlob(parts, type(block) == "table" and (block.title or block.text) or block, app._registrationSearchCache)
 		end
 	end
 	control.searchBlob = table.concat(parts, " ")
@@ -448,12 +457,12 @@ end
 local function buildSearchEntryBlob(app, page, entry)
 	local parts = {}
 	local category = page and app.categoriesByID[page.category or ""]
-	addSearchBlob(parts, entry.label or entry.title or entry.text or entry.id)
-	addSearchBlob(parts, entry.description or entry.desc)
-	addSearchBlob(parts, entry.keywords or entry.searchtags)
-	addSearchBlob(parts, entry.focusID or entry.focusId)
-	addSearchBlob(parts, page and page.title)
-	addSearchBlob(parts, category and category.title)
+	addSearchBlob(parts, entry.label or entry.title or entry.text or entry.id, app._registrationSearchCache)
+	addSearchBlob(parts, entry.description or entry.desc, app._registrationSearchCache)
+	addSearchBlob(parts, entry.keywords or entry.searchtags, app._registrationSearchCache)
+	addSearchBlob(parts, entry.focusID or entry.focusId, app._registrationSearchCache)
+	addSearchBlob(parts, page and page.title, app._registrationSearchCache)
+	addSearchBlob(parts, category and category.title, app._registrationSearchCache)
 	return table.concat(parts, " ")
 end
 
