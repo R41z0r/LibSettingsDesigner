@@ -8,6 +8,7 @@
 
 ### Fixed
 
+- Reduced repeated sorting when hosts register large settings catalogs in a batch.
 - Capitalized the Changed search filter consistently across supported languages.
 
 ## 2026-10-14

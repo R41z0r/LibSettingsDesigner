@@ -387,6 +387,36 @@ local function sortByOrderAndTitle(a, b)
 	return tostring(a.title or a.id) < tostring(b.title or b.id)
 end
 
+-- Registration batches preserve immediate ID lookup while postponing array ordering.
+local function sortRegistrationList(app, list)
+	if (app._registrationBatchDepth or 0) > 0 then
+		app._registrationSortLists = app._registrationSortLists or {}
+		app._registrationSortLists[list] = true
+	else
+		table.sort(list, sortByOrderAndTitle)
+	end
+end
+
+function AppMixin:BeginRegistrationBatch()
+	self._registrationBatchDepth = (self._registrationBatchDepth or 0) + 1
+end
+
+function AppMixin:FlushRegistrationSorts()
+	local lists = self._registrationSortLists
+	if not lists then return end
+	for list in pairs(lists) do
+		table.sort(list, sortByOrderAndTitle)
+	end
+	self._registrationSortLists = nil
+end
+
+function AppMixin:EndRegistrationBatch()
+	local depth = self._registrationBatchDepth or 0
+	if depth == 0 then return end
+	self._registrationBatchDepth = depth - 1
+	if depth == 1 then self:FlushRegistrationSorts() end
+end
+
 local function rebuildSearchBlob(app, control)
 	local parts = {}
 	local page = app.pagesByID[control.pageID or ""]
@@ -478,7 +508,7 @@ function AppMixin:RegisterCategory(data)
 		self.categoriesByID[category.id] = category
 		self.categories[#self.categories + 1] = category
 	end
-	table.sort(self.categories, sortByOrderAndTitle)
+	sortRegistrationList(self, self.categories)
 	return category
 end
 
@@ -500,7 +530,7 @@ function AppMixin:RegisterPage(data)
 	if page.category and not self.categoriesByID[page.category] then
 		self:RegisterCategory({ id = page.category, title = page.category, order = 1000 })
 	end
-	table.sort(self.pages, sortByOrderAndTitle)
+	sortRegistrationList(self, self.pages)
 	rebuildPageSearchEntries(self, page)
 	return page
 end
@@ -519,7 +549,7 @@ function AppMixin:RegisterGroup(pageID, data)
 		page.groupsByID[id] = group
 		page.groups[#page.groups + 1] = group
 	end
-	table.sort(page.groups, sortByOrderAndTitle)
+	sortRegistrationList(self, page.groups)
 	return group
 end
 
@@ -544,7 +574,7 @@ function AppMixin:RegisterPageNote(pageID, data)
 		end
 	end
 	page.aboutNotes[#page.aboutNotes + 1] = note
-	table.sort(page.aboutNotes, sortByOrderAndTitle)
+	sortRegistrationList(self, page.aboutNotes)
 	return note
 end
 
@@ -569,7 +599,7 @@ function AppMixin:RegisterControlNote(controlID, data)
 		end
 	end
 	control.notes[#control.notes + 1] = note
-	table.sort(control.notes, sortByOrderAndTitle)
+	sortRegistrationList(self, control.notes)
 	rebuildSearchBlob(self, control)
 	return note
 end
@@ -598,7 +628,7 @@ function AppMixin:RegisterControl(pageID, data)
 		self:RegisterGroup(pageID, { id = control.groupID, title = control.groupTitle or control.groupID })
 	end
 	rebuildSearchBlob(self, control)
-	table.sort(page.controls, sortByOrderAndTitle)
+	sortRegistrationList(self, page.controls)
 	return control
 end
 
@@ -723,11 +753,13 @@ function AppMixin:RegisterLegacyControl(data)
 end
 
 function AppMixin:GetCategories()
+	self:FlushRegistrationSorts()
 	table.sort(self.categories, sortByOrderAndTitle)
 	return self.categories
 end
 
 function AppMixin:GetPages(categoryID)
+	self:FlushRegistrationSorts()
 	local pages = wipeTable(self._tmpPages)
 	for _, page in ipairs(self.pages) do
 		if self:IsPageVisible(page) and (not categoryID or page.category == categoryID) then
@@ -739,6 +771,7 @@ function AppMixin:GetPages(categoryID)
 end
 
 function AppMixin:GetPageControls(pageOrID)
+	self:FlushRegistrationSorts()
 	local page = type(pageOrID) == "string" and self.pagesByID[pageOrID] or pageOrID
 	local controls = wipeTable(self._tmpControls)
 	self._tmpControls = controls
@@ -847,6 +880,7 @@ function AppMixin:GetPage(pageID)
 end
 
 function AppMixin:GetDefaultPageID()
+	self:FlushRegistrationSorts()
 	return self.defaultPageID or (self.pages[1] and self.pages[1].id)
 end
 
