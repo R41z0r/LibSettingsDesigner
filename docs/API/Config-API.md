@@ -176,6 +176,7 @@ app:RegisterPage({ id = "general.core", category = "general", title = "Core" })
 app:EndRegistrationBatch()
 ```
 
+- Search metadata normalization is reused within a registration batch; the temporary cache is released when the outermost batch ends.
 - `BeginRegistrationBatch()` supports nesting. Pair every begin with an end,
   including error paths in host code that catches registration errors.
 - `EndRegistrationBatch()` sorts pending categories, pages, groups, controls,
