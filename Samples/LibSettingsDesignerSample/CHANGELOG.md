@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Multi-select dropdowns support grouped submenus, section dividers and indicators for groups with selected options.
+
 ### Changed
 
 - Reduced empty space on pages without tabs and removed redundant default Settings headings.
