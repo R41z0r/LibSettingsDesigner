@@ -3893,6 +3893,7 @@ local function getControlOptions(control)
 			resolved.menuGroup = option.menuGroup
 			resolved.menuGroupLabel = option.menuGroupLabel
 			resolved.menuGroupOrder = tonumber(option.menuGroupOrder)
+			resolved.menuSection = option.menuSection
 		end
 		return resolved
 	end
@@ -5800,7 +5801,30 @@ local function addMultiDropdownWidget(row, app, control, opts)
 				lib.AttachSoundPreviewCleanupInitializer(check)
 				rootDescription:CreateDivider()
 			end
+			local groups, sections = {}, {}
 			for _, option in ipairs(menuOptions) do
+				local menu = rootDescription
+				if option.menuGroup then
+					if not groups[option.menuGroup] then
+						local groupKey = option.menuGroup
+						local groupLabel = tostring(option.menuGroupLabel or groupKey)
+						local submenu = rootDescription:CreateButton(groupLabel)
+						submenu:AddInitializer(function(menuButton)
+							local selected = false
+							local selection = lib.GetMultiSelection(app, control)
+							for _, child in ipairs(menuOptions) do
+								if child.menuGroup == groupKey and lib.IsMultiOptionSelected(selection, child.value) then selected = true; break end
+							end
+							menuButton.fontString:SetTextToFit(groupLabel .. (selected and " |TInterface\\Buttons\\UI-CheckBox-Check:16:16|t" or ""))
+						end)
+						groups[groupKey] = submenu
+					end
+					menu = groups[option.menuGroup]
+				end
+				if option.menuSection ~= nil then
+					if sections[menu] ~= nil and sections[menu] ~= option.menuSection then menu:CreateDivider() end
+					sections[menu] = option.menuSection
+				end
 				local function isSelected(value)
 					return lib.IsMultiOptionSelected(lib.GetMultiSelection(app, control), value)
 				end
@@ -5830,7 +5854,7 @@ local function addMultiDropdownWidget(row, app, control, opts)
 					end
 					refreshSummary()
 				end
-				local check = rootDescription:CreateCheckbox(option.label, isSelected, setSelected, option.value)
+				local check = menu:CreateCheckbox(option.label, isSelected, setSelected, option.value)
 				lib.AttachSoundPreviewCleanupInitializer(check)
 			end
 		end)

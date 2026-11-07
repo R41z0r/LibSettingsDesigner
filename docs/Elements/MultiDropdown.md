@@ -80,3 +80,7 @@ end
 
 [//]: # (Links)
 [Top]: #Top
+
+### Grouped menus
+
+Array options may set `menuGroup` (stable group key), `menuGroupLabel` (display label), and `menuSection` (section identifier). Groups appear as submenus in first-appearance order, with a check indicator when any child is selected. A change of `menuSection` inserts a divider within that menu. Supply options in the intended group and section order. Options without `menuGroup` remain in the root menu.
