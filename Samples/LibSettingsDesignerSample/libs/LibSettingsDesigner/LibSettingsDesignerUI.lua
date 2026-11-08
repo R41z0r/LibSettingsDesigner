@@ -6107,7 +6107,9 @@ local function addColorWidget(row, app, control, opts)
 			r, g, b, a = 1, 1, 1, 1
 		end
 		r, g, b, a = r or 1, g or 1, b or 1, a or 1
+		local initializing = true
 		local function applyColor()
+			if initializing then return end
 			local nr, ng, nb = ColorPickerFrame:GetColorRGB()
 			local na = ColorPickerFrame.GetColorAlpha and ColorPickerFrame:GetColorAlpha() or a
 			control.setColor(key, nr, ng, nb, na)
@@ -6123,7 +6125,7 @@ local function addColorWidget(row, app, control, opts)
 				swatchFunc = applyColor,
 				opacityFunc = applyColor,
 				cancelFunc = function(previous)
-					if previous then control.setColor(key, previous.r, previous.g, previous.b, previous.opacity) end
+					if previous then control.setColor(key, previous.r, previous.g, previous.b, previous.a) end
 					lib.RefreshVisibleRows(row._state)
 				end,
 			})
@@ -6132,14 +6134,15 @@ local function addColorWidget(row, app, control, opts)
 			ColorPickerFrame.opacityFunc = applyColor
 			ColorPickerFrame.hasOpacity = control.hasOpacity
 			ColorPickerFrame.opacity = a
-			ColorPickerFrame.previousValues = { r = r, g = g, b = b, opacity = a }
+			ColorPickerFrame.previousValues = { r = r, g = g, b = b, a = a }
 			ColorPickerFrame.cancelFunc = function(previous)
-				if previous then control.setColor(key, previous.r, previous.g, previous.b, previous.opacity) end
+				if previous then control.setColor(key, previous.r, previous.g, previous.b, previous.a) end
 				lib.RefreshVisibleRows(row._state)
 			end
 			ColorPickerFrame:SetColorRGB(r, g, b)
 			ColorPickerFrame:Show()
 		end
+		initializing = false
 	end
 	if button then
 		button:SetScript("OnClick", openPicker)
@@ -6235,7 +6238,9 @@ local function addColorOverridesWidget(row, app, control, opts)
 				r, g, b, a = 1, 1, 1, 1
 			end
 			r, g, b, a = r or 1, g or 1, b or 1, a or 1
+			local initializing = true
 			local function applyColor()
+				if initializing then return end
 				local nr, ng, nb = ColorPickerFrame:GetColorRGB()
 				local na = ColorPickerFrame.GetColorAlpha and ColorPickerFrame:GetColorAlpha() or a
 				control.setColor(entry.key, nr, ng, nb, control.hasOpacity and na or nil)
@@ -6256,12 +6261,13 @@ local function addColorOverridesWidget(row, app, control, opts)
 								previous.r,
 								previous.g,
 								previous.b,
-								control.hasOpacity and previous.opacity or nil
+								control.hasOpacity and previous.a or nil
 							)
 						end
 						lib.RefreshVisibleRows(row._state)
 					end,
 				})
+				initializing = false
 			end
 
 		item:SetScript("OnClick", openPicker)
