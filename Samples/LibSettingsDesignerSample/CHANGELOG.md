@@ -12,6 +12,8 @@
 
 ### Fixed
 
+- Color opacity is preserved when opening or canceling the color picker.
+
 - Reduced startup time spent preparing settings search.
 - Reduced repeated sorting when hosts register large settings catalogs in a batch.
 - Capitalized the Changed search filter consistently across supported languages.
