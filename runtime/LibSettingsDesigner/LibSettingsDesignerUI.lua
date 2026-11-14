@@ -10912,7 +10912,6 @@ local function createFrame(app)
 	end)
 
 	state:RenderSidebar()
-	state:RenderContent()
 	return frame
 end
 
