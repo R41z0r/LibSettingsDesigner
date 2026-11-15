@@ -12,7 +12,9 @@
 
 ## [Overview][Top]
 
-A slider stores a numeric value in a bounded range.
+A slider stores a numeric value in a bounded range. Click its displayed value to
+enter a number directly; Enter applies it and Escape cancels. The editor fits
+the value area and uses the same font as the displayed value.
 
 ## [Preview][Top]
 
