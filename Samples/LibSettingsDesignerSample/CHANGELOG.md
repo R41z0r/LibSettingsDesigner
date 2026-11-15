@@ -12,6 +12,8 @@
 
 ### Fixed
 
+- Slider value editors stay within their column and use the displayed value’s font.
+- Reduced delays when opening settings for the first time.
 - Color opacity is preserved when opening or canceling the color picker.
 
 - Reduced startup time spent preparing settings search.

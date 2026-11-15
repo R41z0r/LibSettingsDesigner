@@ -5494,8 +5494,13 @@ local function addSliderWidget(row, app, control, opts)
 	end
 
 	local valueEdit = CreateFrame("EditBox", nil, row, "InputBoxTemplate")
-	valueEdit:SetSize(96, 22)
-	valueEdit:SetPoint("CENTER", valueText, "CENTER", 0, 0)
+	valueEdit:SetHeight(22)
+	-- InputBoxTemplate extends its left border five units beyond the edit box.
+	valueEdit:SetPoint("LEFT", valueText, "LEFT", 5, 0)
+	valueEdit:SetPoint("RIGHT", valueText, "RIGHT", 0, 0)
+	valueEdit:SetFontObject(valueText.Text:GetFontObject())
+	valueEdit:SetJustifyH("RIGHT")
+	valueEdit:SetTextInsets(0, 4, 0, 0)
 	valueEdit:SetAutoFocus(false)
 	valueEdit:Hide()
 	row.sliderValueEdit = valueEdit
